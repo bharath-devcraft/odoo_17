@@ -1,0 +1,205 @@
+<odoo>
+    <data>
+    <!-- explicit form view definition -->
+    <record id="cm_task_group_form" model="ir.ui.view">
+        <field name="name">CM Task Group Form</field>
+        <field name="model">cm.task.group</field>
+        <field name="arch" type="xml">
+        <form string="Task Group">
+            
+            <header>
+                <button string="Approve" class="btn btn-success" icon="fa-thumbs-up" type="object" name="entry_approve" invisible = "status not in ('draft')" confirm="Are you sure to proceed ?"/>
+                <button string="Inactive" class="btn btn-danger" icon="fa-thumbs-down" type="object" name="entry_inactive" invisible = "status != 'active'" confirm="Are you sure to proceed ?"/>
+                <button string="Revise" class="btn btn-primary" type="object" name="entry_revise" invisible = "status != 'active'" confirm="Are you sure to proceed ?"/> 
+                <!-- tempory Group need to add for above revise field -->
+                <field name="status" widget="statusbar" style="width:700px;"/>                
+            </header>
+            
+            <sheet>
+                <group>
+                    <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+                </group>
+                <group>
+                    <group>
+                        <label for="name" class="name-lable"/>
+                        <div>
+                            <field name="name" class ="name-class" required="1" readonly = "status in ('active','inactive','revised')"/>
+                        </div> 
+                        <field name="department_ids" widget="many2many_tags" required="1" readonly = "status in ('active','inactive','revised')"/>
+                    </group>
+                    <group>
+                        <field name="short_name" widget="upper_case" required="1" readonly = "status in ('active','inactive','revised')"/>
+                        <field name="watcher_mail_id" readonly = "status in ('revised','inactive')"/>
+                        <field name="status" readonly = "1" invisible="1"/>
+                    </group>
+                </group>
+                <group>
+                    <group>
+                        <field name = "nature_of_work" readonly = "status in ('active','inactive','revised')"/>
+                    </group>
+                </group>
+                <notebook>
+                    <page string="Task Managers" >
+                        <field name="line_ids" colspan="4" nolabel="1"  required="1" readonly = "status in ('active','inactive','revised')">
+                            <tree string="Master Line Tree" editable="top">
+                                <field name="header_id" column_invisible="1"/>
+                                <field name="task_manager_id"/>
+                                <field name="name" column_invisible="1"/>
+                                <field name="email"/>
+                                <field name="mobile_no"/>
+                                <field name="status"/>                            
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Inactive Remark" invisible = "status not in ('active','inactive')">
+                        <field name="inactive_remark" readonly = "status != 'active'" nolabel="1"/>
+                    </page>
+                    <page string="Revise Remark" invisible = "status not in ('revised','active')">
+                        <field name="revise_remark" readonly = "status != 'active'" nolabel="1"/>
+                    </page>
+                    <page string="Entry Info">
+                        <group>
+                            <group>
+                                <field name="active_trans"/>
+                                <field name="active_rpt"/>
+                                <field name="parent_ref" readonly="1"/>
+                                <field name="revise_version" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="active" widget="boolean_toggle"/>
+                                <field name="entry_mode"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="user_id" widget="many2one_avatar_user"/>
+                                <field name="ap_rej_user_id" invisible = "status not in ('active','inactive')" widget="many2one_avatar_user"/>
+                                <field name="inactive_user_id" invisible = "status != 'inactive'" widget="many2one_avatar_user"/>
+                                <field name="revised_user_id" invisible = "status != 'revised'" widget="many2one_avatar_user"/>
+                                <field name="update_user_id" widget="many2one_avatar_user"/>
+                            </group>
+                            <group>
+                                <field name="crt_date"/>
+                                <field name="ap_rej_date" invisible = "status not in ('active','inactive')"/>
+                                <field name="inactive_date" invisible = "status != 'inactive'"/>
+                                <field name="revised_date" invisible = "status != 'revised'"/>
+                                <field name="update_date"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+                <group>
+                    <field name="note"  placeholder="Write your notes here."/>
+                </group>
+                <div class="oe_chatter">
+                    <field name="message_ids"/>
+                </div>  
+            </sheet>
+        </form>
+        </field>
+    </record>
+    <!-- form view end -->
+
+    <!-- explicit tree view with dash board definition -->
+
+    <record id="cm_task_group_tree_js" model="ir.ui.view">
+      <field name="name">CM Task Group Inherit CM Task Group Tree</field>
+      <field name="model">cm.task.group</field>
+      <field name="arch" type="xml">
+        <tree string="Task Group" js_class="cm_task_group_list"
+                decoration-info="status == 'draft'" 
+                decoration-success = "status == 'revised'"
+                decoration-bf = "status in ('active','draft')"
+                decoration-primary = "status == 'inactive'">
+            <field name="name"/>
+            <field name="short_name"/>
+            <field name="status" widget="badge" decoration-info = "status == 'draft'"
+                decoration-success = "status == 'revised'"
+                decoration-bf = "status == 'active'"
+                decoration-primary = "status == 'inactive'"/>
+           <field name="ap_rej_user_id"/>
+           <field name="crt_date" widget="date"/>
+        </tree>
+      </field>
+    </record>
+    <!-- Tree view end -->
+    
+    <!-- explicit tree view with out dash board definition -->
+
+    <record id="cm_task_group_tree" model="ir.ui.view">
+      <field name="name">CM Task Group Tree</field>
+      <field name="model">cm.task.group</field>
+      <field name="arch" type="xml">
+        <tree string="Task Group"
+                decoration-info="status == 'draft'" 
+                decoration-success = "status == 'revised'"
+                decoration-bf = "status in ('active','draft')"
+                decoration-primary = "status == 'inactive'">
+            <field name="name"/>
+            <field name="short_name"/>
+            <field name="status" widget="badge" decoration-info = "status == 'draft'"
+                decoration-success = "status == 'revised'"
+                decoration-bf = "status == 'active'"
+                decoration-primary = "status == 'inactive'"/>
+           <field name="ap_rej_user_id"/>
+           <field name="crt_date" widget="date"/>
+        </tree>
+      </field>
+    </record>
+    <!-- Tree view end -->
+    
+    <!-- explicit search view definition -->
+    <record id="cm_task_group_search" model="ir.ui.view">
+        <field name="name">CM Task Group Search</field>
+        <field name="model">cm.task.group</field>
+        <field name="arch" type="xml">
+            <search string="Search Task Group">
+                <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
+                <field name="short_name" string="Short Name" filter_domain="[('short_name','ilike',self)]"/>
+
+                <filter name="my_master" string="My Master" domain="[('user_id', '=', uid)]"/>
+                <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+                <filter name="Active" domain="[('status', '=', 'active')]"/>
+                <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                <filter name="Revised" domain="[('status', '=', 'revised')]"/>
+                <filter name="My Draft" domain="[('status', '=', 'draft'),('user_id', '=', uid)]"/>
+                <filter name="My Active" domain="[('status', '=', 'active'),('user_id', '=', uid)]"/>
+                <filter name="My Inactive" domain="[('status', '=', 'inactive'),('user_id', '=', uid)]"/>
+                <filter name="My Revised" domain="[('status', '=', 'revised'),('user_id', '=', uid)]"/>
+                <filter name="Hidden" domain="[('active', '=', False)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Short Name" name="short_name" domain="[]" context="{'group_by': 'short_name'}"/>
+                    <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                    <filter string="Approved By" name="status" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                    <filter string="Approved Date" name="status" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- search view end -->
+
+    <!-- actions opening views on models -->
+
+    <record id="cm_task_group_win_action" model="ir.actions.act_window">
+        <field name="name">Task Group</field>
+        <field name="res_model">cm.task.group</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="view_id" ref="cm_task_group_tree_js"/>
+        <field name="search_view_id" ref="cm_task_group_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No master record found. Let's create one!</p>
+        </field>
+    </record>
+    <!-- actions end -->
+    
+
+    <!-- actions menus -->
+
+    <menuitem name="Task Group" id="cm_task_group_act_menu" parent="cm_master.cm_master_m_parent" action="cm_task_group_win_action"/>
+
+    </data>
+        
+</odoo>

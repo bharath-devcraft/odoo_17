@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data noupdate="0">
+
+    
+	<!--ERP Admin Group-->
+ 
+	<record id="group_erp_admin" model="res.groups">
+        <field name="name">ERP Admin</field>
+        <field name="custom_group">True</field>
+        <field eval="[(6,0,[       			
+            ])]" name="menu_access"/>        
+    </record>	
+    
+    <record id="group_master_admin" model="res.groups">
+        <field name="name">Master Admin</field>
+        <field name="custom_group">True</field>
+        <field eval="[(6,0,[       			
+            ])]" name="menu_access"/>        
+    </record>
+    
+     <record id="group_master_user" model="res.groups">
+        <field name="name">Master User</field>
+        <field name="custom_group">True</field>
+        <field eval="[(6,0,[       			
+            ])]" name="menu_access"/>        
+    </record>
+    
+    <record id="group_set_to_draft" model="res.groups">
+        <field name="name">Set to Draft</field>
+        <field name="custom_group">True</field>
+        <field eval="[(6,0,[       			
+            ])]" name="menu_access"/>        
+    </record>
+    
+    <record id="group_division_admin" model="res.groups">
+        <field name="name">Division Admin</field>
+        <field name="custom_group">True</field>
+        <field eval="[(6,0,[       			
+            ])]" name="menu_access"/>        
+    </record>
+    
+    <record id="group_company_admin" model="res.groups">
+        <field name="name">Company Admin</field>
+        <field name="custom_group">True</field>
+        <field eval="[(6,0,[       			
+            ])]" name="menu_access"/>        
+    </record>
+    
+    <record id="group_mgmt_admin" model="res.groups">
+        <field name="name">MGMT Admin</field>
+        <field name="custom_group">True</field>
+        <field eval="[(6,0,[       			
+            ])]" name="menu_access"/>        
+    </record>
+ 
+    
+</data>
+</openerp>

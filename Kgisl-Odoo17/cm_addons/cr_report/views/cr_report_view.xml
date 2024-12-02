@@ -1,0 +1,66 @@
+<odoo>
+    <data>
+    <!-- explicit form view definition -->
+    <record id="cr_report_form" model="ir.ui.view">
+        <field name="name">Custom Report</field>
+        <field name="model">cr.report</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Custom Register">
+            <header>
+                  <h5 style="text-align:center;font-size: 1.5em;"> Standard Excel Report Template </h5>
+            </header>
+            <group>
+                <group>
+                    <field name="from_date" required="1"/>
+                    <field name="partner_ids"  widget="many2many_tags" options="{'no_create_edit': True}"/>
+                </group>
+                <group>
+                    <field name="to_date" required="1" widget="custom_date"/>
+                    <field name="output_type" required="1"/>
+                    <button name="print_report_button" type="object" string="Generate" class="oe_highlight"/>
+                </group>
+            </group>
+
+            <notebook>
+
+            <page string="Entry Info">
+            <group>
+                <group>
+                    <field name="generate_user_id"/>
+                </group>
+                <group>
+                    <field name="generate_date"/>
+                </group>
+            </group>
+            </page>
+            </notebook>
+            </form>
+        </field>
+    </record>
+    
+    <!-- actions start -->
+    <record id="cr_report_win_action" model="ir.actions.act_window">
+        <field name="name">Custom Report</field>
+        <field name="res_model">cr.report</field>
+        <field name="view_mode">form</field>
+    </record>
+    <!-- actions end -->
+    
+
+    <!-- Top menu item -->
+
+    <menuitem name="Reports" web_icon="cr_report,static/description/icon.png"  id="cr_report_m_root"/>
+    <!-- menu categories -->
+
+<!--
+    <menuitem name="Regesters" id="cr_report_m_parent" parent="cr_report_m_root"/>
+-->
+
+    <!-- actions menus -->
+
+    <menuitem name="Standard Excel Report" id="cr_report_act_menu" parent="cr_report_m_root" action="cr_report_win_action"/>
+
+    </data>
+        
+</odoo>

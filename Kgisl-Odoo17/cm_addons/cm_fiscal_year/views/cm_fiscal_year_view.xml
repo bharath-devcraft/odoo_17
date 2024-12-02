@@ -1,0 +1,152 @@
+<odoo>
+    <data>
+    <!-- explicit form view definition -->
+    <record id="cm_fiscal_year_form" model="ir.ui.view">
+        <field name="name">Fiscal Year Form</field>
+        <field name="model">cm.fiscal.year</field>
+        <field name="arch" type="xml">
+        <form string="Fiscal Year">
+            
+            <header>
+                <button string="Approve" class="btn btn-success" icon="fa-thumbs-up" type="object" name="approve_warning_rule" invisible = "status not in ('draft','editable')" confirm="Are you sure to proceed ?"/>
+                <button string="Set To Draft" class="btn btn-primary" type="object" name="entry_draft" groups = "cm_user_mgmt.group_set_to_draft" invisible = "status != 'active'" confirm="Are you sure to proceed ?"/><!-- group need to set-->
+                <button string="Inactive" class="btn btn-danger" icon="fa-thumbs-down" type="object" name="entry_inactive" invisible = "status != 'active'" confirm="Are you sure to proceed ?"/>
+                <field name="status" widget="statusbar" style="width:700px;"/>                
+            </header>
+            
+            <sheet>
+                <group>
+                    <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+                </group>
+                <group>
+                    <group>
+                        <field name="name" required="1" readonly = "status in ('active','inactive')"/>
+                        <field name="from_date" required="1" readonly = "status in ('active','inactive')"/>
+                    </group>
+                    <group>
+                        <field name="short_name" required="1" readonly = "status in ('active','inactive')"/>
+                        <field name="to_date" required="1" readonly = "status in ('active','inactive')"/>
+                        <field name="status" readonly = "1" invisible="1"/>
+                    </group>
+                </group>
+                <notebook>
+                    <page string="Inactive Remark" invisible = "status not in ('active','inactive')">
+                        <field name="inactive_remark" readonly = "status != 'active'" nolabel="1"/>
+                    </page>
+                    <page string="Entry Info">
+                        <group>
+                            <group>
+                                <field name="active_trans"/>
+                                <field name="active_rpt"/>
+                            </group>
+                            <group>
+                                <field name="active" widget="boolean_toggle"/>
+                                <field name="entry_mode"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="user_id" widget="many2one_avatar_user"/>
+                                <field name="ap_rej_user_id" invisible = "status not in ('active','inactive')" widget="many2one_avatar_user"/>
+                                <field name="inactive_user_id" invisible = "status != 'inactive'" widget="many2one_avatar_user"/>
+                                <field name="update_user_id" widget="many2one_avatar_user"/>
+                            </group>
+                            <group>
+                                <field name="crt_date"/>
+                                <field name="ap_rej_date" invisible = "status not in ('active','inactive')"/>
+                                <field name="inactive_date" invisible = "status != 'inactive'"/>
+                                <field name="update_date"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+                <group>
+                    <field name="note"  placeholder="Write your notes here."/>
+                </group>
+                <div class="oe_chatter">
+                    <field name="message_ids"/>
+                </div>  
+            </sheet>
+        </form>
+        </field>
+    </record>
+    <!-- form view end -->
+
+    
+    <!-- explicit tree view definition -->
+
+    <record id="cm_fiscal_year_tree" model="ir.ui.view">
+      <field name="name">CM Fiscal Year Tree</field>
+      <field name="model">cm.fiscal.year</field>
+      <field name="arch" type="xml">
+        <tree string="Fiscal Year" js_class="cm_fiscal_year_list"
+                decoration-info="status == 'draft'" 
+                decoration-success = "status == 'editable'"
+                decoration-bf = "status in ('active','draft')"
+                decoration-muted = "status == 'inactive'">
+            <field name="name"/>
+            <field name="short_name"/>
+            <field name="status" widget="badge" decoration-info = "status == 'draft'"
+                decoration-success = "status == 'editable'"
+                decoration-bf = "status == 'active'"
+                decoration-muted = "status == 'inactive'"/>
+           <field name="ap_rej_user_id"/>
+        </tree>
+      </field>
+    </record>
+    <!-- Tree view end -->
+    
+    <!-- explicit search view definition -->
+    <record id="cm_fiscal_year_search" model="ir.ui.view">
+        <field name="name">CM Fiscal Year Search</field>
+        <field name="model">cm.fiscal.year</field>
+        <field name="arch" type="xml">
+            <search string="Search Fiscal Year">
+                <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
+                <field name="short_name" string="Short Name" filter_domain="[('short_name','ilike',self)]"/>
+
+                <filter name="my_master" string="My Master" domain="[('user_id', '=', uid)]"/>
+                <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+                <filter name="Active" domain="[('status', '=', 'active')]"/>
+                <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                <filter name="Editable" domain="[('status', '=', 'editable')]"/>
+                <filter name="My Draft" domain="[('status', '=', 'draft'),('user_id', '=', uid)]"/>
+                <filter name="My Active" domain="[('status', '=', 'active'),('user_id', '=', uid)]"/>
+                <filter name="My Inactive" domain="[('status', '=', 'inactive'),('user_id', '=', uid)]"/>
+                <filter name="My Editable" domain="[('status', '=', 'editable'),('user_id', '=', uid)]"/>
+                <filter name="Hidden" domain="[('active', '=', False)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Short Name" name="short_name" domain="[]" context="{'group_by': 'short_name'}"/>
+                    <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                    <filter string="Approved By" name="status" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                    <filter string="Approved Date" name="status" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- search view end -->
+
+    <!-- actions opening views on models -->
+
+    <record id="cm_fiscal_year_win_action" model="ir.actions.act_window">
+        <field name="name">Fiscal Year</field>
+        <field name="res_model">cm.fiscal.year</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="search_view_id" ref="cm_fiscal_year_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No master record found. Let's create one!</p>
+        </field>
+    </record>
+    <!-- actions end -->
+    
+
+    <!-- actions menus -->
+
+    <menuitem name="Fiscal Year" id="cm_fiscal_year_act_menu" parent="cm_master.cm_master_m_parent" action="cm_fiscal_year_win_action"/>
+
+    </data>
+        
+</odoo>

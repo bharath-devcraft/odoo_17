@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="cm_supplier_customer.CmSupplierListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CmSupplierDashBoard />
+        </xpath>
+    </t>
+</templates>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="cm_supplier_customer_batch_inactive_form" model="ir.ui.view">
+        <field name="name">cm.supplier.customer.batch.inactive.form</field>
+        <field name="model">cm.supplier.customer.batch.inactive</field>
+        <field name="arch" type="xml">
+            <form string="Batch inactive">
+                <field name="master_ids" invisible="1"/>
+                <h5> Note: Only active entries can be eligible inactivation.</h5>
+                <group>
+                    <field name="inactive_remark"/>
+                </group>
+                <footer>
+                    <button class="btn-primary"
+                            name="action_batch_inactive"
+                            type="object"
+                            string="Batch inactive"/>
+                    <button string="Discard" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cm_supplier_customer_batch_inactive" model="ir.actions.act_window">
+        <field name="name">Batch inactive</field>
+        <field name="res_model">cm.supplier.customer.batch.inactive</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="cm_supplier_customer_batch_inactive_form"/>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_cm_supplier_customer"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+</odoo>

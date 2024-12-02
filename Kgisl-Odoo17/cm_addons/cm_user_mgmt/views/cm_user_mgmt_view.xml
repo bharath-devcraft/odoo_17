@@ -1,0 +1,252 @@
+<odoo>
+    <data>
+       <!-- Form view starts -->
+		
+	<record id="m_form_v_users" model="ir.ui.view">
+	    <field name="name">res.users.form</field>
+	    <field name="model">res.users</field>
+	    <field name="arch" type="xml">
+	    <form string="Users">
+		<header>
+		    <button string="Approve" class="btn btn-success" icon="fa-thumbs-up" type="object" name="entry_approve" invisible = "status not in ('draft','editable')" confirm="Are you sure to proceed ?"/>
+		    <button string="Set To Draft" class="btn btn-primary" type="object" name="entry_draft" groups = "base.group_partner_manager" invisible = "status != 'active'" confirm="Are you sure to proceed ?"/><!-- group need to set-->
+		    <button string="Inactive" class="btn btn-danger" icon="fa-thumbs-down" type="object" name="entry_inactive" invisible = "status != 'active'" confirm="Are you sure to proceed ?"/>
+		    <field name="status" widget="statusbar" style="width:700px;"/>                               
+		</header>
+		<sheet>
+		    <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>	    
+		    <field name="image_1920" widget='image' class="oe_avatar_style oe_avatar" options='{"zoom": true, "preview_image": "avatar_128"}'/>
+		    <h2> Display Name </h2>		    
+		    <field name="name" required = "1" style = "width:45%"  readonly = "status in ('active','inactive')"/>						
+			    <group>
+			    <group string="User Properties">								
+				<field name="login" string="Login Name" readonly = "status in ('active','inactive')"/>
+				<field name="company_id" string ="User Company" required = "1" options="{'no_create':1,'no_create_edit':1}" readonly = "status in ('active','inactive')"/>
+				<field name="division_id" required = "1" options="{'no_create':1,'no_create_edit':1}" readonly = "status in ('active','inactive')"/>
+				<field name="department_id" required = "1" options="{'no_create':1,'no_create_edit':1}" readonly = "status in ('active','inactive')"/>
+				<field name="mobile_no" required = "1" readonly = "status in ('active','inactive')"/>
+				<field name="ext_no" readonly = "status in ('active','inactive')"/>
+				<field name="email" string="Email" readonly = "status in ('active','inactive')"/>                                
+			    </group>
+			    <group string="Access Rights Properties">								
+				<field name="status" readonly = "1" invisible="1"/>
+				<field name="fiscal_year_id" required="1" options="{'no_create':1,'no_create_edit':1}"/>
+				<field name="company_user_ids" widget="many2many_tags" required="1" readonly = "status in ('active','inactive')"/>
+				<field name="division_ids" widget="many2many_tags" required="1" readonly = "status in ('active','inactive')"/>
+				<field name="department_ids" widget="many2many_tags" required="1" readonly = "status in ('active','inactive')"/>
+		                <field name="digi_sign" widget='image' class="oe_avatar_style oe_avatar"/>
+			    </group>						
+					    
+		</group>
+	    
+		<group string="Copy User Rights">
+		    <group>
+			<field name="copy_user_id"  options="{'no_create':1,'no_create_edit':1}" readonly = "status in ('active','inactive')"/>
+		    </group>
+		    <group>
+			<button string="Load User Rights" type="object" name="copy_menus_user_id" class="oe_highlight custom_button_width" help="Press the Button to load the menus of the user" invisible = "status in ('active','inactive')"/>
+		    </group>
+		</group>	
+		<group>
+		    <field name="inactive_remark" readonly = "status != 'active'" invisible = "status not in ('active','inactive')" />
+		</group>
+
+		<notebook>
+								
+		<page string="Access Rights">
+		    <tree>
+			<field name="groups_id" options="{'no_create':1,'no_create_edit':1}" readonly = "status in ('active','inactive')"/>
+		    </tree>
+		</page>                          
+				   
+		<page string="Menus" >
+		    <field name="user_menu_access" options="{'no_create':1,'no_create_edit':1}" readonly = "status in ('active','inactive')">
+			    <tree string="Menus" editable="top">
+				<field name="sequence"/>
+				<field name="name"/>																    
+			    </tree>
+		    </field>
+		    </page>
+		    <page string="Entry Info">
+			<group>
+			    <group>
+				<field name="active_trans"/>
+				<field name="active_rpt"/>
+			    </group>
+			    <group>
+				<field name="active" widget="boolean_toggle"/>
+				<field name="entry_mode"/>
+			    </group>
+			</group>
+			<group>
+			    <group>
+				<field name="user_id"/>
+				<field name="ap_rej_user_id" invisible = "status not in ('active','inactive')"/>
+				<field name="inactive_user_id" invisible = "status != 'inactive'" />
+				<field name="update_user_id"/>
+			    </group>
+			    <group>
+				<field name="crt_date"/>
+				<field name="ap_rej_date" invisible = "status not in ('active','inactive')"/>
+				<field name="inactive_date" invisible = "status != 'inactive'"/>
+				<field name="update_date"/>
+			    </group>
+			</group>
+		    </page>
+					
+		</notebook>
+
+		<div class="oe_chatter">
+		    <field name="message_follower_ids"/>
+		    <field name="activity_ids"/>
+		    <field name="message_ids"/>
+		</div> 
+
+		</sheet>
+		</form>
+	    </field>
+	</record>
+	
+        <!-- Form view ends -->
+        
+        
+        <!-- Tree view starts -->
+        
+        <record id="m_tree_view_users" model="ir.ui.view">
+            <field name="name">Users Tree View</field>
+            <field name="model">res.users</field>
+            <field name="arch" type="xml">
+		<tree string="Users" js_class="cm_user_list"
+			decoration-info="status == 'draft'" 
+			decoration-success = "status == 'editable'"
+			decoration-bf = "status in ('active','draft')"
+			decoration-primary = "status == 'inactive'">
+                    <field name="name"/>
+                    <field name="login" string="Login Name"/>
+                    <field name="email"/>
+                    <field name="status" widget="badge" decoration-info = "status == 'draft'"
+			decoration-success = "status == 'editable'"
+			decoration-bf = "status == 'active'"
+			decoration-primary = "status == 'inactive'"/>
+		</tree>
+            </field>
+        </record>
+
+        
+        <!-- Tree view ends -->
+    
+    
+    <!-- Update user form !-->
+	<record id="view_users_form_preference" model="ir.ui.view">
+    <field name="name">res.users.form.forum</field>
+    <field name="model">res.users</field>
+    <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+    <field name="arch" type="xml">
+        <!-- Hide the Preferences page -->
+        <xpath expr="//page[@name='preferences_page']" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </xpath>        
+        <!-- Hide the Account Security page -->
+        <xpath expr="//page[@name='page_account_security']" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </xpath>        
+        <!-- Placing User Info in a different position -->
+        <xpath expr="//form" position="inside">
+			<group>
+				<group string="">               
+					<field name="mobile_no" required="1"/>
+					<field name="ext_no" required="1"/>                
+				</group>
+				<group string="">
+					<field name="email" required="1"/>
+					<field name="fiscal_year_id" required="1" options="{'no_create':1,'no_create_edit':1}"/>
+				</group>
+            </group>
+        </xpath>
+    </field>
+	</record>
+
+
+        
+        
+    
+        
+	<!-- Search view starts -->
+
+        <record id="m_search_view_users" model="ir.ui.view">
+            <field name="name">Users Search View</field>
+            <field name="model">res.users</field>
+            <field name="arch" type="xml">
+               <search string="Search Master">
+		    <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
+		     
+		    <filter name="my_master" string="My Master" domain="[('user_id', '=', uid)]"/> 
+		    <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+		    <filter name="Editable" domain="[('status', '=', 'editable')]"/>
+		    <filter name="Active" domain="[('status', '=', 'active')]"/>
+		    <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+		    <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
+		    <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
+		    <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
+		    <filter name="My Inactive" string="My Inactive" domain="[('user_id', '=', uid),('status', '=', 'inactive')]"/>
+		    <filter name="Inactive List" domain="[('active', '=', False)]"/>
+		    
+		    <group expand="0" string="Group By">
+			<filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+			<filter string="Approved By" name="status" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+			<filter string="Approved Date" name="status" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+		    </group>
+            </search>
+            </field>
+        </record>
+        
+		 <!-- Search view ends -->
+		 
+         <!-- action menu starts -->
+
+        <record id="mma_res_users_new" model="ir.actions.act_window">
+            <field name="name">Users</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.users</field>
+             <field name="view_mode">tree,form</field>
+            <field name="domain">[('status','in',('draft','active','editable'))]</field>
+            <field name="search_view_id" ref="m_search_view_users"/>
+        </record>
+        
+         <!-- action menu ends -->
+         
+         <!-- action menu-tree starts -->
+
+       <record id="res_user_new_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="m_tree_view_users"/>
+            <field name="act_window_id" ref="mma_res_users_new"/>
+        </record>
+        
+         <!-- action menu-tree ends -->
+         
+         <!-- action menu-form starts -->
+
+        <record id="res_user_new_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="m_form_v_users"/>
+            <field name="act_window_id" ref="mma_res_users_new"/>
+        </record>
+
+
+
+    <!-- Top menu item -->
+
+    <menuitem name="Users" id="cm_user_m_root" web_icon="cm_user_mgmt,static/description/icon.png"/>
+    <!-- menu categories -->
+
+    <menuitem name="User Master" id="cm_user_m_parent" parent="cm_user_m_root"/>
+
+    <!-- actions menus -->
+
+    <menuitem name="Users" id="cm_user_act_menu" parent="cm_user_m_parent" action="mma_res_users_new"/>
+
+    </data>
+</odoo>

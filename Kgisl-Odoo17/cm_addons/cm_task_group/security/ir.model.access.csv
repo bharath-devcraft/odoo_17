@@ -1,0 +1,5 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_cm_task_group","cm.task.group","model_cm_task_group","base.group_user",1,1,1,1
+"access_cm_task_group_batch_inactive","cm.task.group.batch.inactive","model_cm_task_group_batch_inactive","base.group_user",1,1,1,1
+"access_cm_task_group_line","cm.task.group.line","model_cm_task_group_line","base.group_user",1,1,1,1
+

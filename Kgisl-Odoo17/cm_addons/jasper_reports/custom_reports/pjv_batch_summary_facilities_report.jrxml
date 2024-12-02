@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="kg_pjv_batch" language="groovy" pageWidth="792" pageHeight="612" orientation="Landscape" columnWidth="764" leftMargin="14" rightMargin="14" topMargin="14" bottomMargin="14" isFloatColumnFooter="true">
+	<property name="ireport.zoom" value="1.1000000000000019"/>
+	<property name="ireport.x" value="307"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="wiz_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="login_user_id" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="value_range" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="payment_type" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="batch_no" class="java.lang.String">
+		<defaultValueExpression><![CDATA[$P{batch_no}]]></defaultValueExpression>
+	</parameter>
+	<parameter name="type" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="confirmed_by" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="approved_by" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="confirmed_name" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="pjv_category" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select
+trim(TO_CHAR((grand_tot-grand_tot_credit)::float,'999G999G99G999G99G99G990D99')) as grand_total1,
+trim(TO_CHAR((grand_line_total)::float,'999G999G99G999G99G99G990D99')) as grand_line_total1,
+* from (
+select
+
+(sum(total_amt) OVER (PARTITION BY totals)) as grand_tot,
+(sum(total_credit_amt) OVER (PARTITION BY totals)) as grand_tot_credit,
+(sum(line_total_amt) OVER (PARTITION BY totals)) as grand_line_total,
+
+*
+from ((select
+division.name as division_name,
+division.alias_name as alias_name,
+case when $P{payment_type} = 'cash' then 'Cash'
+when $P{payment_type} = 'credit' then 'Credit'
+when $P{payment_type} = 'credit_card' then 'Credit Card - ' || (select name from kg_creditcard_master where id =(select credit_card from kg_pjv_batch where id=$P{wiz_id}))
+else INITCAP($P{payment_type}) end  as payment,
+(select state from kg_pjv_batch where id =$P{wiz_id}  ) as status,
+to_char(CURRENT_TIMESTAMP + interval '5' HOUR+ interval '30' MINUTE,'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= 1)),'') as login_user,
+
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= (select user_id from kg_pjv_batch where id =$P{wiz_id}))),'') as created_by,
+COALESCE((select login from res_users where id= (select user_id from kg_pjv_batch where id =$P{wiz_id})),'erpadmin') as created_user,
+COALESCE((select to_char(crt_date+ interval '5' HOUR+ interval '30' MINUTE
+,'DD-MM-YYYY HH12:MI:SS AM') from kg_pjv_batch where id =$P{wiz_id}  ),'') as created_date,
+
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= (select confirm_user_id from kg_pjv_batch where id =$P{wiz_id}))),'') as confirmed_by,
+COALESCE((select login from res_users where id= (select confirm_user_id from kg_pjv_batch where id =$P{wiz_id})),'erpadmin') as confirmed_user,
+COALESCE((select to_char(confirm_date+ interval '5' HOUR+ interval '30' MINUTE
+,'DD-MM-YYYY HH12:MI:SS AM') from kg_pjv_batch where id =$P{wiz_id}  ),'') as confirmed_date,
+
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= (select ap_rej_user_id from kg_pjv_batch where id =$P{wiz_id}))),'') as approved_by,
+COALESCE((select login from res_users where id= (select ap_rej_user_id from kg_pjv_batch where id =$P{wiz_id})),'erpadmin') as approved_user,
+
+COALESCE((select to_char(ap_rej_date+ interval '5' HOUR+ interval '30' MINUTE
+,'DD-MM-YYYY HH12:MI:SS AM') from kg_pjv_batch where id =$P{wiz_id}  ),'') as approved_date,
+(select to_char(entry_date, 'DD-MM-YYYY') from kg_pjv_batch
+	where id =$P{wiz_id}  )
+ as start_date,
+(select to_char(entry_date, 'DD-MM-YYYY') from kg_pjv_batch where id =$P{wiz_id}  ) as end_date,
+COALESCE((select name from res_currency where id= (select currency_id from kg_pjv_batch where id =$P{wiz_id})),'') as currency,
+$P{value_range} as value_range,
+$P{pjv_category} as pjv_category,
+case when partner.name !='' then partner.name else 'Local Supplier' end as supplier_name,
+count(invoice.id) as bills,
+
+0.00 as total_credit_amt,
+
+(round((sum(invoice.net_amt))::numeric,2)) as total_amt,
+
+trim(TO_CHAR((round((sum(invoice.net_amt))::numeric,2)), '999G999G99G999G99G99G990D99'))  as total_amt_text,
+trim(TO_CHAR((round((sum(invoice.advance_adjusted_amt))::numeric,2)), '999G999G99G999G99G99G990D99')) as adv_adj_amt,
+trim(TO_CHAR((round((sum(invoice.credit_note_amt))::numeric,2)), '999G999G99G999G99G99G990D99')) as credit_note_amt,
+trim(TO_CHAR((round((sum(invoice.net_amt) - (sum(invoice.credit_note_amt) + sum(invoice.advance_adjusted_amt)))::numeric,2)), '999G999G99G999G99G99G990D99'))  as line_total,
+(round((sum(invoice.net_amt) - (sum(invoice.credit_note_amt) + sum(invoice.advance_adjusted_amt)))::numeric,2)) as line_total_amt,
+
+  'total'::text as totals
+from kg_purchase_invoice invoice
+left join kg_division_master division on (division.id = invoice.division_id)
+left join res_partner partner on (partner.id = invoice.partner_id)
+left join res_company comp on (comp.id = invoice.company_id)
+where
+
+invoice.id in (select distinct invoice_id from ch_pjv_batch_line line left join kg_pjv_batch batch on (batch.id=line.header_id)
+ where header_id = $P{wiz_id} and batch.state not in ('draft','confirmed','cancel'))
+
+group by supplier_name,division.name,division.alias_name order by supplier_name
+ )
+
+ union all
+
+ (select
+division.name as division_name,
+division.alias_name as alias_name,
+case when $P{payment_type} = 'cash' then 'Cash'
+when $P{payment_type} = 'credit' then 'Credit'
+when $P{payment_type} = 'credit_card' then 'Credit Card - ' || (select name from kg_creditcard_master where id =(select credit_card from kg_pjv_batch where id=$P{wiz_id}))
+else INITCAP($P{payment_type}) end  as payment,
+(select state from kg_pjv_batch where id =$P{wiz_id}  ) as status,
+to_char(CURRENT_TIMESTAMP + interval '5' HOUR+ interval '30' MINUTE,'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= 1)),'') as login_user,
+
+
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= (select user_id from kg_pjv_batch where id =$P{wiz_id}))),'') as created_by,
+COALESCE((select login from res_users where id= (select user_id from kg_pjv_batch where id =$P{wiz_id})),'erpadmin') as created_user,
+COALESCE((select to_char(crt_date+ interval '5' HOUR+ interval '30' MINUTE
+,'DD-MM-YYYY HH12:MI:SS AM') from kg_pjv_batch where id =$P{wiz_id}  ),'') as created_date,
+
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= (select confirm_user_id from kg_pjv_batch where id =$P{wiz_id}))),'') as confirmed_by,
+COALESCE((select login from res_users where id= (select confirm_user_id from kg_pjv_batch where id =$P{wiz_id})),'erpadmin') as confirmed_user,
+COALESCE((select to_char(confirm_date+ interval '5' HOUR+ interval '30' MINUTE
+,'DD-MM-YYYY HH12:MI:SS AM') from kg_pjv_batch where id =$P{wiz_id}  ),'') as confirmed_date,
+
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= (select ap_rej_user_id from kg_pjv_batch where id =$P{wiz_id}))),'') as approved_by,
+COALESCE((select login from res_users where id= (select ap_rej_user_id from kg_pjv_batch where id =$P{wiz_id})),'erpadmin') as approved_user,
+
+COALESCE((select to_char(ap_rej_date+ interval '5' HOUR+ interval '30' MINUTE
+,'DD-MM-YYYY HH12:MI:SS AM') from kg_pjv_batch where id =$P{wiz_id}  ),'') as approved_date,
+(select to_char(entry_date, 'DD-MM-YYYY') from kg_pjv_batch
+	where id =$P{wiz_id}  )
+ as start_date,
+(select to_char(entry_date, 'DD-MM-YYYY') from kg_pjv_batch where id =$P{wiz_id}  ) as end_date,
+COALESCE((select name from res_currency where id= (select currency_id from kg_pjv_batch where id =$P{wiz_id})),'') as currency,
+$P{value_range} as value_range,
+$P{pjv_category} as pjv_category,
+card.name as supplier_name,
+count(invoice.id) as bills,
+
+0.00 as total_credit_amt,
+
+(round((sum(invoice.to_pay_amt))::numeric,2)) as total_amt,
+
+trim(TO_CHAR((round((sum(invoice.to_pay_amt))::numeric,2)), '999G999G99G999G99G99G990D99'))  as total_amt_text,
+'0.00'  as adv_adj_amt,
+'0.00'  as credit_note_amt,
+trim(TO_CHAR((round((sum(invoice.to_pay_amt))::numeric,2)), '999G999G99G999G99G99G990D99'))  as line_total,
+(round((sum(invoice.to_pay_amt))::numeric,2)) as line_total_amt,
+
+  'total'::text as totals
+from kg_recharge_entry invoice
+left join kg_creditcard_master card on (card.id = invoice.petrocard_id)
+left join kg_division_master division on (division.id = invoice.division_id)
+left join res_partner partner on (partner.id = $P{login_user_id})
+left join res_company comp on (comp.id = invoice.company_id)
+where
+
+invoice.id in (select distinct recharge_id from ch_pjv_batch_line line left join kg_pjv_batch batch on (batch.id=line.header_id)
+ where header_id = $P{wiz_id} and batch.state not in ('draft','confirmed','cancel'))
+
+group by supplier_name,division.name,division.alias_name order by supplier_name
+ )
+union all
+
+(select
+division.name as division_name,
+division.alias_name as alias_name,
+case when $P{payment_type} = 'cash' then 'Cash'
+when $P{payment_type} = 'credit' then 'Credit'
+when $P{payment_type} = 'credit_card' then 'Credit Card - ' || (select name from kg_creditcard_master where id =(select credit_card from kg_pjv_batch where id=$P{wiz_id}))
+else INITCAP($P{payment_type}) end  as payment,
+(select state from kg_pjv_batch where id =$P{wiz_id}  ) as status,
+to_char(CURRENT_TIMESTAMP + interval '5' HOUR+ interval '30' MINUTE,'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= 1)),'') as login_user,
+
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= (select user_id from kg_pjv_batch where id =$P{wiz_id}))),'') as created_by,
+COALESCE((select login from res_users where id= (select user_id from kg_pjv_batch where id =$P{wiz_id})),'erpadmin') as created_user,
+COALESCE((select to_char(crt_date+ interval '5' HOUR+ interval '30' MINUTE
+,'DD-MM-YYYY HH12:MI:SS AM') from kg_pjv_batch where id =$P{wiz_id}  ),'') as created_date,
+
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= (select confirm_user_id from kg_pjv_batch where id =$P{wiz_id}))),'') as confirmed_by,
+COALESCE((select login from res_users where id= (select confirm_user_id from kg_pjv_batch where id =$P{wiz_id})),'erpadmin') as confirmed_user,
+COALESCE((select to_char(confirm_date+ interval '5' HOUR+ interval '30' MINUTE
+,'DD-MM-YYYY HH12:MI:SS AM') from kg_pjv_batch where id =$P{wiz_id}  ),'') as confirmed_date,
+
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= (select ap_rej_user_id from kg_pjv_batch where id =$P{wiz_id}))),'') as approved_by,
+COALESCE((select login from res_users where id= (select ap_rej_user_id from kg_pjv_batch where id =$P{wiz_id})),'erpadmin') as approved_user,
+
+COALESCE((select to_char(ap_rej_date+ interval '5' HOUR+ interval '30' MINUTE
+,'DD-MM-YYYY HH12:MI:SS AM') from kg_pjv_batch where id =$P{wiz_id}  ),'') as approved_date,
+(select to_char(entry_date, 'DD-MM-YYYY') from kg_pjv_batch
+	where id =$P{wiz_id}  )
+ as start_date,
+(select to_char(entry_date, 'DD-MM-YYYY') from kg_pjv_batch where id =$P{wiz_id}  ) as end_date,
+COALESCE((select name from res_currency where id= (select currency_id from kg_pjv_batch where id =$P{wiz_id})),'') as currency,
+$P{value_range} as value_range,
+$P{pjv_category} as pjv_category,
+case when partner.name !='' then partner.name else 'Local Supplier' end as supplier_name,
+count(invoice.id) as bills,
+
+0.00 as total_credit_amt,
+
+(round((sum(invoice.advance_amt))::numeric,2)) as total_amt,
+
+trim(TO_CHAR((round((sum(invoice.advance_amt))::numeric,2)), '999G999G99G999G99G99G990D99'))  as total_amt_text,
+'0.00'  as adv_adj_amt,
+'0.00'  as credit_note_amt,
+trim(TO_CHAR((round((sum(invoice.advance_amt))::numeric,2)), '999G999G99G999G99G99G990D99'))  as line_total,
+(round((sum(invoice.advance_amt))::numeric,2)) as line_total_amt,
+
+  'total'::text as totals
+from kg_supplier_advance invoice
+left join kg_division_master division on (division.id = invoice.division_id)
+left join res_partner partner on (partner.id = invoice.partner_id)
+left join res_company comp on (comp.id = invoice.company_id)
+where
+
+invoice.id in (select distinct advance_id from ch_pjv_batch_line line left join kg_pjv_batch batch on (batch.id=line.header_id)
+ where header_id = $P{wiz_id} and batch.state not in ('draft','cancel'))
+
+group by supplier_name,division.name,division.alias_name order by supplier_name
+ )
+union all
+
+(select
+division.name as division_name,
+division.alias_name as alias_name,
+case when $P{payment_type} = 'cash' then 'Cash'
+when $P{payment_type} = 'credit' then 'Credit'
+when $P{payment_type} = 'credit_card' then 'Credit Card - ' || (select name from kg_creditcard_master where id =(select credit_card from kg_pjv_batch where id=$P{wiz_id}))
+else INITCAP($P{payment_type}) end  as payment,
+(select state from kg_pjv_batch where id =$P{wiz_id}  ) as status,
+to_char(CURRENT_TIMESTAMP + interval '5' HOUR+ interval '30' MINUTE,'DD-MM-YYYY HH12:MI:SS AM') AS New_Date,
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= 1)),'') as login_user,
+
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= (select user_id from kg_pjv_batch where id =$P{wiz_id}))),'') as created_by,
+COALESCE((select login from res_users where id= (select user_id from kg_pjv_batch where id =$P{wiz_id})),'erpadmin') as created_user,
+COALESCE((select to_char(crt_date+ interval '5' HOUR+ interval '30' MINUTE
+,'DD-MM-YYYY HH12:MI:SS AM') from kg_pjv_batch where id =$P{wiz_id}  ),'') as created_date,
+
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= (select confirm_user_id from kg_pjv_batch where id =$P{wiz_id}))),'') as confirmed_by,
+COALESCE((select login from res_users where id= (select confirm_user_id from kg_pjv_batch where id =$P{wiz_id})),'erpadmin') as confirmed_user,
+COALESCE((select to_char(confirm_date+ interval '5' HOUR+ interval '30' MINUTE
+,'DD-MM-YYYY HH12:MI:SS AM') from kg_pjv_batch where id =$P{wiz_id}  ),'') as confirmed_date,
+
+COALESCE((select name from res_partner where id in (select partner_id
+        from res_users where id= (select ap_rej_user_id from kg_pjv_batch where id =$P{wiz_id}))),'') as approved_by,
+COALESCE((select login from res_users where id= (select ap_rej_user_id from kg_pjv_batch where id =$P{wiz_id})),'erpadmin') as approved_user,
+
+COALESCE((select to_char(ap_rej_date+ interval '5' HOUR+ interval '30' MINUTE
+,'DD-MM-YYYY HH12:MI:SS AM') from kg_pjv_batch where id =$P{wiz_id}  ),'') as approved_date,
+(select to_char(entry_date, 'DD-MM-YYYY') from kg_pjv_batch
+	where id =$P{wiz_id}  )
+ as start_date,
+(select to_char(entry_date, 'DD-MM-YYYY') from kg_pjv_batch where id =$P{wiz_id}  ) as end_date,
+COALESCE((select name from res_currency where id= (select currency_id from kg_pjv_batch where id =$P{wiz_id})),'') as currency,
+$P{value_range} as value_range,
+$P{pjv_category} as pjv_category,
+'Rewards Credit (-)' as supplier_name,
+count(invoice.id) as bills,
+
+(round((sum(invoice.credit_amt))::numeric,2)) as total_credit_amt,
+
+0.00 as total_amt,
+
+trim(TO_CHAR((round((sum(invoice.credit_amt))::numeric,2)), '999G999G99G999G99G99G990D99'))  as total_amt_text,
+'0.00'  as adv_adj_amt,
+'0.00'  as credit_note_amt,
+trim(TO_CHAR((round((sum(invoice.credit_amt))::numeric,2)), '999G999G99G999G99G99G990D99'))  as line_total,
+(round((sum(invoice.credit_amt))::numeric,2)) as line_total_amt,
+
+  'total'::text as totals
+from kg_pjv_batch invoice
+left join kg_division_master division on (division.id = invoice.division_id)
+left join res_partner partner on (partner.id = $P{login_user_id})
+left join res_company comp on (comp.id = invoice.company_id)
+where
+
+invoice.id = $P{wiz_id} and invoice.state not in ('draft','confirmed','cancel')
+
+group by supplier_name,division.name,division.alias_name order by supplier_name
+ )
+
+
+
+ ) as a ) as b]]>
+	</queryString>
+	<field name="grand_total1" class="java.lang.String"/>
+	<field name="grand_line_total1" class="java.lang.String"/>
+	<field name="grand_tot" class="java.math.BigDecimal"/>
+	<field name="grand_tot_credit" class="java.math.BigDecimal"/>
+	<field name="grand_line_total" class="java.math.BigDecimal"/>
+	<field name="division_name" class="java.lang.String"/>
+	<field name="alias_name" class="java.lang.String"/>
+	<field name="payment" class="java.lang.String"/>
+	<field name="status" class="java.lang.String"/>
+	<field name="new_date" class="java.lang.String"/>
+	<field name="login_user" class="java.lang.String"/>
+	<field name="created_by" class="java.lang.String"/>
+	<field name="created_user" class="java.lang.String"/>
+	<field name="created_date" class="java.lang.String"/>
+	<field name="confirmed_by" class="java.lang.String"/>
+	<field name="confirmed_user" class="java.lang.String"/>
+	<field name="confirmed_date" class="java.lang.String"/>
+	<field name="approved_by" class="java.lang.String"/>
+	<field name="approved_user" class="java.lang.String"/>
+	<field name="approved_date" class="java.lang.String"/>
+	<field name="start_date" class="java.lang.String"/>
+	<field name="end_date" class="java.lang.String"/>
+	<field name="currency" class="java.lang.String"/>
+	<field name="value_range" class="java.lang.String"/>
+	<field name="pjv_category" class="java.lang.String"/>
+	<field name="supplier_name" class="java.lang.String"/>
+	<field name="bills" class="java.lang.Long"/>
+	<field name="total_credit_amt" class="java.math.BigDecimal"/>
+	<field name="total_amt" class="java.math.BigDecimal"/>
+	<field name="total_amt_text" class="java.lang.String"/>
+	<field name="adv_adj_amt" class="java.lang.String"/>
+	<field name="credit_note_amt" class="java.lang.String"/>
+	<field name="line_total" class="java.lang.String"/>
+	<field name="line_total_amt" class="java.math.BigDecimal"/>
+	<field name="totals" class="java.lang.String"/>
+	<background>
+		<band height="348">
+			<image>
+				<reportElement mode="Opaque" x="112" y="13" width="628" height="258">
+					<printWhenExpression><![CDATA[$F{status}.equals('draft')]]></printWhenExpression>
+				</reportElement>
+				<imageExpression><![CDATA["/Odoo/CMS_ERP/Digital_Signatures/Draft.jpg"]]></imageExpression>
+			</image>
+			<image>
+				<reportElement x="262" y="6" width="598" height="298">
+					<printWhenExpression><![CDATA[$P{type}=='accounts' && $F{status}!='draft']]></printWhenExpression>
+				</reportElement>
+				<imageExpression><![CDATA["/Odoo/CMS_ERP/Digital_Signatures/Facilities.jpg"]]></imageExpression>
+			</image>
+			<image>
+				<reportElement x="229" y="13" width="544" height="271">
+					<printWhenExpression><![CDATA[$P{type}=='facilities' && $F{status}!='draft']]></printWhenExpression>
+				</reportElement>
+				<imageExpression><![CDATA["/Odoo/CMS_ERP/Digital_Signatures/Facilities.jpg"]]></imageExpression>
+			</image>
+		</band>
+	</background>
+	<pageHeader>
+		<band height="71">
+			<textField>
+				<reportElement x="-9" y="-4" width="764" height="16"/>
+				<box>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{division_name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="262" y="12" width="234" height="14"/>
+				<box topPadding="2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Supplier Wise Purchase Invoice Summary"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement x="65" y="26" width="318" height="15"/>
+				<box topPadding="2"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{batch_no}+$F{start_date}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement x="560" y="27" width="195" height="15"/>
+				<box topPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Value Range / Currency : "+$F{value_range} + " / " +$F{currency}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement x="560" y="41" width="195" height="15"/>
+				<box topPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["PJV Category : "+$F{pjv_category}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="-10" y="56" width="466" height="15"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Mode of Payment "+" "+ ":"+" "+$F{payment}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="-10" y="26" width="85" height="15"/>
+				<box topPadding="2"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Batch No / Date : "]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="-10" y="42" width="466" height="15"/>
+				<textElement verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{alias_name}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="31" splitType="Stretch">
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToTallestObject" x="-10" y="0" width="35" height="31"/>
+				<box>
+					<topPen lineWidth="0.5" lineStyle="Dashed"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["S.No"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="25" y="0" width="220" height="31"/>
+				<box>
+					<topPen lineWidth="0.5" lineStyle="Dashed"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Supplier Name"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="323" y="0" width="150" height="31"/>
+				<box topPadding="3" leftPadding="3" rightPadding="2">
+					<topPen lineWidth="0.5" lineStyle="Dashed"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Invoice Value"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="245" y="0" width="78" height="31"/>
+				<box topPadding="3" leftPadding="3" rightPadding="2">
+					<topPen lineWidth="0.5" lineStyle="Dashed"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["No.of Bills"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="473" y="0" width="150" height="31"/>
+				<box topPadding="3" leftPadding="3" rightPadding="2">
+					<topPen lineWidth="0.5" lineStyle="Dashed"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Adv/CR Amt"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="623" y="0" width="150" height="31"/>
+				<box topPadding="3" leftPadding="3" rightPadding="2">
+					<topPen lineWidth="0.5" lineStyle="Dashed"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Total Value"]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="24" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="-10" y="0" width="35" height="24"/>
+				<box topPadding="2" leftPadding="0">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="25" y="0" width="220" height="24"/>
+				<box topPadding="2" leftPadding="2">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{supplier_name}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="623" y="0" width="150" height="24"/>
+				<box topPadding="2" leftPadding="0" rightPadding="2">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{line_total}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="323" y="0" width="150" height="24"/>
+				<box topPadding="2" leftPadding="2" rightPadding="2">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total_amt_text}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="245" y="0" width="78" height="24"/>
+				<box topPadding="2" leftPadding="0">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{bills}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement stretchType="RelativeToTallestObject" x="473" y="0" width="150" height="24"/>
+				<box topPadding="2" leftPadding="2" rightPadding="2">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{adv_adj_amt}+" / "+$F{credit_note_amt}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="15">
+			<textField>
+				<reportElement x="-9" y="0" width="308" height="15"/>
+				<box leftPadding="10">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{login_user}+" / "+$F{new_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="291" y="0" width="80" height="15"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="371" y="0" width="402" height="15"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="176">
+			<rectangle>
+				<reportElement mode="Transparent" x="51" y="56" width="310" height="114"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</rectangle>
+			<textField>
+				<reportElement x="125" y="59" width="189" height="15"/>
+				<box topPadding="2"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["For Facilities Department"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="64" y="134" width="68" height="12"/>
+				<box leftPadding="3">
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Prepared by"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="223" y="134" width="76" height="12"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Approved by"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="517" y="59" width="206" height="114"/>
+				<box leftPadding="4" rightPadding="0">
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["For Accounts Department"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="531" y="146" width="69" height="12"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Received by"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="633" y="146" width="69" height="24"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Approved by"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="633" y="134" width="69" height="12"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Manager"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="-10" y="0" width="453" height="20"/>
+				<box topPadding="2" leftPadding="3">
+					<topPen lineWidth="0.5" lineStyle="Dashed"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Grand Total :"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement stretchType="RelativeToTallestObject" x="51" y="146" width="112" height="30"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{created_by}+"\n"+$F{created_date}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="443" y="0" width="330" height="20"/>
+				<box topPadding="2" leftPadding="11" rightPadding="3">
+					<topPen lineWidth="0.5" lineStyle="Dashed"/>
+					<bottomPen lineWidth="0.5" lineStyle="Dashed"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grand_line_total1}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

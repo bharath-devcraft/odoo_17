@@ -1,0 +1,796 @@
+<odoo>
+    <data>
+    <template id="minimal_layout">
+        <t t-call="web.basic_layout">
+            <div class="container">
+                <t t-raw="0"/>
+            </div>
+        </t>
+    </template>
+
+    <!-- Home Page Template -->
+    <template id="home_page" name="Home Page">
+        <t t-call="cm_survey.minimal_layout">
+            <style>
+                body {
+                    margin: 0;
+                    overflow: hidden;
+                }
+
+                .container {
+                    display: block;
+                    justify-content: center;
+                }
+
+                .blurred-background {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    overflow: hidden;
+                    z-index: -1;
+                }
+
+                .blurred-background-image {
+                    background-image: url('/cm_survey/static/src/img/dw_1.jpg');
+                    background-size: cover;
+                    width: 100%;
+                    height: 100%;
+                    filter: blur(1px);
+                }
+
+                .home-container {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    padding: 20px;
+                    position: relative;
+                    z-index: 1; /* Ensure this is above the blurred background */
+                }
+
+                .home-card {
+                    border: none;
+                    border-radius: 100px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    background-color: lightcyan;
+                    padding: 2rem;
+                    max-width: 600px;
+                    width: 100%;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                }
+
+                .home-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 6px 50px rgba(0, 0, 0, 0.15);
+                }
+
+                .home-card-header {
+                    border-bottom: none; /* Remove default border */
+                    color: #333;
+                    padding: 1rem 0;
+                    text-align: center;
+                    font-size: 1.75rem;
+                    font-weight: bold;
+                    margin-bottom: 1.5rem;
+                    position: relative; /* Ensure positioning context for animation */
+                    overflow: hidden; /* Hide overflow for line animation */
+                }
+
+                .home-card-header::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 3px; /* Adjust line height */
+                    background-color: #007bff; /* Line color */
+                    animation: waveAnimation 2s infinite linear; /* Animation properties */
+                }
+
+                .home-card-logo {
+                    text-align: center;
+                    margin-bottom: 1rem;
+                }
+
+                img, svg {
+                    vertical-align: middle;
+                    width: 50%;
+                }
+
+                .home-card-body {
+                    text-align: center;
+                    font-size: 1.2rem;
+                    color: black;
+                }
+
+                .feedback-btn {
+                    background-color: #007bff;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    font-size: 1rem;
+                    border-radius: 50px;
+                    color: #ffffff;
+                    text-decoration: none;
+                    transition: background-color 0.3s ease;
+                    margin-top: 1.5rem;
+                    display: inline-block;
+                }
+
+                .feedback-btn:hover {
+                    background-color: #0056b3;
+                    color: white;
+                }
+
+                /* Keyframes for the wavy animation */
+                @keyframes waveAnimation {
+                    0% {
+                        transform: translateX(-100%);
+                    }
+                    50% {
+                        transform: translateX(100%);
+                    }
+                    100% {
+                        transform: translateX(-100%);
+                    }
+                }
+            </style>
+
+            <div class="blurred-background">
+                <div class="blurred-background-image"></div>
+            </div>
+
+            <div class="home-container">
+                <div class="home-card">
+                    <div class="home-card-logo">
+                        <img src="/cm_survey/static/src/img/kgisl_logo.png" alt="Logo"/>
+                    </div>
+                    <div class="home-card-header">
+                        Welcome to Our Survey!
+                    </div>
+                    <div class="home-card-body">
+                        <p>Explore and share your thoughts through our surveys.</p>
+                        <a t-attf-href="/feedback_form?survey_token={{ survey_token }}" class="feedback-btn">Go to Feedback Form</a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+
+        
+    <!-- Feedback Form Template -->
+    <template id="feedback_form" name="Feedback Form">
+        <t t-call="cm_survey.minimal_layout">
+            <style>
+                body {
+                    margin: 0;
+                    overflow: hidden;
+                }
+
+                .container {
+                    display: block;
+                    justify-content: center;
+                }
+
+                .blurred-background {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    overflow: hidden;
+                    z-index: -1;
+                }
+
+                .blurred-background-image {
+                    background-image: url('/cm_survey/static/src/img/dw_9.jpg');
+                    background-size: cover;
+                    width: 100%;
+                    height: 100%;
+                    filter: blur(1px);
+                }
+
+                .feedback-container {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    padding: 20px;
+                    position: relative;
+                    z-index: 1; /* Ensure this is above the blurred background */
+                }
+
+                .feedback-card {
+                    border: none;
+                    border-radius: 100px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    background-color: lightcyan;
+
+                    padding: 2rem;
+                    max-width: 600px;
+                    width: 100%;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                }
+
+                .feedback-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 6px 50px rgba(0, 0, 0, 0.15);
+                }
+
+                .feedback-card-header {
+                    border-bottom: 2px solid #007bff;
+                    color: #333;
+                    padding: 1rem 0;
+                    text-align: center;
+                    font-size: 1.75rem;
+                    font-weight: bold;
+                    margin-bottom: 1.5rem;
+                    padding-top: unset;
+                }
+
+                .feedback-purpose {
+                    text-align: left;
+                    font-size: 1.1rem;
+                    margin-bottom: 1.5rem;
+                    padding: 0rem;
+                    word-wrap: break-word;
+                }
+
+                .feedback-form .form-group {
+                    margin-bottom: 1.5rem;
+                }
+
+                .feedback-form .form-group label {
+                    font-weight: bold;
+                    font-size: 1rem;
+                    color: black;
+                    margin-bottom: 0.5rem;
+                    display: block;
+                }
+
+                .feedback-form .form-control {
+                    border-radius: 5px;
+                    border: 1px solid #ced4da;
+                    padding: 0.75rem;
+                    font-size: 1rem;
+                }
+
+                .feedback-form .form-control:focus {
+                    border-color: #007bff;
+                    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+                }
+
+                .feedback-form .btn-primary {
+                    background-color: #007bff;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    font-size: 1rem;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    transition: background-color 0.3s ease;
+                }
+
+                .feedback-form .btn-primary:hover {
+                    background-color: #0056b3;
+                }
+
+                .feedback-form .text-danger {
+                    color: #dc3545;
+                }
+            </style>
+
+            <div class="blurred-background">
+                <div class="blurred-background-image"></div>
+            </div>
+
+            <div class="feedback-container">
+                <div class="feedback-card">
+                    <div class="feedback-card-header">
+                        <t t-esc="survey_sudo.name"/>
+                    </div>
+                    <div class="feedback-purpose">
+                        <span style="font-weight: bold; color: blue">Purpose : </span> <t t-esc="survey_sudo.purpose"/>
+                    </div>
+                    <div class="feedback-card-body">
+                        <form class="feedback-form" action="/custom/survey/submit_feedback" method="POST">
+                            <div class="form-group">
+                                <label for="name">Your Name <span class="text-danger">*</span></label>
+                                <input type="text" id="name" name="name" class="form-control" required="required"/>
+                            </div>
+                            <div class="form-group">
+                                <label for="feedback">Your Feedback <span class="text-danger">*</span></label>
+                                <textarea id="feedback" name="feedback" class="form-control" rows="5" required="required"></textarea>
+                            </div>
+                            <input type="hidden" name="survey_token" t-att-value="survey_token"/>
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+
+    
+    <!-- Thank You Page Template -->
+    <template id="thank_you" name="Thank You">
+        <t t-call="cm_survey.minimal_layout">
+            <style>
+                body, html {
+                    margin: 0;
+                    overflow: hidden;
+                }
+
+                .container {
+                    display: block;
+                    justify-content: center;
+                }
+
+                .blurred-background {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    overflow: hidden;
+                    z-index: -1;
+                }
+
+                .blurred-background-image {
+                    background-image: url('cm_survey/static/src/img/dw_3.jpg');
+                    background-size: cover;
+                    width: 100%;
+                    height: 100%;
+                    filter: blur(1px);
+                }
+
+                .thank-you-container {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    padding: 20px;
+                    position: relative;
+                    z-index: 1; /* Ensure this is above the blurred background */
+                    //align-items: flex-start; /* Align items to the top */
+                }
+
+                .thank-you-card {
+                    border: none;
+                    border-radius: 100px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    background-color: lightcyan;
+                    padding: 2rem;
+                    max-width: 600px;
+                    width: 100%;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                }
+
+                .thank-you-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 6px 50px rgba(0, 0, 0, 0.15);
+                }
+
+                .thank-you-card-header {
+                    border-bottom: 2px solid #007bff;
+                    color: #333;
+                    padding: 1rem 0;
+                    text-align: center;
+                    font-size: 1.75rem;
+                    font-weight: bold;
+                    margin-bottom: 1.5rem;
+                }
+
+                .thank-you-card-body {
+                    text-align: center;
+                    font-size: 1.2rem;
+                    color: black;
+                }
+
+                .back-to-home-btn {
+                    background-color: #007bff;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    font-size: 1rem;
+                    border-radius: 5px;
+                    color: #ffffff;
+                    text-decoration: none;
+                    transition: background-color 0.3s ease;
+                    display: inline-block;
+                    margin-top: 1.5rem;
+                }
+
+                .back-to-home-btn:hover {
+                    background-color: #0056b3;
+                    color: white;
+                }
+            </style>
+
+            <div class="blurred-background">
+                <div class="blurred-background-image"></div>
+            </div>
+
+            <div class="thank-you-container">
+                <div class="thank-you-card">
+                    <div class="thank-you-card-header">
+                        Thank You! &#128522;
+                    </div>
+                    <div class="thank-you-card-body">
+                        <p>Your feedback has been submitted successfully.</p>
+                        <p>We appreciate your time and effort.</p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+
+
+    <!-- Survey Closed Page Template -->
+    <template id="survey_closed" name="Survey Closed">
+        <t t-call="cm_survey.minimal_layout">
+            <style>
+                body {
+                    margin: 0;
+                    overflow: hidden;
+                }
+
+                .container {
+                    display: block;
+                    justify-content: center;
+                }
+
+                .blurred-background {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    overflow: hidden;
+                    z-index: -1;
+                }
+
+                .blurred-background-image {
+                    background-image: url('/cm_survey/static/src/img/dw_4.jpg');
+                    background-size: cover;
+                    width: 100%;
+                    height: 100%;
+                    filter: blur(1px);
+                }
+
+                .survey-closed-container {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    padding: 20px;
+                    position: relative;
+                    z-index: 1; /* Ensure this is above the blurred background */
+                    //align-items: flex-start; /* Align items to the top */
+                }
+
+                .survey-closed-card {
+                    border: none;
+                    border-radius: 100px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    background-color: lightcyan;
+                    padding: 2rem;
+                    max-width: 600px;
+                    width: 100%;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                }
+
+                .survey-closed-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 6px 50px rgba(0, 0, 0, 0.15);
+                }
+
+                .survey-closed-card-header {
+                    border-bottom: 2px solid #007bff;
+                    color: #333;
+                    padding: 1rem 0;
+                    text-align: center;
+                    font-size: 1.75rem;
+                    font-weight: bold;
+                    margin-bottom: 1.5rem;
+                }
+
+                .survey-closed-card-body {
+                    text-align: center;
+                    font-size: 1.2rem;
+                    color: black;
+                }
+
+                .back-to-home-btn {
+                    background-color: #007bff;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    font-size: 1rem;
+                    border-radius: 5px;
+                    color: #ffffff;
+                    text-decoration: none;
+                    transition: background-color 0.3s ease;
+                    display: inline-block;
+                    margin-top: 1.5rem;
+                }
+
+                .back-to-home-btn:hover {
+                    background-color: #0056b3;
+                    color: white;
+                }
+            </style>
+
+            <div class="blurred-background">
+                <div class="blurred-background-image"></div>
+            </div>
+
+            <div class="survey-closed-container">
+                <div class="survey-closed-card">
+                    <div class="survey-closed-card-header">
+                        Sorry! &#128546;
+                    </div>
+                    <div class="survey-closed-card-body">
+                        <p>Survey already closed.</p>
+                        <p>We appreciate your time and effort.</p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+
+
+
+    <!-- Invalid Link or Error Page Template -->
+    <template id="invalid_transaction_token" name="Invalid Link or Error">
+        <t t-call="cm_survey.minimal_layout">
+            <style>
+                body {
+                    margin: 0;
+                    overflow: hidden;
+                }
+
+                .container {
+                    display: block;
+                    justify-content: center;
+                }
+
+                .blurred-background {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    overflow: hidden;
+                    z-index: -1;
+                }
+
+                .blurred-background-image {
+                    background-image: url('/cm_survey/static/src/img/ms_16.jpg');
+                    background-size: cover;
+                    width: 100%;
+                    height: 100%;
+                    filter: blur(1px);
+                }
+
+                .error-container {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    padding: 20px;
+                    position: relative;
+                    z-index: 1; /* Ensure this is above the blurred background */
+                    //align-items: flex-start; /* Align items to the top */
+                }
+
+                .error-card {
+                    border: none;
+                    border-radius: 100px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    background-color: lightcyan;
+                    padding: 2rem;
+                    max-width: 600px;
+                    width: 100%;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                }
+
+                .error-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 6px 50px rgba(0, 0, 0, 0.15);
+                }
+
+                .error-card-header {
+                    border-bottom: 2px solid #007bff;
+                    color: #333;
+                    padding: 1rem 0;
+                    text-align: center;
+                    font-size: 1.75rem;
+                    font-weight: bold;
+                    margin-bottom: 1.5rem;
+                }
+
+                .error-card-body {
+                    text-align: center;
+                    font-size: 1.2rem;
+                    color: black;
+                }
+
+                .back-to-home-btn {
+                    background-color: #007bff;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    font-size: 1rem;
+                    border-radius: 5px;
+                    color: #ffffff;
+                    text-decoration: none;
+                    transition: background-color 0.3s ease;
+                    display: inline-block;
+                    margin-top: 1.5rem;
+                }
+
+                .back-to-home-btn:hover {
+                    background-color: #0056b3;
+                    color: white;
+                }
+            </style>
+
+            <div class="blurred-background">
+                <div class="blurred-background-image"></div>
+            </div>
+
+            <div class="error-container">
+                <div class="error-card">
+                    <div class="error-card-header">
+                        Sorry for the inconvenience! &#128532;
+                    </div>
+                    <div class="error-card-body">
+                        <p>The URL is invalid. Please check the URL and try again.</p>
+                        <p>We appreciate your time and effort.</p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+
+
+    <!-- Custom 404 Error Page Template -->
+    <template id="custom_404" name="Custom 404 Page">
+        <t t-call="cm_survey.minimal_layout">
+            <style>
+                body {
+                    margin: 0;
+                    overflow: hidden;
+                }
+
+                .container {
+                    display: block;
+                    justify-content: center;
+                }
+
+                .blurred-background {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    overflow: hidden;
+                    z-index: -1;
+                }
+
+                .blurred-background-image {
+                    background-image: url('/cm_survey/static/src/img/dw_10.jpg');
+                    background-size: cover;
+                    width: 100%;
+                    height: 100%;
+                    filter: blur(1px);
+                }
+
+                .error-container {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    padding: 20px;
+                    position: relative;
+                    z-index: 1; /* Ensure this is above the blurred background */
+                    //float: right; /* Align to the right */
+                }
+
+                .error-card {
+                    border: none;
+                    border-radius: 100px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                    background-color: lightcyan;
+                    padding: 2rem;
+                    max-width: 600px;
+                    width: 100%;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                }
+
+                .error-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 6px 50px rgba(0, 0, 0, 0.15);
+                }
+
+                .error-card-header {
+                    border-bottom: 2px solid #007bff;
+                    color: #333;
+                    padding: 1rem 0;
+                    text-align: center;
+                    font-size: 1.75rem;
+                    font-weight: bold;
+                    margin-bottom: 1.5rem;
+                }
+
+                .error-card-body {
+                    text-align: center;
+                    font-size: 1.2rem;
+                    color: black;
+                }
+
+                .back-to-home-btn {
+                    background-color: #007bff;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    font-size: 1rem;
+                    border-radius: 5px;
+                    color: #ffffff;
+                    text-decoration: none;
+                    transition: background-color 0.3s ease;
+                    display: inline-block;
+                    margin-top: 1.5rem;
+                }
+
+                .back-to-home-btn:hover {
+                    background-color: #0056b3;
+                    color: white;
+                }
+            </style>
+
+            <div class="blurred-background">
+                <div class="blurred-background-image"></div>
+            </div>
+
+            <div class="error-container">
+                <div class="error-card">
+                    <div class="error-card-header">
+                        Oops! Page not found &#128533;
+                    </div>
+                    <div class="error-card-body">
+                        <p>The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+
+
+    <template id="custom_400">
+        <t t-call="cm_survey.minimal_layout">
+            <div id="wrap">
+                <div class="container">
+                    <h1 class="mt-5">Oops! Something went wrong.</h1>
+                    <p>Take a look at the error message below.</p>
+                </div>
+                <t t-if="editable or debug">
+                    <t t-call="http_routing.http_error_debug"/>
+                </t>
+                <t t-else="">
+                    <div class="container">
+                        <t t-call="http_routing.error_message"/>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    </data>
+</odoo>
