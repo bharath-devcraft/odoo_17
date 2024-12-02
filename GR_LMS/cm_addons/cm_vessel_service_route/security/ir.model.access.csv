@@ -1,0 +1,11 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+access_cm_vessel_service_route_admin,Vessel Service Route Admin,model_cm_vessel_service_route,custom_properties.group_master_admin,1,1,1,1
+access_cm_vessel_service_route_line_admin,Vessel Service Route Line Admin,model_cm_vessel_service_route_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_vessel_service_route_additional_checklist_line_admin,Vessel Service Route Additional Checklist Line Admin,model_cm_vessel_service_route_additional_checklist_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_vessel_service_route_attachment_line_admin,Vessel Service Route Attachment Line Admin,model_cm_vessel_service_route_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_vsr_batch_inactive_admin,Vessel Batch Inactive Admin,model_cm_vsr_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_vessel_service_route_user,Vessel Service Route User,model_cm_vessel_service_route,custom_properties.group_master_user,1,0,0,0
+access_cm_vessel_service_route_line_user,Vessel Service Route Line User,model_cm_vessel_service_route_line,custom_properties.group_master_user,1,0,0,0
+access_cm_vessel_service_route_additional_checklist_line_user,Vessel Service Route Additional Checklist Line User,model_cm_vessel_service_route_additional_checklist_line,custom_properties.group_master_user,1,0,0,0
+access_cm_vessel_service_route_attachment_line_user,Vessel Service Route Attachment Line User,model_cm_vessel_service_route_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_vsr_batch_inactive_user,Vessel Batch Inactive,model_cm_vsr_batch_inactive,custom_properties.group_master_user,1,0,0,0

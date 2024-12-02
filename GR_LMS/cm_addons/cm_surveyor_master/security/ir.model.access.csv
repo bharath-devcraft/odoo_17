@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_surveyor_master_admin,cm.surveyor.master.admin,model_cm_surveyor_master,custom_properties.group_master_admin,1,1,1,1
+access_cm_surveyor_master_line_admin,cm.surveyor.master.line.admin,model_cm_surveyor_master_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_surveyor_master_attachment_line_admin,cm.surveyor.master.attachment.line.admin,model_cm_surveyor_master_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_surveyor_master_bank_details_line_admin,cm.surveyor.master.bank.details.line.admin,model_cm_surveyor_master_bank_details_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_surveyor_master_batch_inactive_admin,cm.surveyor.master.batch.inactive.admin,model_cm_surveyor_master_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_surveyor_master_user,cm.surveyor.master.user,model_cm_surveyor_master,custom_properties.group_master_user,1,0,0,0
+access_cm_surveyor_master_line_user,cm.surveyor.master.line.user,model_cm_surveyor_master_line,custom_properties.group_master_user,1,0,0,0
+access_cm_surveyor_master_attachment_line_user,cm.surveyor.master.attachment.line.user,model_cm_surveyor_master_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_surveyor_master_bank_details_line_user,cm.surveyor.master.bank.details.line.user,model_cm_surveyor_master_bank_details_line,custom_properties.group_master_user,1,0,0,0
+access_cm_surveyor_master_batch_inactive_user,cm.surveyor.master.batch.inactive.user,model_cm_surveyor_master_batch_inactive,custom_properties.group_master_user,1,0,0,0

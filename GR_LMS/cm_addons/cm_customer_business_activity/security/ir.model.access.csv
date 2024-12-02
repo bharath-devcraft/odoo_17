@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_customer_business_activity_admin,cm.customer.business.activity.admin,model_cm_customer_business_activity,custom_properties.group_master_admin,1,1,1,1
+access_cm_customer_business_activity_attachment_line_admin,cm.customer.business.activity.attachment.line.admin,model_cm_customer_business_activity_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_cus_bus_act_batch_inactive_admin,cm.cus.bus.act.batch.inactive.admin,model_cm_cus_bus_act_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_customer_business_activity_user,cm.customer.business.activity.user,model_cm_customer_business_activity,custom_properties.group_master_user,1,0,0,0
+access_cm_customer_business_activity_attachment_line_user,cm.customer.business.activity.attachment.line.user,model_cm_customer_business_activity_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_cus_bus_act_batch_inactive_user,cm.cus.bus.act.batch.inactive.user,model_cm_cus_bus_act_batch_inactive,custom_properties.group_master_user,1,0,0,0

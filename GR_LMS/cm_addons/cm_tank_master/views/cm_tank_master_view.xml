@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="cm_tank_master_form" model="ir.ui.view">
+            <field name="name">Form View</field>
+            <field name="model">cm.tank.master</field>
+            <field name="arch" type="xml">
+                <form string="Tank Master">
+                    <header>
+                        <button string="Approve" 
+                            class="btn btn-success" 
+                            icon="fa-thumbs-up" 
+                            type="object" 
+                            name="entry_approve" 
+                            invisible = "status not in ('draft','editable')" 
+                            confirm="Are you sure to proceed ?"/>
+                        <button string="Set To Draft"
+                            class="btn btn-primary"
+                            type="object" name="entry_draft"
+                            invisible = "status != 'active'" 
+                            confirm="Are you sure to proceed ?"/>
+                        <button string="Inactive"
+                            class="btn btn-danger"
+                            icon="fa-thumbs-down" 
+                            type="object" name="entry_inactive" 
+                            invisible = "status != 'active'" 
+                            confirm="Are you sure to proceed ?"/>
+                        <field name="status" widget="statusbar" style="width:700px;"/>                
+                    </header>
+                    
+                    <sheet>                    
+                        <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+                        <group>
+                            <group >
+                                <label for="name" class="name-lable"/>
+                                <div>
+                                    <field name="name" string="Number" class="name-value" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+                                </div> 
+                                <field name="tank_operator_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="ownership_type" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="vendor_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="owner_name" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="short_name" widget="upper_case" required="1" readonly = "1" force_save="1"/>
+                                <field name="tank_t_code" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="sub_type" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="sub_type2" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="bus_location" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="status" readonly = "1" invisible="1"/>
+                            </group>
+                        </group>
+                        <group string = "Technical Specification">
+                            <group>
+                                <field name="iso_code" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="container_size" string="Size (TEU's)" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="size_dim" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="capacity" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="max_cross_wgt" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="tare_wgt" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="gross_wgt" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="pay_cap" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="moc_shell" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="tank_mawp" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="test_test_pres" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="steam_mawp" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="steam_test_pres" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="baffle" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="heat_area" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="tube_assembly" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="steam_runs" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="bot_dis_assembly" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="top_dis_assembly" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="air_assembly" required="1" readonly = "status not in ('draft','editable')"/>
+                                
+                            </group>
+                            <group>
+                                <field name="srv_type" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="srv_fix_type" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="srv_work_pres" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="srv_work_vac" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="rup_disc" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="bot_out_hous" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="spill_box_cover" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="shyp_tube" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="frame_type" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="ext_clad" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="vacuum_valve" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="type_walkway" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="mfg_vendor_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="mfg_date" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="age" required="1" force_save="1" readonly = "1"/>
+                                <field name="mfg_warranty" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="valid_from_date" required="mfg_warranty == 'limited'" invisible="mfg_warranty != 'limited'" readonly = "status not in ('draft','editable')"/>
+                                <field name="valid_to_date" required="mfg_warranty == 'limited'" invisible="mfg_warranty != 'limited'" readonly = "status not in ('draft','editable')"/>
+                                <field name="on_hire_date" required="ownership_type in ('soc','other')" invisible="ownership_type not in ('soc','other')" readonly = "status not in ('draft','editable')"/>
+                                <field name="port_id" required="ownership_type in ('soc','other')" invisible="ownership_type not in ('soc','other')" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="off_hire_date" force_save = "1" invisible="ownership_type not in ('soc','other')" readonly = "1"/>
+                                <field name="off_location" force_save = "1" invisible="ownership_type not in ('soc','other')" readonly = "1"/>
+                                <field name="reason"  force_save = "1" invisible="ownership_type not in ('soc','other')" readonly = "1"/>
+                                <field name="periodic_ins" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="interval" required="periodic_ins == 'required'" invisible="periodic_ins != 'required'" readonly = "status not in ('draft','editable')"/>
+                                <field name="last_inspection_date" required="periodic_ins == 'required'" invisible="periodic_ins != 'required'" readonly = "status not in ('draft','editable')"/>
+                                <field name="next_inspection_date" required="periodic_ins == 'required'" invisible="periodic_ins != 'required'" readonly = "status not in ('draft','editable')"/>
+                                <field name="hyd_test_date" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="pneu_test" required="1" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                        </group>
+                        
+                        <notebook>
+                            <page string="Surveyor Inspection Details" >
+                                <field name="line_ids" nolabel="1" readonly = "status not in ('draft','editable')">
+                                    <tree>
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="type_ins" required="1"/>
+                                        <field name="ins_status" required="1"/>
+                                        <field name="inspected_by" required="1"/>
+                                        <field name="last_inspection_date" required="1" width="150px"/>
+                                        <field name="attachment_ids" required="1" string = "Certificate"/>
+                                        <field name="validity_period" string="Validity Periods(Days)" required="1"  width="200px"/>
+                                        <field name="valid_to_date" force_save="1" readonly="1"  width="150px"/>
+                                        <field name="company_id" column_invisible="1"/>                           
+                                    </tree>
+                                    <form>
+                                       <group>
+                                            <group>
+                                                <field name="header_id" invisible="1"/>
+                                                <field name="type_ins" required="1"/>
+                                                <field name="ins_status" required="1"/>
+                                                <field name="inspected_by" required="1"/>
+                                                
+                                            </group>
+                                            <group>
+                                                <field name="last_inspection_date" required="1"/>
+                                                <field name="validity_period" string="Validity Periods(Days)" required="1"/>
+                                                <field name="valid_to_date" force_save="1" readonly="1"/>
+                                                <field name="attachment_ids"  string = "Certificate" widget="single_file_binary"  required="1"/>
+                                                <field name="company_id" invisible="1"/>                           
+                                            </group>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                            <page string="Insurance Details" >
+                                <field name="line_ids_b" nolabel="1" readonly = "1">
+                                    <tree string="Details" editable="bottom">
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="insurance" required="1"/>
+                                        <field name="tank_operator_id" required="1" options="{'no_create': True}"/>
+                                        <field name="vendor_id" required="1" options="{'no_create': True}"/>
+                                        <field name="policy_no" required="1"/>
+                                        <field name="validity_from" required="1"  width="150px"/>
+                                        <field name="validity_to" force_save="1" readonly="1"  width="150px"/>
+                                        <field name="company_id" column_invisible="1"/>                           
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Recently used Product" >
+                                <field name="line_ids_c" nolabel="1" readonly = "1">
+                                    <tree string="Details" editable="bottom">
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="product_id" required="1" options="{'no_create': True}"/>
+                                        <field name="dg_product" required="1"/>
+                                        <field name="bl_ref_no" required="1"/>
+                                        <field name="date" string = 'Date' required="1"/>
+                                        <field name="company_id" column_invisible="1"/>                           
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Attachments" >
+                                <field name="line_ids_a" nolabel="1" readonly = "status not in ('draft','editable')">
+                                    <tree string="Attachments" editable="bottom">
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="attach_desc" required="1"/>
+                                        <field name="attachment_ids" required="1" widget="single_file_binary" options="{'no_create_edit': True}"/>
+                                        <field name="attach_user_id" force_save="1" readonly="1"/>
+                                        <field name="attach_date" force_save="1" readonly="1"/> 
+                                        <field name="company_id" column_invisible="1"/>                              
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Inactive Remarks" invisible = "status not in ('active','inactive')">
+                                <field name="inactive_remark" readonly = "status != 'active'" nolabel="1"/>
+                            </page>
+                            <page string="Entry Info">
+                                <group>
+                                    <group>
+                                        <field name="company_id"/>
+                                        <field name="active_trans"/>
+                                        <field name="active_rpt"/>
+                                    </group>
+                                    <group>
+                                        <field name="restriction_flag" readonly="1"/>
+                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="entry_mode"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group>
+                                        <field name="user_id" widget="many2one_avatar_user" />
+                                        <field name="ap_rej_user_id" string="Approved By" widget="many2one_avatar_user" invisible = "status not in ('active','inactive')"/>
+                                        <field name="inactive_user_id" widget="many2one_avatar_user" invisible = "status != 'inactive'" />
+                                        <field name="update_user_id" widget="many2one_avatar_user"/>
+                                    </group>
+                                    <group>
+                                        <field name="crt_date"/>
+                                        <field name="ap_rej_date" string="Approved Date" invisible = "status not in ('active','inactive')"/>
+                                        <field name="inactive_date" invisible = "status != 'inactive'"/>
+                                        <field name="update_date"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                        <group>
+                            <field name="remarks"  placeholder="Write your remarks here."/>
+                        </group>
+                        <div class="oe_chatter">
+                            <field name="message_ids"/>
+                        </div>  
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="cm_tank_master_tree_js" model="ir.ui.view">
+            <field name="name">Dashboard View</field>
+            <field name="model">cm.tank.master</field>
+            <field name="priority" eval="10"/>
+            <field name="arch" type="xml">
+                <tree string="Tank Master" js_class="cm_tank_master_list"
+                        decoration-info="status == 'draft'" 
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status in ('active','draft')"
+                        decoration-primary = "status == 'inactive'">
+                    <field name="name" string="Number"/>
+                    <field name="tank_t_code"/>
+                    <field name="sub_type"/>
+                    <field name="sub_type2"/>
+                    <field name="ownership_type"/>
+                    <field name="tank_operator_id"/>
+                    <field name="vendor_id"/>
+                    <field name="bus_location"/>
+                    <field name="age"/>
+                    <field name="status" widget="badge" decoration-info = "status == 'draft'"
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status == 'active'"
+                        decoration-primary = "status == 'inactive'"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="cm_tank_master_tree" model="ir.ui.view">
+            <field name="name">Tree View</field>
+            <field name="model">cm.tank.master</field>
+            <field name="priority" eval="1"/>
+            <field name="arch" type="xml">
+                <tree string="Tank Master"
+                        decoration-info="status == 'draft'" 
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status in ('active','draft')"
+                        decoration-primary = "status == 'inactive'">
+                    <field name="name" string="Number"/>
+                    <field name="tank_t_code"/>
+                    <field name="sub_type"/>
+                    <field name="sub_type2"/>
+                    <field name="ownership_type"/>
+                    <field name="tank_operator_id"/>
+                    <field name="vendor_id"/>
+                    <field name="bus_location"/>
+                    <field name="age"/>
+                    <field name="status" widget="badge" decoration-info = "status == 'draft'"
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status == 'active'"
+                        decoration-primary = "status == 'inactive'"/>
+                </tree>
+            </field>
+        </record>
+
+        
+        <record id="cm_tank_master_search" model="ir.ui.view">
+            <field name="name">Search View</field>
+            <field name="model">cm.tank.master</field>
+            <field name="arch" type="xml">
+                <search string="Tank Master">
+                    <field name="name" string="Number" filter_domain="[('tank_operator_id','ilike',self)]"/>
+                    <field name="tank_operator_id" filter_domain="[('tank_operator_id','ilike',self)]"/>
+                    <field name="vendor_id" string="Owner / Lessor Name" filter_domain="[('vendor_id','ilike',self)]"/>
+                    <field name="short_name" string="Short Name" filter_domain="[('short_name','ilike',self)]"/>
+                    
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
+                    <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+                    <filter name="Editable" domain="[('status', '=', 'editable')]"/>
+                    <filter name="Active" domain="[('status', '=', 'active')]"/>
+                    <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
+                    <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
+                    <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
+                    <filter name="My Inactive" string="My Inactive" domain="[('user_id', '=', uid),('status', '=', 'inactive')]"/>
+                    <filter name="Hidden" domain="[('active', '=', False)]"/>
+                    
+                    <group expand="0" string="Group By">
+                        <filter string="Tank T Code" name="tank_t_code" domain="[]" context="{'group_by': 'tank_t_code'}"/>
+                        <filter string="Ownership Type" name="ownership_type" domain="[]" context="{'group_by': 'ownership_type'}"/>
+                        <filter string="Tank Operator Name" name="tank_operator_id" domain="[]" context="{'group_by': 'ownership_type'}"/>
+                        <filter string="Owner / Lessor Name" name="vendor_id" domain="[]" context="{'group_by': 'ownership_type'}"/>
+                        <filter string="Sub Type" name="sub_type" domain="[]" context="{'group_by': 'ownership_type'}"/>
+                        <filter string="Sub Type 2" name="sub_type2" domain="[]" context="{'group_by': 'ownership_type'}"/>
+                        <filter string="Business Location" name="bus_location" domain="[]" context="{'group_by': 'ownership_type'}"/>
+                        <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                        <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="cm_tank_master_win_action" model="ir.actions.act_window">
+            <field name="name">Tank Master</field>
+            <field name="res_model">cm.tank.master</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="view_id" ref="cm_tank_master_tree_js"/>
+            <field name="search_view_id" ref="cm_tank_master_search"/>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+            </field>
+        </record>
+
+        <menuitem name="Tank Master" id="cm_tank_master_act_menu" parent="cm_master.cm_crm_master_m_parent" action="cm_tank_master_win_action" sequence="62"/>
+
+    </data>
+        
+</odoo>

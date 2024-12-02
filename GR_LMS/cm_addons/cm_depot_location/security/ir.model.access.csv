@@ -1,0 +1,15 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_cm_depot_location_admin","cm.depot.location.admin","model_cm_depot_location","custom_properties.group_master_admin",1,1,1,1
+"access_cm_depot_location_line_admin","cm.depot.location.line.admin","model_cm_depot_location_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_depot_location_attachment_line_admin","cm.depot.location.attachment.line.admin","model_cm_depot_location_attachment_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_depot_location_audit_checklist_line_admin","cm.depot.location.audit.checklist.line.admin","model_cm_depot_location_audit_checklist_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_depot_location_nearby_port_details_line_admin","cm.depot.location.nearby.port.details.line.admin","model_cm_depot_location_nearby_port_details_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_depot_location_nearby_depot_locations_line_admin","cm.depot.location.nearby.depot.locations.line.admin","model_cm_depot_location_nearby_depot_locations_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_depot_location_batch_inactive_admin","cm.depot.location.batch.inactive.admin","model_cm_depot_location_batch_inactive","custom_properties.group_master_admin",1,1,1,1
+"access_cm_depot_location_user","cm.depot.location.user","model_cm_depot_location","custom_properties.group_master_user",1,0,0,0
+"access_cm_depot_location_line_user","cm.depot.location.line.user","model_cm_depot_location_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_depot_location_attachment_line_user","cm.depot.location.attachment.line.user","model_cm_depot_location_attachment_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_depot_location_audit_checklist_line_user","cm.depot.location.audit.checklist.line.user","model_cm_depot_location_audit_checklist_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_depot_location_nearby_port_details_line_user","cm.depot.location.nearby.port.details.line.user","model_cm_depot_location_nearby_port_details_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_depot_location_nearby_depot_locations_line_user","cm.depot.location.nearby.depot.locations.line.user","model_cm_depot_location_nearby_depot_locations_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_depot_location_batch_inactive_user","cm.depot.location.batch.inactive.user","model_cm_depot_location_batch_inactive","custom_properties.group_master_user",1,0,0,0

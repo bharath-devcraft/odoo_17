@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="cm_business_vertical_sub_type.CmBusinessVerticalSubTypeListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CmBusinessVerticalSubTypeDashBoard />
+        </xpath>
+    </t>
+</templates>

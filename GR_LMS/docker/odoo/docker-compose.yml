@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  Catalyst:
+    image: catalyst:v1
+    container_name: odoo-catalyst
+    environment:
+      - HOST=10.30.100.47
+      - USER=odoo
+      - PASSWORD=odoo
+      - DB_PORT=5432
+    ports:
+      - "8069:8069"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8069"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+    restart: on-failure
+    volumes:
+      - odooappdataQC:/var/lib/odoo
+      - ./extra-odoo-addons:/mnt/extra-addons
+    networks:
+      - odoo-net 
+
+networks:
+  odoo-net:
+    driver: bridge
+
+volumes:
+  odooappdataQC:

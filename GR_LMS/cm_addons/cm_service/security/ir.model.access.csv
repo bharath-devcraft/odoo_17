@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_service_admin,cm.service.admin,model_cm_service,custom_properties.group_master_admin,1,1,1,1
+access_cm_service_line_admin,cm.service.line.admin,model_cm_service_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_service_checklist_line_admin,cm.service.checklist.line.admin,model_cm_service_checklist_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_service_terms_condition_line_admin,cm.service.terms.condition.line.admin,model_cm_service_terms_condition_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_service_attachment_line_admin,cm.service.attachment.line.admin,model_cm_service_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_service_batch_inactive_admin,cm.service.batch.inactive.admin,model_cm_service_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_service_user,cm.service.user,model_cm_service,custom_properties.group_master_user,1,0,0,0
+access_cm_service_line_user,cm.service.line.user,model_cm_service_line,custom_properties.group_master_user,1,0,0,0
+access_cm_service_attachment_line_user,cm.service.attachment.line.user,model_cm_service_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_service_batch_inactive_user,cm.service.batch.inactive.user,model_cm_service_batch_inactive,custom_properties.group_master_user,1,0,0,0
+access_cm_service_checklist_line_user,cm.service.checklist.line.user,model_cm_service_checklist_line,custom_properties.group_master_user,1,0,0,0
+access_cm_service_terms_condition_line_user,cm.service.terms.condition.line.user,model_cm_service_terms_condition_line,custom_properties.group_master_user,1,0,0,0

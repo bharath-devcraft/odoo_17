@@ -1,0 +1,9 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_cm_customer_credit_form_admin","cm.customer.credit.form.admin","model_cm_customer_credit_form","custom_properties.group_master_admin",1,1,1,1
+"access_cm_customer_credit_form_line_admin","cm.customer.credit.form.line.admin","model_cm_customer_credit_form_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_customer_credit_form_attachment_line_admin","cm.customer.credit.form.attachment.line.admin","model_cm_customer_credit_form_attachment_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_customer_credit_batch_inactive_admin","cm.customer.credit.batch.inactive.admin","model_cm_customer_credit_batch_inactive","custom_properties.group_master_admin",1,1,1,1
+"access_cm_customer_credit_form_user","cm.customer.credit.form.user","model_cm_customer_credit_form","custom_properties.group_master_user",1,0,0,0
+"access_cm_customer_credit_form_line_user","cm.customer.credit.form.line.user","model_cm_customer_credit_form_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_customer_credit_form_attachment_line_user","cm.customer.credit.form.attachment.line.user","model_cm_customer_credit_form_attachment_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_customer_credit_batch_inactive_user","cm.customer.credit.batch.inactive.user","model_cm_customer_credit_batch_inactive","custom_properties.group_master_user",1,0,0,0

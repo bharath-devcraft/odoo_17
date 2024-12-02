@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_carrier_admin,cm.carrier.admin,model_cm_carrier,custom_properties.group_master_admin,1,1,1,1
+access_cm_carrier_line_admin,cm.carrier.line.admin,model_cm_carrier_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_carrier_attachment_line_admin,cm.carrier.attachment.line.admin,model_cm_carrier_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_carrier_checklist_line_admin,cm.carrier.checklist.line.admin,model_cm_carrier_checklist_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_carrier_bank_details_line_admin,cm.carrier.bank.details.line.admin,model_cm_carrier_bank_details_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_carrier_batch_inactive_admin,cm.carrier.batch.inactive.admin,model_cm_carrier_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_carrier_user,cm.carrier.user,model_cm_carrier,custom_properties.group_master_user,1,0,0,0
+access_cm_carrier_line_user,cm.carrier.line.user,model_cm_carrier_line,custom_properties.group_master_user,1,0,0,0
+access_cm_carrier_attachment_line_user,cm.carrier.attachment.line.user,model_cm_carrier_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_carrier_checklist_line_user,cm.carrier.checklist.line.user,model_cm_carrier_checklist_line,custom_properties.group_master_user,1,0,0,0
+access_cm_carrier_bank_details_line_user,cm.carrier.bank.details.line.user,model_cm_carrier_bank_details_line,custom_properties.group_master_user,1,0,0,0
+access_cm_carrier_batch_inactive_user,cm.carrier.batch.inactive.user,model_cm_carrier_batch_inactive,custom_properties.group_master_user,1,0,0,0

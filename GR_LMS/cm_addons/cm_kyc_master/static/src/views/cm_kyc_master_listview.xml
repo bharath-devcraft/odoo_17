@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="cm_kyc_master.CmKycMasterListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CmKycMasterDashBoard />
+        </xpath>
+    </t>
+</templates>

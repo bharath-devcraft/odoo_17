@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="cm_depot_tariff_form" model="ir.ui.view">
+            <field name="name">Form View</field>
+            <field name="model">cm.depot.tariff</field>
+            <field name="arch" type="xml">
+                <form string="Depot Tariff">
+                    <header>
+                        <button string="Approve" 
+                            class="btn btn-success" 
+                            icon="fa-thumbs-up" 
+                            type="object" 
+                            name="entry_approve" 
+                            invisible = "status not in ('draft','editable')" 
+                            confirm="Are you sure to proceed ?"/>
+                        <button string="Set To Draft"
+                            class="btn btn-primary"
+                            type="object" name="entry_draft"
+                            invisible = "status != 'active'" 
+                            confirm="Are you sure to proceed ?"/>
+                        <button string="Inactive"
+                            class="btn btn-danger"
+                            icon="fa-thumbs-down" 
+                            type="object" name="entry_inactive" 
+                            invisible = "status != 'active'" 
+                            confirm="Are you sure to proceed ?"/>
+                        <field name="status" widget="statusbar" style="width:700px;"/>                
+                    </header>
+                    
+                    <sheet>                    
+                        <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+                        <group>
+                            <group >
+                                <label for="eff_from_date" class="name-lable"/>
+                                <div>
+                                    <field name="eff_from_date" class="name-value"  required="1" readonly = "status not in ('draft','editable')"/> 
+                                    <field name="name"  widget="no_special_char" invisible="1" readonly = "status not in ('draft','editable')"/>
+                                </div>
+                                <field name="depot_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/> 
+                                <field name="depot_vendor_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/> 
+                                <field name="country_id" options="{'no_create': True}"  required="1" readonly = "1" force_save="1"/> 
+                                <field name="city_id" options="{'no_create': True}" readonly = "1" force_save="1"/> 
+                                <field name="state_id" options="{'no_create': True}" readonly = "1" force_save="1"/> 
+                                
+                            </group>
+                            <group>
+                                <field name="short_name" widget="upper_case" invisible="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="status" readonly = "1" invisible="1"/>
+                                <field name="tank_t_code" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="sub_type2" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="clean_cate_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="package_deal" readonly="1" force_save="1"/>
+                                <!-- <field name="package_deal_ref_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/> -->
+                                <field name="rental_per_day" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                        </group>
+                        
+                        <notebook>
+                            <page string="Charges Details" >
+                                <field name="line_ids" nolabel="1" readonly = "status not in ('draft','editable')">
+                                    <tree string="Details" editable="bottom">
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="charges_id" required="1" options="{'no_create': True}"/>
+                                        <field name="mandatory" required="1"/>
+                                        <field name="currency_id" required="1" options="{'no_create': True}"/>
+                                        <field name="tax_ids" widget="many2many_tags" options="{'no_create': True}" readonly="1" force_save="1"/>
+                                        <field name="actual_cost" required="1" width="110px"/>
+                                        <field name="gr_cost" required="1"/>
+                                        <field name="company_id" column_invisible="1"/>                           
+                                    </tree>
+                                </field>
+                            </page> 
+                            
+                            <page string="Attachments" >
+                                <field name="line_ids_a" nolabel="1" readonly = "status not in ('draft','editable')">
+                                    <tree string="Attachments" editable="bottom">
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="attach_desc" required="1"/>
+                                        <field name="attachment_ids" required="1" widget="single_file_binary" options="{'no_create_edit': True}"/>
+                                        <field name="attach_user_id" force_save="1" readonly="1"/>
+                                        <field name="attach_date" force_save="1" readonly="1"/> 
+                                        <field name="company_id" column_invisible="1"/>                              
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Inactive Remarks" invisible = "status not in ('active','inactive')">
+                                <field name="inactive_remark" readonly = "status != 'active'" nolabel="1"/>
+                            </page>
+                            <page string="Entry Info">
+                                <group>
+                                    <group>
+                                        <field name="company_id"/>
+                                        <field name="active_trans"/>
+                                        <field name="active_rpt"/>
+                                    </group>
+                                    <group>
+                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="entry_mode"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group>
+                                        <field name="user_id" widget="many2one_avatar_user" />
+                                        <field name="ap_rej_user_id" string="Approved By" widget="many2one_avatar_user" invisible = "status not in ('active','inactive')"/>
+                                        <field name="inactive_user_id" widget="many2one_avatar_user" invisible = "status != 'inactive'" />
+                                        <field name="update_user_id" widget="many2one_avatar_user"/>
+                                    </group>
+                                    <group>
+                                        <field name="crt_date"/>
+                                        <field name="ap_rej_date" string="Approved Date" invisible = "status not in ('active','inactive')"/>
+                                        <field name="inactive_date" invisible = "status != 'inactive'"/>
+                                        <field name="update_date"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                        <notebook>
+                            <page string="Storage Fee Details" >
+                                <field name="line_ids_b" nolabel="1" readonly = "status not in ('draft','editable')">
+                                    <tree string="Details" editable="bottom">
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="minimum_days" required="1" width="150px"/>
+                                        <field name="maximum_days" required="1" width="150px"/>
+                                        <field name="currency_id" required="1" options="{'no_create': True}"/>
+                                        <field name="actual_cost" required="1" width="110px"/>
+                                        <field name="gr_cost" required="1"/>
+                                        <field name="company_id" column_invisible="1"/>                           
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                        <group>
+                            <field name="remarks"  placeholder="Write your remarks here."/>
+                        </group>
+                        <div class="oe_chatter">
+                            <field name="message_ids"/>
+                        </div>  
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="cm_depot_tariff_tree_js" model="ir.ui.view">
+            <field name="name">Dashboard View</field>
+            <field name="model">cm.depot.tariff</field>
+            <field name="priority" eval="10"/>
+            <field name="arch" type="xml">
+                <tree string="Depot Tariff" js_class="cm_depot_tariff_list"
+                        decoration-info="status == 'draft'" 
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status in ('active','draft')"
+                        decoration-primary = "status == 'inactive'">
+                    <field name="eff_from_date"/>
+                    <field name="depot_id"/>
+                    <field name="depot_vendor_id"/>
+                    <field name="state_id"/>
+                    <field name="country_id"/>
+                    <field name="tank_t_code"/>
+                    <field name="clean_cate_id"/>
+                    <field name="package_deal"/>
+                    <field name="status" widget="badge" decoration-info = "status == 'draft'"
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status == 'active'"
+                        decoration-primary = "status == 'inactive'"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="cm_depot_tariff_tree" model="ir.ui.view">
+            <field name="name">Tree View</field>
+            <field name="model">cm.depot.tariff</field>
+            <field name="priority" eval="1"/>
+            <field name="arch" type="xml">
+                <tree string="Depot Tariff"
+                        decoration-info="status == 'draft'" 
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status in ('active','draft')"
+                        decoration-primary = "status == 'inactive'">
+                    <field name="eff_from_date"/>
+                    <field name="depot_id"/>
+                    <field name="depot_vendor_id"/>
+                    <field name="state_id"/>
+                    <field name="country_id"/>
+                    <field name="tank_t_code"/>
+                    <field name="clean_cate_id"/>
+                    <field name="package_deal"/>
+                    <field name="status" widget="badge" decoration-info = "status == 'draft'"
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status == 'active'"
+                        decoration-primary = "status == 'inactive'"/>
+                </tree>
+            </field>
+        </record>
+
+        
+        <record id="cm_depot_tariff_search" model="ir.ui.view">
+            <field name="name">Search View</field>
+            <field name="model">cm.depot.tariff</field>
+            <field name="arch" type="xml">
+                <search string="Depot Tariff">
+                    <field name="depot_id" string="Depot Location Name" filter_domain="[('depot_id','ilike',self)]"/>
+                    <field name="depot_vendor_id" string="Deport Vendor Name" filter_domain="[('depot_vendor_id','ilike',self)]"/>
+                    <field name="clean_cate_id" string="Cleaning Category" filter_domain="[('clean_cate_id','ilike',self)]"/>
+                    
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
+                    <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+                    <filter name="Editable" domain="[('status', '=', 'editable')]"/>
+                    <filter name="Active" domain="[('status', '=', 'active')]"/>
+                    <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
+                    <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
+                    <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
+                    <filter name="My Inactive" string="My Inactive" domain="[('user_id', '=', uid),('status', '=', 'inactive')]"/>
+                    <filter name="Hidden" domain="[('active', '=', False)]"/>
+                    
+                    <group expand="0" string="Group By">
+                        <filter string="Depot Location Name" name="depot_id" domain="[]" context="{'group_by': 'depot_id'}"/>
+                        <filter string="Deport Vendor Name" name="depot_vendor_id" domain="[]" context="{'group_by': 'depot_vendor_id'}"/>
+                        <filter string="Tank T Code" name="tank_t_code" domain="[]" context="{'group_by': 'tank_t_code'}"/>
+                        <filter string="Cleaning Category" name="clean_cate_id" domain="[]" context="{'group_by': 'clean_cate_id'}"/>
+                        <filter string="City" name="city_id" domain="[]" context="{'group_by': 'city_id'}"/>
+                        <filter string="State" name="state_id" domain="[]" context="{'group_by': 'state_id'}"/>
+                        <filter string="Country" name="country_id" domain="[]" context="{'group_by': 'country_id'}"/>
+                        <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                        <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="cm_depot_tariff_win_action" model="ir.actions.act_window">
+            <field name="name">Depot Tariff</field>
+            <field name="res_model">cm.depot.tariff</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="view_id" ref="cm_depot_tariff_tree_js"/>
+            <field name="search_view_id" ref="cm_depot_tariff_search"/>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+            </field>
+        </record>
+
+        <menuitem name="Depot Tariff" id="cm_depot_tariff_act_menu" parent="cm_master.cm_tariff_master_m_parent" action="cm_depot_tariff_win_action" sequence="8"/>
+
+    </data>
+        
+</odoo>

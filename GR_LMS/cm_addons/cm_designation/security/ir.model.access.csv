@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_designation_admin,cm.designation.admin,model_cm_designation,custom_properties.group_master_admin,1,1,1,1
+access_cm_designation_attachment_line_admin,cm.designation.attachment.line.admin,model_cm_designation_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_designation_batch_inactive_admin,cm.designation.batch.inactive.admin,model_cm_designation_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_designation_user,cm.designation.user,model_cm_designation,custom_properties.group_master_user,1,0,0,0
+access_cm_designation_attachment_line_user,cm.designation.attachment.line.user,model_cm_designation_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_designation_batch_inactive_user,cm.designation.batch.inactive.user,model_cm_designation_batch_inactive,custom_properties.group_master_user,1,0,0,0

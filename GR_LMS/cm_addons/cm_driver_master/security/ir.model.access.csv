@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_driver_master_admin,cm.driver.master.admin,model_cm_driver_master,custom_properties.group_master_admin,1,1,1,1
+access_cm_driver_master_line_admin,cm.driver.master.line.admin,model_cm_driver_master_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_driver_master_attachment_line_admin,cm.driver.master.attachment.line.admin,model_cm_driver_master_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_driver_master_health_history_line_admin,cm.driver.master.health.history.line.admin,model_cm_driver_master_health_history_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_driver_master_lang_details_line_admin,cm.driver.master.lang.details.line.admin,model_cm_driver_master_lang_details_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_driver_master_batch_inactive_admin,cm.driver.master.batch.inactive.admin,model_cm_driver_master_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_driver_master_user,cm.driver.master.user,model_cm_driver_master,custom_properties.group_master_user,1,0,0,0
+access_cm_driver_master_line_user,cm.driver.master.line.user,model_cm_driver_master_line,custom_properties.group_master_user,1,0,0,0
+access_cm_driver_master_attachment_line_user,cm.driver.master.attachment.line.user,model_cm_driver_master_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_driver_master_health_history_line_user,cm.driver.master.health.history.line.user,model_cm_driver_master_health_history_line,custom_properties.group_master_user,1,0,0,0
+access_cm_driver_master_lang_details_line_user,cm.driver.master.lang.details.line.user,model_cm_driver_master_lang_details_line,custom_properties.group_master_user,1,0,0,0
+access_cm_driver_master_batch_inactive_user,cm.driver.master.batch.inactive.user,model_cm_driver_master_batch_inactive,custom_properties.group_master_user,1,0,0,0

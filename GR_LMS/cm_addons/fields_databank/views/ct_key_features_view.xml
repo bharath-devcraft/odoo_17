@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+   <record id="ct_key_features_form" model="ir.ui.view">
+      <field name="name">Form View</field>
+      <field name="model">ct.key.features</field>
+      <field name="arch" type="xml">
+         <form string="Transaction Key Features">
+            <header>
+
+                <button string="Confirm"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_confirm" invisible = "status != 'draft'"
+                    confirm="Are you sure to proceed ?"/>
+               <button string="Approve"
+                    icon="fa-thumbs-up"
+                    class="btn btn-success"
+                    type="object"
+                    name="common_warning_rule" invisible = "status != 'wfa'"
+                    confirm="Are you sure to proceed ?"/>
+                <button string="Feedback"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_feedback" invisible = "status != 'approved' or rating != False "/>
+
+                <field name="status" widget="statusbar" style="width:700px;"/>                
+
+            </header>
+            <sheet>
+               <div class="oe_button_box" name="button_box">
+                    <button name="action_transaction_history" type="object"
+                        class="oe_stat_button" icon="fa-list-ul"
+                        context="{}"
+                        >
+                        <div class="o_stat_info">
+                            <field name="id" widget="statinfo" string="Transactions"/>
+                        </div>
+                    </button>
+                </div>
+               <group>
+                  <group>
+                     <field name="name" required="1" readonly="status not in ('draft','wfa')"/>
+                  </group>
+                  <group>
+                     <field name="note"/>
+                  </group>
+               </group>
+               <notebook>
+                  <page string="Entry Info">
+                     <group>
+                        <group>
+                           <field name="rating" readonly = "1" force_save="1"/>
+                           <field name="rating_feedback" readonly = "1" force_save="1"/>
+                        </group>
+                        <group>
+                           <field name="active" widget="boolean_toggle"/>
+                           <field name="company_id" force_save="1"/>
+                        </group>
+                     </group>
+                     <group>
+                        <group>
+                           <field name="user_id" widget="many2one_avatar_user" />
+                           <field name="confirm_user_id" invisible="status == 'draft'" widget="many2one_avatar_user" />
+                           <field name="ap_rej_user_id" invisible="status in ('draft','wfa')" widget="many2one_avatar_user" />
+                           <field name="update_user_id" widget="many2one_avatar_user" />
+                        </group>
+                        <group>
+                           <field name="crt_date" />
+                           <field name="confirm_date" invisible="status == 'draft'" />
+                           <field name="ap_rej_date" invisible="status in ('draft','wfa')" />
+                           <field name="update_date" />
+                        </group>
+                     </group>
+                  </page>
+               </notebook>
+            </sheet>
+         </form>
+      </field>
+   </record>
+
+   <record id="ct_key_features_tree" model="ir.ui.view">
+      <field name="name">List View</field>
+      <field name="model">ct.key.features</field>
+      <field name="priority" eval="1"/>
+      <field name="arch" type="xml">
+         <tree string="Transaction Key Features"
+               sample="1"
+               decoration-info = "status == 'draft'"
+               decoration-success = "status == 'wfa'"
+               decoration-bf = "status in ('approved','draft')"
+               decoration-warning = "status == 'rejected'"
+               decoration-primary = "status == 'cancelled'">
+
+               <field name="name" decoration-bf="1"/>
+               <field name="status" widget="badge" 
+                  decoration-info = "status == 'draft'"
+                  decoration-success = "status == 'wfa'"
+                  decoration-bf = "status == 'approved'"
+                  decoration-warning = "status == 'rejected'"
+                  decoration-primary = "status == 'cancelled'"/>
+               <field name="user_id" string="Created By"/>
+               <field name="crt_date"/>
+         </tree>
+      </field>
+   </record>
+   <record id="ct_key_features_search" model="ir.ui.view">
+        <field name="name">Search View</field>
+        <field name="model">ct.key.features</field>
+        <field name="arch" type="xml">
+            <search string="Transaction Key Features">
+                <field name="name"/>
+                <field name="note"/>
+
+                <filter name="my_transactions" string="My Transactions" domain="[('user_id', '=', uid)]"/>
+                <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+                <filter name="WFA" domain="[('status', '=', 'wfa')]"/>
+                <filter name="Approved" domain="[('status', '=', 'approved')]"/>
+                <filter name="Cancelled" domain="[('status', '=', 'cancelled')]"/>
+                <filter name="Rejected" domain="[('status', '=', 'rejected')]"/>
+                <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
+                <filter name="My WFA" string="My WFA" domain="[('user_id', '=', uid),('status', '=', 'wfa')]"/>
+                <filter name="My Approved" string="My Approved" domain="[('user_id', '=', uid),('status', '=', 'approved')]"/>
+                <filter name="My Cancelled" string="My Cancelled" domain="[('user_id', '=', uid),('status', '=', 'cancelled')]"/>
+                <filter name="My Rejected" string="My Rejected" domain="[('user_id', '=', uid),('status', '=', 'rejected')]"/>
+                <filter name="Hidden" domain="[('active', '=', False)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter string="Confirmed By" name="confirm_user_id" domain="[]" context="{'group_by': 'confirm_user_id'}"/>
+                    <filter string="Approved / Rejected By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                    <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+   <record id="ct_key_features_map" model="ir.ui.view">
+      <field name="name">Map View</field>
+      <field name="model">ct.key.features</field>
+      <field name="arch" type="xml">
+         <map/>
+      </field>
+   </record>
+
+   <record id="ct_key_features_win_action" model="ir.actions.act_window" >
+      <field name="name">Transaction Key Features</field>
+      <field name="res_model">ct.key.features</field>
+         <field name="view_mode">tree,form,map</field>
+         <field name="domain">[]</field>
+         <field name="search_view_id" ref="ct_key_features_search"/>
+         <field name="context">{}</field>
+         <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+            No record found. Let's create one!
+            </p><p>
+            This is for transaction key features.
+            </p>
+         </field>
+   </record>
+
+   <record id="ct_key_features_wizard_form" model="ir.ui.view">
+      <field name="name">Wizard From View</field>
+      <field name="model">ct.key.features.wizard</field>
+      <field name="arch" type="xml">
+         <form string="Rating">
+         <script type="text/javascript" src="/fields_databank/static/src/js/feedback_wizard.js"/>
+         <group>
+            <group>
+               <field name="rating" widget="priority" required="1"/>
+            </group>
+            <field name="rating_feedback" placeholder="Reason for rating"/>
+            <footer>
+               <button string="Submit" name="wizard_submit_button" type="object"/>
+            </footer>
+         </group>
+         </form>
+      </field>
+   </record>
+
+   <record model="ir.actions.server" id="ct_key_features_serv_action">
+      <field name="name">Transaction Key Features Server Action</field>
+      <field name="model_id" ref="model_ct_key_features"/>
+      <field name="state">code</field>
+      <field name="code">
+         action = {
+                  'type': 'ir.actions.act_window',
+                  'name': 'Key Features Server Action',
+                  'view_mode': 'tree,form',
+                  'view_type': 'form',
+                  'res_model': 'ct.key.features',
+                  'search_view_id': [env.ref('fields_databank.ct_key_features_search').id, 'search'],
+                  'views': [[env.ref('fields_databank.ct_key_features_tree').id, 'tree'],
+                              [env.ref('fields_databank.ct_key_features_form').id, 'form']],
+                  'domain': [('id','in',env['ct.key.features'].server_action_dynamic_domain()),('status','in',['approved'])]
+                  }
+      </field>
+   </record>
+
+   <menuitem name="Transaction Key Features" id="ct_key_features_sub_menu" 
+         parent="fields_databank.menu_root" sequence="4"/>
+   <menuitem name="Key Features" id="ct_key_features_act_menu" parent="ct_key_features_sub_menu"
+         action="ct_key_features_win_action" sequence="2"/>
+   <menuitem name="Server Action" id="ct_key_features_ser_menu" parent="ct_key_features_sub_menu"
+         action="ct_key_features_serv_action" sequence="4"/>
+
+</odoo>

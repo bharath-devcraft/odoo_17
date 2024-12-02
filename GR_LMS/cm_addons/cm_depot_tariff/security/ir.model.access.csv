@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_depot_tariff_admin,cm.depot.tariff.admin,model_cm_depot_tariff,custom_properties.group_master_admin,1,1,1,1
+access_cm_depot_tariff_line_admin,cm.depot.tariff.line.admin,model_cm_depot_tariff_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_depot_tariff_attachment_line_admin,cm.depot.tariff.attachment.line.admin,model_cm_depot_tariff_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_depot_tariff_storage_fee_details_line_admin,cm.depot.tariff.storage.fee.details.line.admin,model_cm_depot_tariff_storage_fee_details_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_depot_tariff_batch_inactive_admin,cm.depot.tariff.batch.inactive.admin,model_cm_depot_tariff_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_depot_tariff_user,cm.depot.tariff.user,model_cm_depot_tariff,custom_properties.group_master_user,1,0,0,0
+access_cm_depot_tariff_line_user,cm.depot.tariff.line.user,model_cm_depot_tariff_line,custom_properties.group_master_user,1,0,0,0
+access_cm_depot_tariff_attachment_line_user,cm.depot.tariff.attachment.line.user,model_cm_depot_tariff_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_depot_tariff_storage_fee_details_line_user,cm.depot.tariff.storage.fee.details.line.user,model_cm_depot_tariff_storage_fee_details_line,custom_properties.group_master_user,1,0,0,0
+access_cm_depot_tariff_batch_inactive_user,cm.depot.tariff.batch.inactive.user,model_cm_depot_tariff_batch_inactive,custom_properties.group_master_user,1,0,0,0

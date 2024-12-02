@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_res_users,res.users,model_res_users,custom_properties.group_erp_admin,1,1,1,1
+access_res_users_admin,res.users.admin,model_res_users,custom_properties.group_master_admin,1,1,1,1
+

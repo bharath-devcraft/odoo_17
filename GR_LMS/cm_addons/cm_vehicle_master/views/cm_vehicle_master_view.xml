@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="cm_vehicle_master_form" model="ir.ui.view">
+            <field name="name">Form view</field>
+            <field name="model">cm.vehicle.master</field>
+            <field name="arch" type="xml">
+                <form string="Vehicle Master">
+                    
+                    <header>
+                        <button string="Approve"
+                            class="btn btn-success"
+                            icon="fa-thumbs-up"
+                            type="object"
+                            name="entry_approve"
+                            invisible = "status not in ('draft','editable')"
+                            confirm="Are you sure to proceed ?"/>
+                        <button string="Set To Draft" 
+                            class="btn btn-primary"
+                            type="object"
+                            name="entry_draft"
+                            invisible = "status != 'active'"
+                            confirm="Are you sure to proceed ?"/>
+                        <button string="Inactive" 
+                            class="btn btn-danger"
+                            icon="fa-thumbs-down"
+                            type="object"
+                            name="entry_inactive"
+                            invisible = "status != 'active'"
+                            confirm="Are you sure to proceed ?"/>
+                        <field name="status" widget="statusbar" style="width:700px;"/>                
+                    </header>
+                    
+                    <sheet>
+                        <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+                        <group>
+                            <group>
+                                <label for="name" class="name-lable"/>
+                                <div>
+                                    <field name="name" class="name-value" widget="no_special_char"  string="Vehicle No" required="1" readonly = "status not in ('draft','editable')"/>
+                                </div>
+                                <field name="vehicle_make_id" required="1" readonly = "status not in ('draft','editable')"  options="{'no_create': True}"/>
+                                <field name="vehicle_type_id" required="1" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
+                                <field name="purchase_date" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="vehicle_age" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="vehicle_gross_weight" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="model" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="transmission" required="1" readonly = "status not in ('draft','editable')"/>                                
+                                <field name="engine_no" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="engine_capacity" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="chassis_no" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="fuel_type" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="axle" required="1" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="vehicle_tare_weight" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="standard_mileage" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="first_aid_box" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="fire_ext" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="diesel_tk_saft_gurd" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="spill_kit" required="1" readonly = "status not in ('draft','editable')"/>                            
+                                <field name="gps_enabled" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="location" invisible="gps_enabled not in ('yes')"  readonly = "status not in ('draft','editable')"/>
+                                <field name="date_time"  invisible="gps_enabled not in ('yes')" readonly = "status not in ('draft','editable')"/>
+                                <field name="driver_mon_sys" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="ppe_kit" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="battery_saft_gurd" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="mudguard" required="1" readonly = "status not in ('draft','editable')"/>                                                               
+                                <field name="status" readonly = "1" invisible="1"/>
+                            </group>
+                        </group>
+
+                        <group string = "RC Account Details">
+                            <group>
+                                <field name="company_name_id" required="1" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
+                            </group>
+                            <group>
+                                <field name="attachment_ids" widget="single_file_binary" required="1" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
+                            </group>
+                        </group>
+
+                        <group string = "Insurance Details">
+                            <group>
+                                <field name="insurance" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="ins_company_name" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="from_date" required="insurance == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="to_date" required="insurance == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="escalation_mail_days" required="1" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="validity_days" required="insurance == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="validity_months" required="insurance == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="ins_doc_ids" widget="single_file_binary" required="insurance == 'applicable'" readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}"/>
+                                <field name="other_doc_ids" widget="single_file_binary" readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}"/>
+                            </group>
+                        </group>
+
+                        <group string = "State Permit Details">
+                            <group>
+                                <field name="permit" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="state_from_date" required="permit == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="state_to_date" required="permit == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="state_escalation_mail_days" required="1" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="state_validity_days" required="permit == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="state_validity_months" required="permit == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="permit_doc_ids" widget="single_file_binary" required="permit == 'applicable'" readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}"/>
+                                <field name="state_oth_doc_ids" widget="single_file_binary" readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}" />
+                            </group>
+                        </group>                        
+
+                        <group string = "National Permit Details">
+                            <group>
+                                <field name="national_permit" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="national_from_date" required="national_permit == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="national_to_date" required="national_permit == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="nat_esc_mail_days" required="1" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="nat_validity_days" required="national_permit == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="nat_validity_month" required="national_permit == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="nat_doc_ids" widget="single_file_binary" required="national_permit == 'applicable'" readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}"/>
+                                <field name="nat_oth_doc_ids" widget="single_file_binary" readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}" />
+                            </group>
+                        </group>
+
+                        <group string = "Fitness Details(FC)">
+                            <group>
+                                <field name="fc" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="last_fc_date" required="fc == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="next_fc_date" required="fc == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="fc_escalation_mail_days" required="1" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="fc_validity_days" required="fc == 'applicable'" readonly = "status not in ('draft','editable')"/>                    
+                                <field name="fc_validity_months" required="fc == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="fc_doc_ids" widget="single_file_binary" required="fc == 'applicable'" readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}" />
+                                <field name="fc_oth_doc_ids" widget="single_file_binary" required="fc == 'applicable'" readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}"/>
+                            </group>
+                        </group>
+                        <group string = "Road Tax Details">
+                            <group>
+                                <field name="road_tax" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="road_tax_paid_date" required="road_tax == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="rt_validity_to_date" required="road_tax == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="rt_escalation_mail_days" required="1" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="rt_validity_days" required="road_tax == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="rt_validity_months" required="road_tax == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="road_tax_doc_ids" widget="single_file_binary" required="road_tax == 'applicable'" readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}" />
+                                <field name="rt_oth_doc_ids" widget="single_file_binary"  readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}"/>
+                            </group>
+                        </group>
+                        <group string = "PUC Details">
+                            <group>
+                                <field name="puc" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="puc_from_date" required="puc == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="puc_to_date" required="puc == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="puc_escalation_mail_days" required="1" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="puc_validity_days" required="puc == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="puc_validity_months" required="puc == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="puc_doc_ids" widget="single_file_binary" required="puc == 'applicable'" readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}" />
+                                <field name="puc_oth_doc_ids" widget="single_file_binary"  readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}"/>                            
+                            </group>
+                        </group>                        
+                        <group string = "Green Tax Details">
+                            <group>
+                                <field name="green_tax" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="green_tax_from_date" required="green_tax == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="green_tax_to_date" required="green_tax == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="green_tax_escalation_mail_days" required="1" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="green_tax_validity_days" required="green_tax == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="green_tax_validity_months" required="green_tax == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="gre_tax_doc_ids" widget="single_file_binary" required="green_tax == 'applicable'" readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}" />
+                                <field name="gre_oth_doc_ids" widget="single_file_binary"  readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}"/>
+                            </group>
+                        </group> 
+                        <group string = "Speed Govener Details">
+                            <group>
+                                <field name="speed_govener" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="speed_limit_per" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="spd_gov_from_date" required="speed_govener == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="spd_gov_to_date" required="speed_govener == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="speed_govener_escalation_mail_days" required="1" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="speed_govener_validity_days" required="speed_govener == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="speed_govener_validity_months" required="speed_govener == 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="spd_gov_doc_ids" widget="single_file_binary" required="speed_govener == 'applicable'" readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}" />
+                                <field name="spd_gov_oth_doc_ids" widget="single_file_binary" readonly = "status not in ('draft','editable')" options="{'no_create_edit': True}"/>
+                            </group>
+                        </group>                         
+                        <notebook>
+                            <page string="AMC Details" >
+                                <field name="line_ids" string="Additional Contact Detail" nolabel="1" readonly = "status not in ('draft','editable')">
+                                    <tree>
+                                        <field name="amc"/>
+                                        <field name="amc_provider_id" options="{'no_create': True}"/>
+                                        <field name="amc_validity_months" width="200px"/>
+                                        <field name="amc_from_date"/>
+                                        <field name="amc_to_date"/>
+                                        <field name="amc_validity_days" width="200px"/>
+                                    </tree>
+                                    <form>
+                                        <group>
+                                            <group>
+                                                <field name="amc" required="1" />
+                                                <field name="amc_provider_id" required="1"  options="{'no_create_edit': True}" />
+                                                <field name="amc_from_date" required="amc == 'applicable'"/>                                            
+                                                <field name="amc_to_date" required="amc == 'applicable'" />
+                                                <field name="amc_escalation_mail_days" required="1"/>
+                                            </group>
+                                            <group>
+                                                <field name="amc_validity_months" required="amc == 'applicable'"/>
+                                                <field name="amc_validity_days" required="amc == 'applicable'"/>
+                                                <field name="acm_doc_ids" widget="single_file_binary"  required="amc == 'applicable'" options="{'no_create_edit': True}" />
+                                                <field name="acm_oth_doc_ids" widget="single_file_binary" options="{'no_create_edit': True}"/>
+                                                <field name="company_id" invisible="1"/>
+                                            </group>
+                                        </group>
+
+                                    </form>
+                                </field>
+                            </page>
+                            <page string="Attachments" >
+                                <field name="line_ids_a" string="Attachments" nolabel="1" readonly = "status not in ('draft','editable')">
+                                    <tree editable="bottom">
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="attach_desc" required="1"/>
+                                        <field name="attachment_ids" required="1" widget="single_file_binary" options="{'no_create_edit': True}"/>
+                                        <field name="attach_user_id" force_save="1" readonly="1"/>
+                                        <field name="attach_date" force_save="1" readonly="1"/>
+                                        <field name="company_id" column_invisible="1"/>                                
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Inactive Remarks" invisible = "status not in ('active','inactive')">
+                                    <field name="inactive_remark" readonly = "status != 'active'" nolabel="1"/>
+                            </page>
+                            <page string="Entry Info">
+                                <group>
+                                    <group>
+                                        <field name="company_id"/>
+                                        <field name="active_trans"/>
+                                        <field name="active_rpt"/>
+                                    </group>
+                                    <group>
+                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="entry_mode"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group>
+                                        <field name="user_id" widget="many2one_avatar_user"/>
+                                        <field name="ap_rej_user_id" string = "Approved By" widget="many2one_avatar_user" invisible = "status not in ('active','inactive')"/>
+                                        <field name="inactive_user_id" widget="many2one_avatar_user" invisible = "status != 'inactive'" />
+                                        <field name="update_user_id" widget="many2one_avatar_user" />
+                                    </group>
+                                    <group>
+                                        <field name="crt_date"/>
+                                        <field name="ap_rej_date" string = "Approved Date" invisible = "status not in ('active','inactive')"/>
+                                        <field name="inactive_date" invisible = "status != 'inactive'"/>
+                                        <field name="update_date"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                        <group>
+                            <field name="remarks"  placeholder="Write your remarks here."/>
+                        </group>
+                        <div class="oe_chatter">
+                            <field name="message_ids"/>
+                        </div>  
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+            <record id="cm_vehicle_master_tree_js" model="ir.ui.view">
+            <field name="name">Dashboard View</field>
+            <field name="model">cm.vehicle.master</field>
+            <field name="priority" eval="10"/>
+            <field name="arch" type="xml">
+                <tree string="Vehicle Master" js_class="cm_vehicle_master_list"
+                        decoration-info="status == 'draft'" 
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status in ('active','draft')"
+                        decoration-primary = "status == 'inactive'">
+                    <field name="name" string="Vehicle No"/>
+                    <field name="vehicle_type_id"/>
+                    <field name="model"/>
+                    <field name="vehicle_age"/>
+                    <field name="standard_mileage"/>
+                    <field name="company_name_id"/>
+                    <field name="status" widget="badge"  
+                        decoration-info = "status == 'draft'"
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status == 'active'"
+                        decoration-primary = "status == 'inactive'"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="cm_vehicle_master_tree" model="ir.ui.view">
+            <field name="name">Tree View</field>
+            <field name="model">cm.vehicle.master</field>
+            <field name="priority" eval="1"/>
+            <field name="arch" type="xml">
+                <tree string="Vehicle Master" 
+                        decoration-info="status == 'draft'" 
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status in ('active','draft')"
+                        decoration-primary = "status == 'inactive'">
+                    <field name="name" string="Vehicle No"/>
+                    <field name="vehicle_type_id"/>
+                    <field name="model"/>
+                    <field name="vehicle_age"/>
+                    <field name="standard_mileage"/>
+                    <field name="company_name_id"/>
+                    <field name="status" widget="badge"  
+                        decoration-info = "status == 'draft'"
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status == 'active'"
+                        decoration-primary = "status == 'inactive'"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="cm_vehicle_master_search" model="ir.ui.view">
+            <field name="name">Search View</field>
+            <field name="model">cm.vehicle.master</field>
+            <field name="arch" type="xml">
+                <search string="Vehicle Master">
+                    <field name="name" string="Vehicle No" filter_domain="[('name','ilike',self)]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/>
+                    <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+                    <filter name="Editable" domain="[('status', '=', 'editable')]"/>
+                    <filter name="Active" domain="[('status', '=', 'active')]"/>
+                    <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
+                    <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
+                    <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
+                    <filter name="My Inactive" string="My Inactive" domain="[('user_id', '=', uid),('status', '=', 'inactive')]"/>
+                    <filter name="Hidden" domain="[('active', '=', False)]"/>
+                    
+                    <group expand="0" string="Group By">
+                        <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                        <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="cm_vehicle_master_win_action" model="ir.actions.act_window">
+            <field name="name">Vehicle Master</field>
+            <field name="res_model">cm.vehicle.master</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="view_id" ref="cm_vehicle_master_tree_js"/>
+            <field name="search_view_id" ref="cm_vehicle_master_search"/>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+            </field>
+        </record>
+
+        <menuitem name="Vehicle Master" id="cm_vehicle_master_act_menu" parent="cm_master.cm_crm_master_m_parent" action="cm_vehicle_master_win_action" sequence="44"/>
+
+    </data>
+        
+</odoo>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="ct_quotations_mail_preview_form" model="ir.ui.view">
+        <field name="name">Quotations Mail Preview</field>
+        <field name="model">ct.quotations.mail.preview</field>
+        <field name="arch" type="xml">
+            <form string="Preview">
+                <group>
+                    <group>
+                        <field name="mail_to" required = "1" force_save="1"/>
+                        <field name="subject" readonly="1" force_save="1"/>
+                        <field name="mail_cc"  force_save="1"/>
+                        <field name="mail_bcc" force_save="1"/>
+                        <field name="attachment_ids" nolabel="1" widget="single_file_binary" force_save="1"/>
+                    </group>
+                </group>
+                <notebook>
+                    <page string="Body">
+                        <field name="body" force_save="1" readonly="1" options="{'style-inline': true}"/>
+                    </page>
+                </notebook>
+                <footer>
+                   <button string="Send"
+                    icon="fa-paper-plane"
+                    class="btn btn-success"
+                    type="object"
+                    name="action_mail_send"
+                    confirm="Are you sure to send the mail ?"/>                
+                    <button string="Close" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ct_quotations_mail_preview" model="ir.actions.act_window">
+        <field name="name">Preview</field>
+        <field name="res_model">ct.quotations.mail.preview</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="ct_quotations_mail_preview_form"/>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_ct_quotations"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+</odoo>

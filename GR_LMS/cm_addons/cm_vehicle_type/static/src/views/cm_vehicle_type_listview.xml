@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="cm_vehicle_type.CmVehicleTypeListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CmVehicleTypeDashBoard />
+        </xpath>
+    </t>
+</templates>

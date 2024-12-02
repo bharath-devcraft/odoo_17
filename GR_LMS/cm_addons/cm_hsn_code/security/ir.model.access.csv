@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_hsn_code_admin,cm.hsn.code.admin,model_cm_hsn_code,custom_properties.group_master_admin,1,1,1,1
+access_cm_hsn_code_attachment_line_admin,cm.hsn.code.attachment.line.admin,model_cm_hsn_code_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_hsn_code_batch_inactive_admin,cm.hsn.code.batch.inactive.admin,model_cm_hsn_code_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_hsn_code_user,cm.hsn.code.user,model_cm_hsn_code,custom_properties.group_master_user,1,0,0,0
+access_cm_hsn_code_attachment_line_user,cm.hsn.code.attachment.line.user,model_cm_hsn_code_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_hsn_code_batch_inactive_user,cm.hsn.code.batch.inactive.user,model_cm_hsn_code_batch_inactive,custom_properties.group_master_user,1,0,0,0

@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_gr_holiday_admin,cm.gr.holiday.admin,model_cm_gr_holiday,custom_properties.group_master_admin,1,1,1,1
+access_cm_gr_holiday_line_admin,cm.gr.holiday.line.admin,model_cm_gr_holiday_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_gr_holiday_attachment_line_admin,cm.gr.holiday.attachment.line.admin,model_cm_gr_holiday_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_gr_holiday_batch_inactive_admin,cm.gr.holiday.batch.inactive.admin,model_cm_gr_holiday_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_gr_holiday_user,cm.gr.holiday.user,model_cm_gr_holiday,custom_properties.group_master_user,1,0,0,0
+access_cm_gr_holiday_line_user,cm.gr.holiday.line.user,model_cm_gr_holiday_line,custom_properties.group_master_user,1,0,0,0
+access_cm_gr_holiday_attachment_line_user,cm.gr.holiday.attachment.line.user,model_cm_gr_holiday_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_gr_holiday_batch_inactive_user,cm.gr.holiday.batch.inactive.user,model_cm_gr_holiday_batch_inactive,custom_properties.group_master_user,1,0,0,0

@@ -1,0 +1,9 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_cm_business_vertical_admin","cm.business.vertical.admin","model_cm_business_vertical","custom_properties.group_master_admin",1,1,1,1
+"access_cm_master_line_admin","cm.business.vertical.line.admin","model_cm_business_vertical_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_business_vertical_attachment_line_admin","cm.business.vertical.attachment.line.admin","model_cm_business_vertical_attachment_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_business_vertical_batch_inactive_admin","cm.business.vertical.batch.inactive.admin","model_cm_business_vertical_batch_inactive","custom_properties.group_master_admin",1,1,1,1
+"access_cm_business_vertical_user","cm.business.vertical.user","model_cm_business_vertical","custom_properties.group_master_user",1,0,0,0
+"access_cm_business_vertical_line_user","cm.business.vertical.line.user","model_cm_business_vertical_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_business_vertical_attachment_line_user","cm.business.vertical.attachment.line.user","model_cm_business_vertical_attachment_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_business_vertical_batch_inactive_user","cm.business.vertical.batch.inactive.user","model_cm_business_vertical_batch_inactive","custom_properties.group_master_user",1,0,0,0

@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="cm_tank_master.CmTankMasterListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CmTankMasterDashBoard />
+        </xpath>
+    </t>
+</templates>

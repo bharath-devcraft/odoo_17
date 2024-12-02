@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+   <record id="cm_key_features_form" model="ir.ui.view">
+      <field name="name">Form View</field>
+      <field name="model">cm.key.features</field>
+      <field name="arch" type="xml">
+         <form string="Master Key Features">
+            <header>
+               <button string="Approve"
+                    icon="fa-thumbs-up"
+                    class="btn btn-success"
+                    type="object"
+                    name="approve_warning_rule"
+                    invisible = "status not in ('draft','editable')" 
+                    confirm="Are you sure to proceed ?"/>
+                <field name="status" widget="statusbar" style="width:700px;"/>                
+            </header>
+            <sheet>
+               <div name="button_box" position="inside">
+                  <button class="oe_stat_button" type="object" name="action_view_master_transaction"
+                     icon="fa-usd">
+                     <field string="Transaction" name="id" widget="statinfo"/>
+                  </button>
+               </div>
+               <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+               <group>
+                  <group >
+                     <label for="name" class="name-lable"/>
+                     <div>
+                        <field name="name" class="name-value" widget="no_special_char" required="1" readonly = "status in ('active','inactive')"/>
+                     </div> 
+                  </group>
+                  <group>
+                     <field name="short_name" widget="upper_case" required="1" readonly = "status in ('active','inactive')"/>
+                     <field name="status" readonly = "1" invisible="1"/>
+                  </group>
+                  <group>
+                     <field name="note"  placeholder="Write your notes here."/>
+                  </group> 
+               </group>
+                        
+               <notebook>
+                  <page string="Entry Info">
+                     <group>
+                        <group>
+                           <field name="company_id"/>
+                        </group>
+                        <group>
+                           <field name="active" widget="boolean_toggle"/>
+                           <field name="entry_mode"/>
+                        </group>
+                     </group>
+                     <group>
+                        <group>
+                           <field name="user_id" widget="many2one_avatar_user" />
+                           <field name="ap_rej_user_id" string="Approved By" widget="many2one_avatar_user" invisible = "status not in ('active','inactive')"/>
+                           <field name="update_user_id" widget="many2one_avatar_user"/>
+                        </group>
+                        <group>
+                           <field name="crt_date"/>
+                           <field name="ap_rej_date" string="Approved Date" invisible = "status not in ('active','inactive')"/>
+                           <field name="update_date"/>
+                        </group>
+                     </group>
+                  </page>
+               </notebook>
+             
+            </sheet>
+         </form>
+      </field>
+   </record>
+
+   <record id="cm_key_features_tree" model="ir.ui.view">
+      <field name="name">Tree View</field>
+      <field name="model">cm.key.features</field>
+      <field name="priority" eval="1"/>
+      <field name="arch" type="xml">
+         <tree string="Master Key Features"
+               decoration-info="status == 'draft'" 
+               decoration-success = "status == 'editable'"
+               decoration-bf = "status in ('active','draft')"
+               decoration-primary = "status == 'inactive'">
+            <field name="name"/>
+            <field name="short_name"/>
+            <field name="status" widget="badge" decoration-info = "status == 'draft'"
+               decoration-success = "status == 'editable'"
+               decoration-bf = "status == 'active'"
+               decoration-primary = "status == 'inactive'"/>
+            <field name="ap_rej_user_id" string="Approved By"/>
+            <field name="crt_date"/>
+         </tree>
+      </field>
+   </record>
+
+        
+        <record id="cm_key_features_search" model="ir.ui.view">
+            <field name="name">Search View</field>
+            <field name="model">cm.key.features</field>
+            <field name="arch" type="xml">
+                <search string="Master Key Features">
+                    <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
+                    <field name="short_name" string="Short Name" filter_domain="[('short_name','ilike',self)]"/>
+                    
+                    <filter name="my_master" string="My Master" domain="[('user_id', '=', uid)]"/> 
+                    <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+                    <filter name="Editable" domain="[('status', '=', 'editable')]"/>
+                    <filter name="Active" domain="[('status', '=', 'active')]"/>
+                    <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
+                    <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
+                    <filter name="Hidden" domain="[('active', '=', False)]"/>
+                    
+                    <group expand="0" string="Group By">
+                        <filter string="Short Name" name="short_name" domain="[]" context="{'group_by': 'short_name'}"/>
+                        <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Approved By" name="status" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                        <filter string="Approved Date" name="status" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+        <record id="cm_key_features_win_action" model="ir.actions.act_window">
+            <field name="name">Master Key Features</field>
+            <field name="res_model">cm.key.features</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="view_id"/>
+            <field name="search_view_id" ref="cm_key_features_search"/>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">No master record found. Let's create one!</p>
+            </field>
+        </record>
+
+   <menuitem name="Master Key Features" id="cm_key_features_sub_menu" 
+         parent="fields_databank.menu_root" sequence="2" action="cm_key_features_win_action"/>
+
+</odoo>

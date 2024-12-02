@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <!-- <t t-name="disable_messaging_menu" t-inherit="mail.MessagingMenu.content" t-inherit-mode="extension">
+        <xpath expr="//div[contains(@class, 'o-mail-MessagingMenu')]" position="replace">
+        </xpath>
+    </t> -->
+    
+    <t t-name="disable_messaging_menu" t-inherit="mail.MessagingMenu" t-inherit-mode="extension">
+        <xpath expr="//Dropdown" position="replace">
+        </xpath>
+        <xpath expr="//t[@t-else]" position="replace">
+        </xpath>
+    </t>
+
+    <!-- Preference : notification alert content change -->
+    <t t-name="custom_notification_alert" t-inherit="web.NotificationAlert" t-inherit-mode="extension">
+        <xpath expr="//div[contains(@class, 'alert')]" position="replace">
+            <div t-if="isNotificationBlocked" class="alert alert-primary text-center">
+                LMS Push notifications have been blocked. Go to your browser settings to allow them.
+            </div>
+        </xpath>
+    </t>
+
+</templates>
+

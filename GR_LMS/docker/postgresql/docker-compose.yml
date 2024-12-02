@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:16
+    container_name: postgres-catalyst
+    ports:
+      - '5434:5432'
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_DB=postgres
+    networks:
+      - odoo-net
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "user", "-d", "db_test"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+    restart: on-failure
+    volumes:
+      - './odoo-db-dump:/resources/db-dump'
+      - 'odoodbdata:/var/lib/postgresql/data'
+
+networks:
+  odoo-net:
+    driver: bridge
+
+volumes:
+  odoodbdata:
+

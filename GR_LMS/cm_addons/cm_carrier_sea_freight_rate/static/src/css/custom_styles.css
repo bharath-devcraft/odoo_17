@@ -1,0 +1,34 @@
+.o_label_bold_l {
+    font-weight: 500 !important;
+    color:rgb(33 37 41);
+    margin-top: 20px;
+    align-items: center; 
+}
+.o_label_bold_f {
+    font-weight: 500 !important;
+    color:rgb(33 37 41);
+    margin-bottom: 10px;
+    align-items: center; 
+}
+
+.o_label_bold_c {
+    font-weight: 500 !important;
+    color:#0800ff;
+    margin-bottom: 10px;
+    align-items: center; 
+}
+
+.o_rows {
+    display: flex;
+    width: 200%;
+    justify-content: space-between;
+    margin-top: 20px;
+    align-items: center; 
+}
+
+.o_col {
+    flex: 1;
+    font-weight: 400;
+    margin-right: 10px;
+}
+

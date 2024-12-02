@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <record model="ir.ui.view" id="ct_nocost_transaction_form">
+      <field name="name">Form View</field>
+      <field name="model">ct.nocost.transaction</field>
+      <field name="arch" type="xml">
+        <form string="Nocost Transaction Template">
+            <header>
+
+                <button string="Confirm"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_confirm" invisible = "status != 'draft'"
+                    confirm="Are you sure to proceed ?"/>
+                <button string="Approve"
+                    icon="fa-thumbs-up"
+                    class="btn btn-success"
+                    type="object"
+                    name="entry_approve" invisible = "status != 'wfa'"
+                    confirm="Are you sure to proceed ?"/>
+                <button string="Reject"
+                    icon="fa-thumbs-down"
+                    class="btn btn-danger"
+                    type="object"
+                    name="entry_reject" invisible = "status != 'wfa'"
+                    confirm="Are you sure to proceed ?"/>
+                <button string="Cancel"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_cancel" invisible = "status != 'approved'"
+                    confirm="Are you sure to proceed ?"/>
+
+                <field name="status" widget="statusbar" style="width:700px;"/>                
+
+            </header>
+            <sheet>
+                <widget name="web_ribbon" title="Approved" bg_color="bg-success" invisible = "status != 'approved'"/>
+                <group>
+                    <group>
+                        <field name="name" readonly = "1" force_save="1" class="animate-charcter" widget="CopyClipboardChar"/>
+                        <field name="entry_date" required = "1" readonly = "status not in ('draft','wfa')"/>
+                        <field name="draft_name" readonly = "1" force_save="1" class="bold-text" widget="CopyClipboardChar"/>
+                        <field name="draft_date" required = "1" readonly = "status not in ('draft')"/>
+                        <field name="division_id" required = "1" readonly = "status not in ('draft','wfa')" options="{'no_create': True}"/>
+                    </group>
+                    <group>
+                        <field name="department_id" required = "1" readonly = "status not in ('draft','wfa')" options="{'no_create': True}"/>
+                        <field name="partner_id" required = "1" readonly = "status not in ('draft','wfa')" options="{'no_create': True}"/>
+                        <field name="address" readonly = "1" force_save="1"/>
+                        <field name="currency_id" readonly = "1" force_save="1"/>
+                        <field name="delivery_date" required = "1" readonly = "status not in ('draft','wfa')"/>
+                    </group>
+                </group>
+                <group>
+                    <group>
+                    </group>
+                    <group>
+                        <field name="line_count" readonly = "1" force_save="1" invisible="1"/>
+                        <field name="status" readonly = "1" force_save="1" invisible="1"/>
+                    </group>
+                </group>
+
+                
+                <notebook>
+                    <page string="Details" >
+                        <field name="line_ids" string="Details" widget="one2many_search" colspan="4" nolabel="1" readonly = "status not in ('draft','wfa')">
+                            <tree string="Details">
+
+                                <field name="status" column_invisible="1"/>
+                                <field name="header_id" column_invisible="1"/>
+                                <field name="product_id" required="1" force_save="1"/>
+                                <field name="description" readonly = "1" force_save="1"/>
+                                <field name="brand_id"/>
+                                <field name="uom_id"/>
+                                <field name="qty" required="1"/>
+                            </tree>
+                            <form string="Details">
+                                <group>
+                                    <group>
+                                        <field name="product_id" required="1" force_save="1" options="{'no_create': True}"/>
+                                        <field name="description" readonly = "1" force_save="1"/>
+                                        <field name="brand_id" options="{'no_create': True}"/>
+                                    </group>
+                                    <group>
+                                        <field name="uom_id" options="{'no_create': True}" required="1"/>
+                                        <field name="qty" required="1"/>
+                                        <field name="status" invisible="1"/>
+                                        <field name="header_id" invisible="1"/>
+                                        <field name="company_id" invisible="1"/>
+                                    </group>
+                                </group>
+                                
+                                <notebook>
+                                    <page string="Serial Number" >
+                                        <field name="line_ids" nolabel="1">
+                                            <tree editable="bottom">   
+                                                <field name="qty" sum="Total" required="1"/>  
+                                                <field name="serial_no" required="1"/>
+                                                <field name="expiry_date" required="1"/>
+                                            </tree>
+                                        </field>
+                                    </page>
+                                </notebook>
+                            </form>
+                        </field>
+                    </page>
+                    <page string="Attachments" >
+                        <field name="line_ids_a" string="Attachments" colspan="4" nolabel="1" readonly = "status not in ('draft','wfa')">
+                            <tree string="Attachments" editable="bottom">
+
+                                <field name="status" column_invisible="1"/>
+                                <field name="header_id" column_invisible="1"/>
+                                <field name="company_id" column_invisible="1"/>
+                                <field name="attach_desc" required="1"/>
+                                <field name="attachment_ids" required="1" widget="single_file_binary" options="{'no_create_edit': True}"/>
+                                <field name="attach_user_id" readonly = "1" force_save="1"/>
+                                <field name="attach_date" readonly = "1" force_save="1"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Approve / Reject Remarks">
+                        <group>
+                            <field name="ap_rej_remark" nolabel="1" style="width:1000px;" readonly = "status in ('cancelled','rejected')"/>
+                        </group>
+                    </page>
+                    <page string="Cancel Remarks">
+                        <group>
+                            <field name="cancel_remark" nolabel="1" style="width:1000px;" readonly = "status in ('cancelled','rejected')"/>
+                        </group>
+                    </page>
+                    <page string="Entry Info">
+                        <group>
+                            <group>
+                                <field name="company_id" force_save="1"/> 
+                                <field name="fy_control_date" readonly = "1" force_save="1"/>
+                                <field name="active_rpt"/>
+                            </group>
+                            <group>
+                                <field name="active" widget="boolean_toggle"/>
+                                <field name="entry_mode" force_save="1"/>
+                                <field name="active_trans"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="user_id" widget="many2one_avatar_user" />
+                                <field name="confirm_user_id" invisible="status == 'draft'" widget="many2one_avatar_user" />
+                                <field name="ap_rej_user_id" invisible="status in ('draft','wfa')" widget="many2one_avatar_user" />
+                                <field name="cancel_user_id" invisible="status != 'cancelled'" widget="many2one_avatar_user" />
+                                <field name="update_user_id" widget="many2one_avatar_user" />
+                            </group>
+                            <group>
+                                <field name="crt_date" />
+                                <field name="confirm_date" invisible="status == 'draft'" />
+                                <field name="ap_rej_date" invisible="status in ('draft','wfa')" />
+                                <field name="cancel_date" invisible="status != 'cancelled'" />
+                                <field name="update_date" />
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+                <group>
+                    <field name="remarks"/>
+                </group>
+                <div class="oe_chatter">
+                    <field name="message_ids"/>
+                </div>  
+            </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="ct_nocost_transaction_tree_js" model="ir.ui.view">
+        <field name="name">List Dashboard View</field>
+        <field name="model">ct.nocost.transaction</field>
+        <field name="priority" eval="10"/>
+        <field name="arch" type="xml">
+            <tree string="Nocost Transaction Template" js_class="ct_nocost_transaction_list"
+                sample="1"
+                decoration-info = "status == 'draft'"
+                decoration-success = "status == 'wfa'"
+                decoration-bf = "status in ('approved','draft')"
+                decoration-warning = "status == 'rejected'"
+                decoration-primary = "status == 'cancelled'">
+
+                <field name="draft_name" decoration-bf="1"/>
+                <field name="name" decoration-bf="1"/>
+                <field name="entry_date"/>
+                <field name="division_id"/>
+                <field name="department_id"/>
+                <field name="partner_id"/>
+                <field name="line_count"/>
+                <field name="status" widget="badge" 
+                    decoration-info = "status == 'draft'"
+                    decoration-success = "status == 'wfa'"
+                    decoration-bf = "status == 'approved'"
+                    decoration-warning = "status == 'rejected'"
+                    decoration-primary = "status == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ct_nocost_transaction_tree" model="ir.ui.view">
+        <field name="name">List View</field>
+        <field name="model">ct.nocost.transaction</field>
+        <field name="priority" eval="1"/>
+        <field name="arch" type="xml">
+            <tree string="Nocost Transaction Template"
+                sample="1"
+                decoration-info = "status == 'draft'"
+                decoration-success = "status == 'wfa'"
+                decoration-bf = "status in ('approved','draft')"
+                decoration-warning = "status == 'rejected'"
+                decoration-primary = "status == 'cancelled'">
+
+                <field name="draft_name" decoration-bf="1"/>
+                <field name="name" decoration-bf="1"/>
+                <field name="entry_date"/>
+                <field name="division_id"/>
+                <field name="department_id"/>
+                <field name="partner_id"/>
+                <field name="line_count"/>
+                <field name="status" widget="badge" 
+                    decoration-info = "status == 'draft'"
+                    decoration-success = "status == 'wfa'"
+                    decoration-bf = "status == 'approved'"
+                    decoration-warning = "status == 'rejected'"
+                    decoration-primary = "status == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ct_nocost_transaction_search" model="ir.ui.view">
+        <field name="name">Search View</field>
+        <field name="model">ct.nocost.transaction</field>
+        <field name="arch" type="xml">
+            <search string="Nocost Transaction Template">
+                <field name="draft_name"/>
+                <field name="name"/>
+                <field name="division_id"/>
+                <field name="department_id"/>
+                <field name="partner_id"/>
+                <field name="line_ids" string="Products" filter_domain="[('line_ids.product_id','ilike',self)]"/>
+                <field name="remarks"/>
+
+                <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+                <filter name="WFA" domain="[('status', '=', 'wfa')]"/>
+                <filter name="Approved" domain="[('status', '=', 'approved')]"/>
+                <filter name="Cancelled" domain="[('status', '=', 'cancelled')]"/>
+                <filter name="Rejected" domain="[('status', '=', 'rejected')]"/>
+                <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/>
+                <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
+                <filter name="My WFA" string="My WFA" domain="[('user_id', '=', uid),('status', '=', 'wfa')]"/>
+                <filter name="My Approved" string="My Approved" domain="[('user_id', '=', uid),('status', '=', 'approved')]"/>
+                <filter name="My Cancelled" string="My Cancelled" domain="[('user_id', '=', uid),('status', '=', 'cancelled')]"/>
+                <filter name="My Rejected" string="My Rejected" domain="[('user_id', '=', uid),('status', '=', 'rejected')]"/>
+                <filter name="Hidden" domain="[('active', '=', False)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Draft Date" name="draft_date" domain="[]" context="{'group_by': 'draft_date'}"/>
+                    <filter string="Entry Date" name="entry_date" domain="[]" context="{'group_by': 'entry_date'}"/>
+                    <filter string="Division" name="division_id" domain="[]" context="{'group_by': 'division_id'}"/>
+                    <filter string="Department" name="department_id" domain="[]" context="{'group_by': 'department_id'}"/>
+                    <filter string="Partner Name" name="partner_id" domain="[]" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Currency" name="currency_id" domain="[]" context="{'group_by': 'currency_id'}"/>
+                    <filter string="Delivery Date" name="delivery_date" domain="[]" context="{'group_by': 'delivery_date'}"/>
+                    <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter string="Confirmed By" name="confirm_user_id" domain="[]" context="{'group_by': 'confirm_user_id'}"/>
+                    <filter string="Approved / Rejected By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                    <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                    <filter string="Entry Mode" name="entry_mode" domain="[]" context="{'group_by': 'entry_mode'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="ct_nocost_transaction_kanban" model="ir.ui.view">
+        <field name="name">Kanban View</field>
+        <field name="model">ct.nocost.transaction</field>
+        <field name="arch" type="xml">
+            <kanban string="Nocost Transaction Template" class="o_kanban_mobile" sample="1" quick_create="false">
+                <field name="name"/>
+                <field name="entry_date"/>
+                <field name="division_id"/>
+                <field name="partner_id"/>
+                <field name="department_id"/>
+                <field name="currency_id"/>
+                <field name="ap_rej_user_id"/>
+                <field name="status"/>
+                <progressbar field="status"
+                    colors='{"draft": "info", "wfa": "success", "approved": "bf","cancelled": "primary","rejected": "warning"}'/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="kanban-card"> 
+                            <div class="kanban-table">
+                                <div class="kanban-row">
+                                    <div class="kanban-cell" t-att-title="'Order Name'">
+                                        <field style="color: #4d4d4d; font-weight: bold; font-size: 18px;" name="name"/>
+                                    </div>
+                                    <div class="kanban-cell" t-att-title="'Order Date'">
+                                        <field style="color: #808080; font-weight: bold; font-size: 14px;" name="entry_date"/>
+                                    </div>
+                                </div>
+                                <div class="kanban-row">
+                                    <div class="kanban-cell" t-att-title="'Division'">
+                                        <i class="fa fa-building" style="color: #E91E63;" title="Building Icon"></i> <field name="division_id"/>
+                                    </div>
+                                    <div class="kanban-cell" t-att-title="'Partner Name'">
+                                        <i class="fa fa-user" style="color: #4CAF50;" title="Supplier Icon"></i> <field name="partner_id"/>
+                                    </div>
+                                </div>
+                                <div class="kanban-row">
+                                    <div class="kanban-cell" t-att-title="'Department'">
+                                        <i class="fa fa-sitemap" style="color: #2196F3;" title="Department Icon"></i> <field name="department_id"/>
+                                    </div>
+                                    <div class="kanban-cell" t-att-title="'Approved/Reject By'">
+                                        <i class="fa fa-user" style="color: #4CAF50;" title="Supplier Icon"></i> <field name="ap_rej_user_id"/>
+                                    </div>
+                                </div>
+                                <div class="kanban-row">
+                                    <div class="kanban-cell" t-att-title="'Status'">
+                                        <field name="status" widget="label_selection" options="{'classes': {'draft': 'info', 'wfa': 'success', 'approved': 'default', 'cancelled': 'primary', 'rejected': 'warning'}}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="ct_nocost_transaction_graph" model="ir.ui.view">
+       <field name="name">Graph View</field>
+       <field name="model">ct.nocost.transaction</field>
+       <field name="arch" type="xml">
+            <graph string="Nocost Transaction Template" sample="1" disable_linking="True" stacked="0" type="pie">
+                <field name="division_id"/>
+                <field name="id" string="Count" type="measure" operator="count"/>
+                <field name="line_count" invisible="1"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="ct_nocost_transaction_dashboard" model="ir.ui.view">
+       <field name="name">Dashboard View</field>
+       <field name="model">ct.nocost.transaction</field>
+       <field name="arch" type="xml">
+            <dashboard/>
+        </field>
+    </record>
+
+    <record id="ct_nocost_transaction_win_action" model="ir.actions.act_window" >
+      <field name="name">Nocost Transaction Template</field>
+      <field name="res_model">ct.nocost.transaction</field>
+      <field name="view_mode">tree,dashboard,form,kanban,graph</field>
+        <field name="domain">[]</field>
+        <field name="view_id" ref="ct_nocost_transaction_tree_js"/>
+        <field name="search_view_id" ref="ct_nocost_transaction_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No record found. Let's create one!
+          </p><p>
+            This is for base transaction.
+          </p>
+        </field>
+    </record>
+
+    <record id="ct_view_nocost_transaction_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="ct_nocost_transaction.ct_nocost_transaction_tree_js"/>
+        <field name="act_window_id" ref="ct_nocost_transaction_win_action"/>
+    </record>
+
+    <record id="ct_view_nocost_transaction_dashbord" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">dashboard</field>
+        <field name="view_id" ref="ct_nocost_transaction.ct_nocost_transaction_dashboard"/>
+        <field name="act_window_id" ref="ct_nocost_transaction_win_action"/>
+    </record>
+
+    <record id="ct_view_nocost_transaction_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="ct_nocost_transaction.ct_nocost_transaction_form"/>
+        <field name="act_window_id" ref="ct_nocost_transaction_win_action"/>
+    </record>
+
+    <record id="ct_view_nocost_transaction_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="4"/>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="ct_nocost_transaction.ct_nocost_transaction_kanban"/>
+        <field name="act_window_id" ref="ct_nocost_transaction_win_action"/>
+    </record>
+
+    <record id="ct_view_nocost_transaction_graph" model="ir.actions.act_window.view">
+        <field name="sequence" eval="5"/>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="ct_nocost_transaction.ct_nocost_transaction_graph"/>
+        <field name="act_window_id" ref="ct_nocost_transaction_win_action"/>
+    </record>
+
+    <menuitem name="Nocost Transaction" id="ct_nocost_transaction_act_menu" parent="ct_transaction.ct_transaction_m_root"
+              action="ct_nocost_transaction_win_action" sequence="4"/>
+  </data>
+</odoo>

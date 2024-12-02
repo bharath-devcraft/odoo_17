@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_exchange_rate_admin,cm.exchange.rate.admin,model_cm_exchange_rate,custom_properties.group_master_admin,1,1,1,1
+access_cm_exchange_rate_line_admin,cm.exchange.rate.line.admin,model_cm_exchange_rate_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_exchange_rate_attachment_line_admin,cm.exchange.rate.attachment.line.admin,model_cm_exchange_rate_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_exchange_rate_batch_inactive_admin,cm.exchange.rate.batch.inactive.admin,model_cm_exchange_rate_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_exchange_rate_user,cm.exchange.rate.user,model_cm_exchange_rate,custom_properties.group_master_user,1,0,0,0
+access_cm_exchange_rate_line_user,cm.exchange.rate.line.user,model_cm_exchange_rate_line,custom_properties.group_master_user,1,0,0,0
+access_cm_exchange_rate_attachment_line_user,cm.exchange.rate.attachment.line.user,model_cm_exchange_rate_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_exchange_rate_batch_inactive_user,cm.exchange.rate.batch.inactive.user,model_cm_exchange_rate_batch_inactive,custom_properties.group_master_user,1,0,0,0

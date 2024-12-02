@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>      
+    <template id="gr_external_layout_custom">
+        <!-- Header Start-->
+        <div t-attf-class="header o_company_#{company.id}_layout" t-att-style="report_header_style">
+            <div class="o_clean_header">
+                <div class="row row_custom o_header_layout_custom">
+                    <div class="col-10">
+                        <h t-if="trans_data" class="gr_company_name"><t t-out="trans_data.service_id.company_id.name"/></h><br/><br/>
+                        <h t-if="trans_data"><t t-out="trans_data.service_id.company_id.street"/></h>
+                        <h t-if="trans_data and trans_data.service_id.company_id.street1">, <t t-out="trans_data.service_id.company_id.street1"/></h>
+                        <h t-if="trans_data">, <t t-out="trans_data.service_id.company_id.city"/></h>
+                        <h t-if="trans_data">- <t t-out="trans_data.service_id.company_id.pin_code"/></h><br/>
+                        <h t-if="trans_data">, <t t-out="trans_data.service_id.company_id.state_id.name"/></h>
+                        <h t-if="trans_data">, <t t-out="trans_data.service_id.company_id.country_id.name"/></h><br/>
+                        <br/>
+                        <tr>
+                            <td>Phone </td>
+                            <td> :</td>
+                            <td t-if="trans_data"><t t-out="trans_data.service_id.company_id.phone"/></td>
+                            <span>,</span>
+                            <td>Email </td>
+                            <td> :</td>
+                            <td t-if="trans_data"><t t-out="trans_data and trans_data.service_id.company_id.email"/></td>
+                        </tr>
+                        <br/>
+                    </div>
+                    <div class="col-2" style="position:absolute;right: 65px;">
+                        <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" alt="Logo" style="width:200px;height:100px;object-fit: cover;float: left;margin-right: 20px;"/>
+                    </div>
+                    <br/>
+                </div>
+            </div>
+        </div>
+        <!-- Header Ends -->
+
+        <div t-attf-class="article o_report_layout_custom o_company_#{company.id}_layout {{  'o_report_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+            <div class="row row_custom mt-4 mb-4 position-relative">
+                <div class="col col_custom mw-100 mb-2 text-end position-relative" name="title_card">
+                    <p class="text-center fw-bolder gr_o_title_size position-absolute top-0"><h>Quotation</h></p>
+                    <p class="m-0" t-if="trans_data and trans_data.status == 'draft'" >
+                        <img t-att-src="'/report/barcode/QR/%s?width=%s&amp;height=%s&amp;barLevel=H' %('Quotation', 100, 100)" class="text-start start-0 position-absolute"/></p>
+                    <p class="m-0" t-else="">
+                        <img t-att-src="'/report/barcode/QR/%s?width=%s&amp;height=%s&amp;barLevel=H' %('Quotation', 100, 100)" class="text-start start-0 position-absolute"/></p>
+                    <p class="m-0" t-if="trans_data and trans_data.status != 'draft' and trans_data.name" >
+                        <img t-att-src="'/report/barcode/QR/%s?width=%s&amp;height=%s&amp;barLevel=H' %(trans_data.name, 100, 100)" class="text-start start-0 position-absolute"/></p>
+                    <p class="m-0" t-if="trans_data and trans_data.status != 'draft' and trans_data.name" >
+                        <strong class="bg-200">No. : </strong><span class="bg-200" t-out="trans_data.name"/></p>
+                    <p class="m-0" t-else="" >
+                        <strong class="bg-200">No. :</strong></p>
+                    <p class="m-0" t-if="trans_data and trans_data.status != 'draft' and trans_data.entry_date">
+                        <strong>Date : </strong><span class="m-0" t-field="trans_data.entry_date" t-options='{"widget": "date"}'></span></p>
+                    <p class="m-0" t-else="" >
+                        <strong>Date :</strong></p>
+                    <p class="m-0"><strong>Revision No :</strong></p>
+                </div>
+            </div>
+            <div class="d-grid gap-3 o_report_layout_background_custom mt-4" t-attf-style="background-image: url({{('/custom_properties/static/src/img/bg_background_draft.jpg' if (trans_data and trans_data.status == 'draft') else None)}});">
+                <div class="position-relative">
+                    <div class="gr_o_bkg_party_title">
+                        <p><b>Booking Party :</b></p>
+                        <div class="gr_o_bkg_party">
+                            <t t-call="custom_properties.address_layout_custom"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="position-relative">
+                    <table class="gr_o_entry_details table table-sm o_main_table table-borderless">
+                        <tr>
+                            <td>Attn</td>
+                            <td>:</td>
+                            <td><span t-if="trans_data" t-field="trans_data.contact_person"/><h t-else="">Admin</h></td>
+                        </tr>
+                        <tr>
+                            <td>Mobile</td>
+                            <td>:</td>
+                            <td><span t-if="trans_data" t-field="trans_data.mobile_no"/><h t-else="">-</h></td>
+                        </tr>
+                        <tr>
+                            <td>Email</td>
+                            <td>:</td>
+                            <td><span t-if="trans_data" t-field="trans_data.email"/><h t-else="">admin@gmail.com</h></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="page gr_o_core_table" t-att-style="report_header_style">
+                    <div class="oe_structure"/>
+        
+                    <!-- Is there a discount on at least one line? -->
+                    <table class="table col col_custom table-sm o_main_table mt-4" style="border: 1px solid black;page-break-inside: avoid; position:relative;">
+                        <thead style="display: table-row-group" class="bg-200">
+                            <tr>
+                                <th name="th_s_no" class="text-center">S.No</th>
+                                <th name="th_description" class="text-center">Description</th>
+                                <th name="th_qty" class="text-center">Qty / UOM</th>
+                                <th name="th_unit_price" class="text-center">Unit Price</th>
+                                <th name="th_disc" class="text-center">
+                                    <span>Currency</span>
+                                </th>
+                                <th name="th_taxes" class="text-center">Tax(%)</th>
+                                <th name="th_subtotal" class="text-center">
+                                    <span>Amount</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody t-if="o">
+                            <t t-set="current_subtotal" t-value="0"/>
+                            <t t-set="s_no" t-value="1"/>
+                            <t t-if="trans_data">
+                                <t t-foreach="trans_data.line_ids_g" t-as="line">
+                                    <t t-set="current_subtotal" t-value="current_subtotal + line.tot_amt"/>
+                                        <tr t-att-class="'o_line_section'">
+                                            <t t-if="line">
+                                                <td name="td_s_no" class="text-center"><span t-out="s_no"></span></td>
+                                                <td name="td_name"><span t-field="line.description"></span></td>
+                                                <td name="td_qty" class="text-end">
+                                                    <span t-field="line.qty"></span>
+                                                    <span t-field="line.uom_id.name"></span>
+                                                </td>
+                                                <td name="td_unitprice" class="text-end">
+                                                    <span t-out="'%.2f'%(line.unit_price)"></span>
+                                                </td>
+                                                <td name="td_currency">
+                                                    <span t-field="line.currency_id.name"></span>
+                                                </td>
+                                                <td name="td_taxes">
+                                                    <span t-out="', '.join(map(lambda x: (x.description or x.name), line.tax_ids))">
+                                                    </span>
+                                                </td>
+                                                <td name="td_subtotal" class="text-end">
+                                                    <span t-out="'%.2f'%(line.tot_amt)"></span>
+                                                </td>
+                                            </t> 
+                                        </tr>
+                                        <t t-set="s_no" t-value="s_no + 1"/>
+                                    </t>
+                                </t>
+                        </tbody>
+                    </table>
+                    <div>
+                        <table class="o_total_info table-borderless" style="page-break-inside: avoid; position:relative;">
+                            <t>
+                                <tr class="is-subtotal text-end">
+                                    <td name="td_tot_amt" class="text-start">Taxable Amount</td>
+                                    <td>:</td>
+                                    <td colspan="1"><t t-if="trans_data"><span t-out="'%.2f'%(trans_data.taxable_amt)"/></t><t t-else=""><h>0.00</h></t></td>
+                                </tr>
+                                <tr class="is-subtotal text-end">
+                                    <td name="td_tax_amt" class="text-start">
+                                        Tax Amount</td>
+                                    <td>:</td>
+                                    <td><t t-if="trans_data"><span
+                                            t-out="'%.2f'%(trans_data.tax_amt)"
+                                        ></span></t><t t-else=""><h>480.00</h></t></td>
+                                </tr>
+                                <tr class="is-subtotal text-end">
+                                    <td name="td_round" class="text-start">
+                                        Round Off</td>
+                                    <td>:</td>
+                                    <td><t t-if="trans_data"><span
+                                            t-out="'%.2f'%(trans_data.round_off_amt)"
+                                        ></span></t><t t-else=""><h>0.00</h></t></td>
+                                </tr>
+                                <tr class="is-subtotal text-end">
+                                    <td name="td_amount" class="text-start">
+                                        <strong>Total Amount</strong></td>
+                                    <td>:</td>
+                                    <td><t t-if="trans_data"><strong><span
+                                            t-out="trans_data.net_amt"
+                                            t-options='{"widget": "monetary", "display_currency": trans_data.quotation_currency_id}'
+                                        ></span></strong></t><t t-else=""><h><strong>0.00</strong></h></t></td>
+                                </tr>
+                            </t>
+                        </table>
+                        <br/>
+                        <div>
+                            <div style="page-break-inside: avoid; position:relative;">
+                                <table style="width:100%;border-collapse: collapse;">
+                                    <tbody class="sale_tbody" style="border: 1px solid black;">
+                                        <p><b>Terms &amp; Conditions :</b></p>
+                                        <tr>
+                                            <th style="text-align:center; width:250px; border: 1px solid black; padding: 5px;">Term</th>
+                                            <th style="text-align:center; width:250px; border: 1px solid black; padding: 5px;">Description</th>
+                                        </tr>
+                                        <t t-if="trans_data">
+                                            <t t-foreach="trans_data.service_id.line_ids_c" t-as="term_line">
+                                                <tr>
+                                                    <td style="text-align:left; width:250px; border: 1px solid black; padding: 5px;">
+                                                        <t t-out="term_line.term_name"/>
+                                                    </td>
+                                                    <td style="text-align:left; border: 1px solid black; padding: 5px;">
+                                                        <t t-out="term_line.description"/>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="page-break-inside: avoid; position:relative; top:40px;">
+                                <div class="position-absolute" style="left:150px;width:250px;page-break-inside: avoid; position:relative;">
+                                            <img t-if="trans_data and trans_data.confirm_user_id.sign_img" style="display:block;margin-left: auto;margin-right: auto;" t-att-src="image_data_uri(trans_data.confirm_user_id.sign_img)" alt="Logo"/>
+                                            <hr style="border: 1px solid black;"/>
+                                            <p class="text-center" style="margin-bottom:2px" t-if="trans_data"><t t-out="trans_data.confirm_user_id.name"/></p>
+                                            <p class="text-center" style="margin-bottom:2px" t-else=""><h>Admin</h></p>
+                                            <p class="text-center" style="margin-bottom:2px">Prepared By</p>
+                                    <p class="text-center" style="font-size: 10px;" t-if="trans_data and trans_data.confirm_user_id.sign_img">** Digitally Signed</p>
+                                </div>
+                                <div class="position-absolute" style="left:550px;width:250px;page-break-inside: avoid; position:relative;">
+                                            <img t-if="trans_data and trans_data.ap_rej_user_id.sign_img" style="display:block;margin-left: auto;margin-right: auto;" t-att-src="image_data_uri(trans_data.ap_rej_user_id.sign_img)" alt="Logo"/>
+                                            <hr style="border: 1px solid black;"/>
+                                            <p class="text-center" style="margin-bottom:2px" t-if="trans_data"><t t-out="trans_data.ap_rej_user_id.name"/></p>
+                                            <p class="text-center" style="margin-bottom:2px" t-else="">Admin</p>
+                                            <p class="text-center" style="margin-bottom:2px">Approved By</p>
+                                    <p class="text-center" style="font-size: 10px;" t-if="trans_data and trans_data.confirm_user_id.sign_img">** Digitally Signed</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>          
+        </div>
+            
+            <!-- Footer -->
+            <div class="footer">
+                <div class="text-center" style="border-top: 1px solid black;">
+                    <ul class="list-inline mb4">
+                        <div style="width: 65%;float: right;">
+                            <!--Page: <span class="page"/> of <span class="topage"/>-->
+                        </div>
+                        <div style="width: 35%;float: left;" t-if="report_type == 'pdf'">
+                            <span t-field="user.name"/> - <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M:%S')"/>           
+                        </div>
+                    </ul>
+                <div t-if="report_type == 'pdf'" style="width: 30%; float: left;">
+                            Page: <span class="page"/> of <span class="topage"/>
+                </div>
+            </div>
+        </div>
+        <!-- Footer Ends-->
+    </template>
+
+        <!-- External layouts styles -->
+
+    <template id="address_layout_custom">
+        <t t-set="colclass" t-value="('col-sm-5' if report_type == 'html' else 'col-5') + ' ms-auto'"/>
+        <div t-if="consignor_address" class="address row_custom row " title="This block is not always present depending on the printed document.">
+            <t t-if="consignor_address">
+                <t t-set="colclass" t-value="'col-5 offset-1'"/>
+                <div name="consignor_address" class="col-6">
+                    <t t-out="consignor_address or None">
+                    </t>
+                </div>
+            </t>
+        </div>
+        <div class="oe_structure" t-else="">
+                <h>250 Executive Park Blvd,</h><br/>
+                <h>San Francisco,</h><br/>
+                <h>Park Blvd CA 94134,</h><br/>
+                <h>United States</h><br/>
+            </div>
+    </template>
+
+    <template id="ship_to_layout_custom">
+        <t t-set="colclass" t-value="('col-sm-5' if report_type == 'html' else 'col-5') + ' ms-auto'"/>
+        <div t-if="ship_to_address" class="address row_custom row " title="This block is not always present depending on the printed document.">
+            <t t-if="ship_to_address">
+                <t t-set="colclass" t-value="'col-5 offset-1'"/>
+                <div name="ship_to_address" class="col-6">
+                    <t t-out="ship_to_address or None">
+                    </t>
+                </div>
+            </t>
+        </div>
+        <div class="oe_structure" t-else="">
+                <h>250 Executive Park Blvd,</h><br/>
+                <h>San Francisco,</h><br/>
+                <h>Park Blvd CA 94134,</h><br/>
+                <h>United States</h><br/>
+            </div>
+    </template>
+
+    <template id="invoice_to_layout_custom">
+        <t t-set="colclass" t-value="('col-sm-5' if report_type == 'html' else 'col-5') + ' ms-auto'"/>
+        <div t-if="invoice_to_address" class="address row_custom row " title="This block is not always present depending on the printed document.">
+            <t t-if="invoice_to_address">
+                <t t-set="colclass" t-value="'col-5 offset-1'"/>
+                <div name="invoice_to_address" class="col-6">
+                    <t t-out="invoice_to_address or None">
+                    </t>
+                </div>
+            </t>
+        </div>
+        <div class="oe_structure" t-else="">
+                <h>250 Executive Park Blvd,</h><br/>
+                <h>San Francisco,</h><br/>
+                <h>Park Blvd CA 94134,</h><br/>
+                <h>United States</h><br/>
+            </div>
+    </template>
+
+
+    <template id="custom_reports_css" inherit_id="web.styles_company_report">
+        <xpath expr="//t[@t-elif]" position="before">
+            <t t-elif="layout == 'custom_properties.external_layout_custom'">
+                    &amp;.header {
+                        .company_header {
+                            .name_container {
+                                color: <t t-out='primary'/>;
+                            }
+                        }
+                    }
+                    &amp;.compay_name {
+                            font-size:500px;
+                        }
+                    &amp;.invoice_note {
+                        td {
+                            .address {
+                                > span {
+                                    color: <t t-out='secondary'/>;
+                                }
+                            }
+                        }
+                        h2 {
+                            color: <t t-out='primary'/>;
+                        }
+                        .page {
+                            [name=invoice_line_table], [name=stock_move_table], .o_main_table {
+                                th {
+                                    color: <t t-out='secondary'/>;
+                                }
+                            }
+                        }
+                    }
+                    &amp;.test {
+                        background-color: <t t-out='secondary'/>;
+                    }
+                    
+            </t>
+        </xpath>
+    </template>
+</odoo>

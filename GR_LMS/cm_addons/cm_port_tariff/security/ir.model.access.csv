@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_port_tariff_admin,cm.port.tariff.admin,model_cm_port_tariff,custom_properties.group_master_admin,1,1,1,1
+access_cm_port_tariff_line_admin,cm.port.tariff.line.admin,model_cm_port_tariff_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_port_tariff_demurrage_line_admin,cm.port.tariff.demurrage.line.admin,model_cm_port_tariff_demurrage_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_port_tariff_attachment_line_admin,cm.port.tariff.attachment.line.admin,model_cm_port_tariff_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_port_tariff_batch_inactive_admin,cm.port.tariff.batch.inactive.admin,model_cm_port_tariff_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_port_tariff_user,cm.port.tariff.user,model_cm_port_tariff,custom_properties.group_master_user,1,0,0,0
+access_cm_port_tariff_line_user,cm.port.tariff.line.user,model_cm_port_tariff_line,custom_properties.group_master_user,1,0,0,0
+access_cm_port_tariff_demurrage_line_user,cm.port.tariff.demurrage.line.user,model_cm_port_tariff_demurrage_line,custom_properties.group_master_user,1,0,0,0
+access_cm_port_tariff_attachment_line_user,cm.port.tariff.attachment.line.user,model_cm_port_tariff_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_port_tariff_batch_inactive_user,cm.port.tariff.batch.inactive.user,model_cm_port_tariff_batch_inactive,custom_properties.group_master_user,1,0,0,0

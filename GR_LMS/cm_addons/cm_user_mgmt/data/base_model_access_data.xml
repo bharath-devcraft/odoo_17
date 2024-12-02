@@ -1,0 +1,53 @@
+<?xml version="1.0" ?>
+<openerp>
+<data noupdate="0">       		
+		
+		
+		
+	    <record id="erp_admin_ir_model" model="ir.model.access">
+			<field name="model_id" ref="base.model_ir_model"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">IR Model</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'ERP Admin')]"/>
+		</record>
+		
+		
+		<record id="erp_admin_ir_attachment" model="ir.model.access">
+			<field name="model_id" ref="base.model_ir_attachment"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">IR Attachment</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'ERP Admin')]"/>
+		</record>
+		
+		<record id="erp_admin_ir_cron" model="ir.model.access">
+			<field name="model_id" ref="base.model_ir_cron"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">IR Cron</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'ERP Admin')]"/>
+		</record>
+		
+		<record id="erp_admin_ir_model_fields" model="ir.model.access">
+			<field name="model_id" ref="base.model_ir_model_fields"/>
+			<field eval="1" name="perm_read"/>
+			<field name="name">IR Model Fields</field>
+			<field eval="1" name="perm_unlink"/>
+			<field eval="1" name="perm_write"/>
+			<field eval="1" name="perm_create"/>
+			<field model="res.groups" name="group_id" search="[('name', '=', u'ERP Admin')]"/>
+		</record>
+		
+			    
+
+	
+    </data>
+</openerp>
+	

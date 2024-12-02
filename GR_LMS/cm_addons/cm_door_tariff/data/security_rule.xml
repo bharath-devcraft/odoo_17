@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="0">
+	
+    <record id="cm_door_tariff_company_rules" model="ir.rule">
+		<field name="name">CM Door Tariff</field>
+		<field ref="model_cm_door_tariff" name="model_id"/>
+		<field name="domain_force">[]</field>
+		<field name="groups" eval="[(4, ref('custom_properties.group_company_admin'))]"/>
+	</record>
+    
+</odoo>

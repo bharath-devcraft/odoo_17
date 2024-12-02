@@ -1,0 +1,8 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+access_cm_port_terminal_admin,Terminal Admin,model_cm_port_terminal,custom_properties.group_master_admin,1,1,1,1
+access_cm_port_terminal_attachment_line_admin,Terminal Attachment Line Admin,model_cm_port_terminal_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_port_terminal_batch_inactive_admin,Terminal Batch Inactive User,model_cm_port_terminal_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_port_terminal_user,Terminal User,model_cm_port_terminal,custom_properties.group_master_user,1,0,0,0
+access_cm_port_terminal_attachment_line_user,Terminal Attachment Line User,model_cm_port_terminal_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_port_terminal_batch_inactive_user,Terminal Batch Inactive User,model_cm_port_terminal_batch_inactive,custom_properties.group_master_user,1,0,0,0
+

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="cr_report_template_id">
+	    <t t-call="web.html_container">
+	    <t t-foreach="docs" t-as="o">
+			<div class="page">
+				<head>
+				<style>
+				.report_details_left {
+					margin-top: 0%;
+					border: none;
+				}
+				.report_details_right {
+					margin-left: 68%;
+					margin-top: 0%;
+					border: none;
+				}
+				.report_table {
+					margin-top: 3%;
+				}
+				th,td,tbody,table{
+					border: 1px solid lightgray;
+					border-collapse: collapse;
+				}
+				th {
+					text-align: center; 
+					padding: 8px;
+					border: 1px solid black;
+				}
+				h5{
+					text-align : center;
+					font-weight: bold;
+					font-size: 16px; 
+					}
+				b {
+					font-weight: 510;
+					color: #4C4848;
+					}
+				</style>
+				</head>
+				<div class="oe_structure"/>
+			</div>
+
+            <table style="width: 100%; vertical-align: middle; border: none;">
+				<tbody style="border: none;"> 
+					<tr style="border: none;">
+						<td style="width: 10%; text-align: left; vertical-align: middle;border: none;">
+							<img t-if="o.generate_user_id.company_id.logo" t-att-src="image_data_uri(o.generate_user_id.company_id.logo)" alt="Logo" style="width: 150px;"/>
+						</td>
+						<td style="width: 90%; text-align: left; vertical-align: middle; border: none;">
+							<h5>
+								<t t-esc="o.generate_report()['data']['company_name']"/> 
+							</h5>
+							<h5>
+								Purchase Order Register for period of 
+								<t t-esc="o.generate_report()['data']['from_date']"/> 
+								to 
+								<t t-esc="o.generate_report()['data']['to_date']"/>
+							</h5>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+
+			<div>
+				<div class="report_details_left">
+					<table style="border: none;">
+						<tbody style="border: none;">
+							<tr style="border: none;">
+								<th style="border: none;text-align: left;">Partner Name</th>
+								<th style="border: none;">:</th>
+								<td style="border: none;text-align: left;"> <span t-esc="o.partner_ids and 'Limited' or 'All'"/></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				
+				<div class="report_table">
+					<table style="border: none;width:100%;">
+						<tr style = "background-color: #E6E6E6;">
+							<th style="width:5%;">S.No</th>
+							<th style="width:20%;">Description</th>
+							<th style="width:10%;">Brand</th>
+							<th style="width:10%;">UOM</th>
+							<th style="width:10%;">Quantity</th>
+							<th style="width:10%;">Unit Price</th>
+							<th style="width:10%;">Discount</th>
+							<th style="width:10%;">Tax</th>
+							<th style="width:15%;">Total(WT)</th>
+						</tr>
+						<t t-set="serial_no" t-value="1"/>
+						<t t-set="grand_total" t-value="0"/>
+
+						<t t-foreach="o.generate_report()['data']['trans_details']" t-as="item">
+						<t t-if="item['product_details']">
+ 
+
+							<tr style = "background-color:#F7F7F7;">
+								<td t-att-colspan="1" style="width:4%; text-align: center;height: 20px;padding-top:10px;padding-bottom:5px;padding-left:10px;padding-right: 10px;">
+								<b><t t-esc="serial_no"/> </b>
+								</td>
+								<td t-att-colspan="8" style="width:4%; text-align: left;height: 20px;padding-top:10px;padding-bottom:5px;padding-left:10px;padding-right: 10px;">
+								<b> Ref No : </b> <t t-esc="item['trans_no']"/><b> - </b><t t-esc="item['date']"/>  <b>Partner Name: </b><t t-esc="item['partner_name']"/>  <b>Department : </b><t t-esc="item['department']"/> <b>Net Amount : </b><t t-esc="o.currency_indian_format(item['net_amt'])"/>
+								</td>
+							</tr>
+							<t t-set="grand_total" t-value="grand_total+item['net_amt']"/>
+
+							<t t-set="line_serial_no" t-value="1"/>
+							<t t-foreach="item['product_details']" t-as="trans">
+
+							<tr>
+									<td style="font-size: 14px;width:4%; text-align: right;height: 20px;padding-top:10px;padding-bottom:5px;padding-left:10px;padding-right: 10px;">
+										<t t-esc="line_serial_no"/>
+									</td>
+									<td style="width:4%; text-align: left;height: 20px;padding-top:10px;padding-bottom:5px;padding-left:10px;padding-right: 10px;">
+										<t t-esc="trans['product_name']"/>
+									</td>
+									<td style="width:4%; text-align: left;height: 20px;padding-top:10px;padding-bottom:5px;padding-left:10px;padding-right: 10px;">
+										<t t-esc="trans['brand']"/>
+									</td>
+									<td style="width:4%; text-align: left;height: 20px;padding-top:10px;padding-bottom:5px;padding-left:10px;padding-right: 10px;">
+										<t t-esc="trans['uom']"/>
+									</td>
+									<td style="width:4%; text-align: right;height: 20px;padding-top:10px;padding-bottom:5px;padding-left:10px;padding-right: 10px;">
+										<t t-esc="'{:.3f}'.format(trans['qty'])"/>
+									</td>
+									<td style="width:4%; text-align: right;height: 20px;padding-top:10px;padding-bottom:5px;padding-left:10px;padding-right: 10px;">
+										<t t-esc="o.currency_indian_format(trans['unit_price'])"/>
+									</td>
+									<td style="width:4%; text-align: right;height: 20px;padding-top:10px;padding-bottom:5px;padding-left:10px;padding-right: 10px;">
+										<t t-esc="o.currency_indian_format(trans['disc_amt'])"/>
+									</td>
+									<td style="width:4%; text-align: right;height: 20px;padding-top:10px;padding-bottom:5px;padding-left:10px;padding-right: 10px;">
+										<t t-esc="o.currency_indian_format(trans['tax'])"/>
+									</td>
+									<td style="width:4%; text-align: right;height: 20px;padding-top:10px;padding-bottom:5px;padding-left:10px;padding-right: 10px;">
+										<t t-esc="o.currency_indian_format(trans['line_tot_amt'])"/>
+									</td>
+								</tr>
+								<t t-set="line_serial_no" t-value="line_serial_no+1"/>
+							</t>
+							<t t-set="serial_no" t-value="serial_no+1"/>    
+						</t>
+						</t>
+						<tr style = "background-color:#F7F7F7;">
+							<td t-att-colspan="9" style="width:4%; text-align: right;height: 20px;padding-top:10px;padding-bottom:5px;padding-left:10px;padding-right: 10px;">
+								<b> Grand Total : </b><t t-esc="o.currency_indian_format(grand_total)"/>
+							</td>
+						</tr>
+												
+					</table>
+				</div>
+			</div>
+
+			<div class="footer">
+				<div class="text-center" style="border-top: 1px solid black;">
+					<ul class="list-inline mb4">
+						
+						<div style="width: 40%;float: left;">
+							<span t-field="user.name"/> - <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>           
+						</div>
+					</ul>
+					<div style="width: 20%; float: left;">
+						Page: <span class="page"/> of <span class="topage"/>
+					</div>
+			    </div>
+		    </div>
+
+	    </t>
+        </t>
+    </template>
+</odoo>
+

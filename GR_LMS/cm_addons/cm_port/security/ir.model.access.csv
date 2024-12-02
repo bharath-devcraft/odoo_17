@@ -1,0 +1,9 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_cm_port_admin","cm.port.admin","model_cm_port","custom_properties.group_master_admin",1,1,1,1
+"access_cm_port_line_admin","cm.port.line.admin","model_cm_port_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_port_attachment_line_admin","cm.port.attachment.line.admin","model_cm_port_attachment_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_port_batch_inactive_admin","cm.port.batch.inactive.admin","model_cm_port_batch_inactive","custom_properties.group_master_admin",1,1,1,1
+"access_cm_port_user","cm.port.user","model_cm_port","custom_properties.group_master_user",1,0,0,0
+"access_cm_port_line_user","cm.port.line.user","model_cm_port_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_port_attachment_line_user","cm.port.attachment.line.user","model_cm_port_attachment_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_port_batch_inactive_user","cm.port.batch.inactive.user","model_cm_port_batch_inactive","custom_properties.group_master_user",1,0,0,0

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="action_report_ct_quotations" model="ir.actions.report">
+            <field name="name">Quotation Print</field>
+            <field name="model">ct.quotations</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">ct_quotations.report_ct_quotations</field>
+            <field name="report_file">ct_quotations.report_ct_quotations</field>
+            <field name="print_report_name">
+                (object.status not in ('draft') and 'Quotation Print - %s' % (object.name) or
+                'Quotation Print')</field>
+            <field name="binding_model_id" ref="model_ct_quotations"/>
+            <field name="binding_type">report</field>
+        </record>
+    </data>
+</odoo>

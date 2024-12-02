@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_nocost_transaction,ct.nocost.transaction,model_ct_nocost_transaction,custom_properties.group_erp_admin,1,1,1,1
+access_ct_nocost_transaction_line,ct.nocost.transaction.line,model_ct_nocost_transaction_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_nocost_transaction_attachment_line,ct.nocost.transaction.attachment.line,model_ct_nocost_transaction_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_nocost_transaction_batch_cancel,ct.nocost.transaction.batch.cancel,model_ct_nocost_transaction_batch_cancel,custom_properties.group_erp_admin,1,1,1,1
+access_ct_nocost_transaction_serialno_line,ct.nocost.transaction.serialno.line,model_ct_nocost_transaction_serialno_line,custom_properties.group_erp_admin,1,1,1,1

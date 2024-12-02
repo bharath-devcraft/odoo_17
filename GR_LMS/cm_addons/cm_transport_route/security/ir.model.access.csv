@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_transport_route_admin,cm.transport.route.admin,model_cm_transport_route,custom_properties.group_master_admin,1,1,1,1
+access_cm_transport_route_line_admin,cm.transport.route.line.admin,model_cm_transport_route_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_transport_route_charges_line_admin,cm.transport.route.charges.line.admin,model_cm_transport_route_charges_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_transport_route_attachment_line_admin,cm.transport.route.attachment.line.admin,model_cm_transport_route_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_transport_route_batch_inactive_admin,cm.transport.route.batch.inactive.admin,model_cm_transport_route_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_transport_route_user,cm.transport.route.user,model_cm_transport_route,custom_properties.group_master_user,1,0,0,0
+access_cm_transport_route_line_user,cm.transport.route.line.user,model_cm_transport_route_line,custom_properties.group_master_user,1,0,0,0
+access_cm_transport_route_attachment_line_user,cm.transport.route.attachment.line.user,model_cm_transport_route_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_transport_route_batch_inactive_user,cm.transport.route.batch.inactive.user,model_cm_transport_route_batch_inactive,custom_properties.group_master_user,1,0,0,0
+access_cm_transport_route_charges_line_user,cm.transport.route.charges.line.user,model_cm_transport_route_charges_line,custom_properties.group_master_user,1,0,0,0
+

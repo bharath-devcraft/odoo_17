@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_enquiry_source_admin,cm.enquiry.source.admin,model_cm_enquiry_source,custom_properties.group_master_admin,1,1,1,1
+access_cm_enquiry_source_attachment_line_admin,cm.enquiry.source.attachment.line.admin,model_cm_enquiry_source_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_enquiry_source_batch_inactive_admin,cm.enquiry.source.batch.inactive.admin,model_cm_enquiry_source_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_enquiry_source_user,cm.enquiry.source.user,model_cm_enquiry_source,custom_properties.group_master_user,1,0,0,0
+access_cm_enquiry_source_attachment_line_user,cm.enquiry.source.attachment.line.user,model_cm_enquiry_source_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_enquiry_source_batch_inactive_user,cm.enquiry.source.batch.inactive.user,model_cm_enquiry_source_batch_inactive,custom_properties.group_master_user,1,0,0,0

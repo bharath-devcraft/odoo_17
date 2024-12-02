@@ -1,0 +1,224 @@
+<odoo>
+    <data>
+       <!-- Form view starts -->
+       
+       
+       <record id="m_form_v_tax_form" model="ir.ui.view">
+            <field name="name">account.tax.form</field>
+            <field name="model">account.tax</field>
+            <field name="arch" type="xml">
+                <form string="Account Taxes">
+		    
+		    <header>
+			<button string="Approve" class="btn btn-success" icon="fa-thumbs-up" type="object" name="entry_approve" invisible = "status not in ('draft','editable')" confirm="Are you sure to proceed ?"/>
+			<button string="Set To Draft" class="btn btn-primary" type="object" name="entry_draft" invisible = "status != 'active'" confirm="Are you sure to proceed ?"/>
+			<button string="Inactive" class="btn btn-danger" icon="fa-thumbs-down" type="object" name="entry_inactive" invisible = "status != 'active'" confirm="Are you sure to proceed ?"/>
+			<field name="status" widget="statusbar" style="width:700px;"/>                
+		    </header>
+		    
+                    <field name="company_id" invisible="1"/>
+                    <sheet>
+                    <group>
+                        <group>
+                            <field name="name" readonly = "status in ('active','inactive')"/>
+							<field name="tax_group_id" readonly = "status in ('active','inactive')" domain="[('status', '=', 'active'),('active_trans', '=', True)]"/>
+                            <field name="amount_type" invisible="1" readonly = "status in ('active','inactive')"/>
+                            <field name="country_id" options="{'no_create_edit': True}" readonly = "status in ('active','inactive')"/>
+							<field name="status" readonly = "1" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="is_used" invisible="1"/>
+							<field name="description" string="Short Name" readonly = "status in ('active','inactive')"/>
+                            <field name="type_tax_use" invisible="1" readonly = "status in ('active','inactive')"/>
+                            <field name="tax_scope" invisible="1" readonly = "status in ('active','inactive')"/>
+                            <label for="amount" invisible="amount_type not in ('fixed', 'percent', 'division')" string="Tax (%)"/>
+                            <div invisible="amount_type not in ('fixed', 'percent', 'division')">
+                                <field name="amount" class="oe_inline" nolabel="1" readonly = "status in ('active','inactive')"/>
+                                <span class="o_form_label oe_inline" invisible="amount_type == 'fixed'"></span>
+                            </div>
+                        </group>
+                    </group>
+                    <notebook>
+                        
+                        <page string="Advanced Options" name="advanced_options" invisible="1">
+                            <group>
+                                <group>
+                                    <field name="invoice_label" invisible="amount_type == 'group'" readonly = "status in ('active','inactive')"/>
+                                    <field name="tax_group_id" invisible="amount_type == 'group'" required="amount_type != 'group'" readonly = "status in ('active','inactive')"/>
+                                    <field name="analytic" invisible="amount_type == 'group'" groups="analytic.group_analytic_accounting" readonly = "status in ('active','inactive')"/>
+                                    <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company" readonly = "status in ('active','inactive')"/>
+                                    <field name="country_id" required="True" readonly = "status in ('active','inactive')"/>
+                                </group>
+                                <group name="advanced_booleans">
+                                    <field name="price_include" invisible="amount_type == 'group'" readonly = "status in ('active','inactive')"/>
+                                    <field name="include_base_amount" invisible="amount_type == 'group'" readonly = "status in ('active','inactive')"/>
+                                    <field name="is_base_affected"
+                                           invisible="amount_type == 'group' or price_include"
+                                           groups="base.group_no_one" readonly = "status in ('active','inactive')"/>
+                                    <field name="hide_tax_exigibility" invisible="1" readonly = "status in ('active','inactive')"/>
+                                    <field name="tax_exigibility" widget="radio" invisible="amount_type == 'group' or not hide_tax_exigibility" groups="account.group_account_readonly" readonly = "status in ('active','inactive')"/>
+                                    <field name="cash_basis_transition_account_id" options="{'no_create': True}" invisible="tax_exigibility == 'on_invoice'" required="tax_exigibility == 'on_payment'" groups="account.group_account_readonly" readonly = "status in ('active','inactive')"/>
+                                </group>
+                            </group>
+                        </page>
+			<page string="Attachments" >
+				<field name="line_ids" nolabel="1" readonly = "status not in ('draft','editable')">
+					<tree string="Attachments" editable="bottom">
+						<field name="header_id" column_invisible="1"/>
+						<field name="attach_desc" required="1"/>
+						<field name="attachment_ids" required="1" widget="single_file_binary" options="{'no_create_edit': True}"/>
+						<field name="attach_user_id" force_save="1" readonly="1"/>
+						<field name="attach_date" force_save="1" readonly="1"/> 
+						<field name="company_id" column_invisible="1"/>                              
+					</tree>
+				</field>
+			</page>          
+			<page string="Inactive Remark" invisible = "status in ('draft')">
+			    <field name="inactive_remark" readonly = "status != 'active'" nolabel="1"/>
+			</page>			
+			<page string="Entry Info">
+                        <group>
+                            <group>
+                                <field name="active_trans"/>
+                                <field name="active_rpt"/>
+                            </group>
+                            <group>
+                                <field name="active" widget="boolean_toggle"/>
+                                <field name="entry_mode"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="user_id"/>
+                                <field name="ap_rej_user_id" invisible = "status not in ('active','inactive')"/>
+                                <field name="inactive_user_id" invisible = "status != 'inactive'" />
+                                <field name="update_user_id"/>
+                            </group>
+                            <group>
+                                <field name="crt_date"/>
+                                <field name="ap_rej_date" invisible = "status not in ('active','inactive')"/>
+                                <field name="inactive_date" invisible = "status != 'inactive'"/>
+                                <field name="update_date"/>
+                            </group>
+                        </group>
+                    </page>
+                    </notebook>
+		    <group>
+			<field name="note"  placeholder="Write your notes here."/>
+		    </group>
+                </sheet>
+		
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+                </form>
+              </field>
+        </record>
+       
+       
+	
+        <!-- Form view ends -->
+        
+        
+        <!-- Tree view starts -->
+        
+        <record id="m_tree_view_tax" model="ir.ui.view">
+            <field name="name">Taxes Tree View</field>
+            <field name="model">account.tax</field>
+            <field name="arch" type="xml">
+		<tree string="Taxes" js_class="cm_tax_list"
+			decoration-info="status == 'draft'" 
+			decoration-success = "status == 'editable'"
+			decoration-bf = "status in ('active','draft')"
+			decoration-primary = "status == 'inactive'">
+		    <field name="display_name" string="Name"/>
+		    <field name="tax_group_id" string="Tax Group"/>
+		    <field name="country_id"/>
+		    <field name="amount" string="Tax (%)"/>
+            <field name="status" widget="badge" decoration-info = "status == 'draft'"
+			decoration-success = "status == 'editable'"
+			decoration-bf = "status == 'active'"
+			decoration-primary = "status == 'inactive'"/>
+			<field name="ap_rej_user_id" string="Approved By"/>
+            <field name="crt_date"/>
+		</tree>
+            </field>
+        </record>
+
+        
+        <!-- Tree view ends -->
+        
+	<!-- Search view starts -->
+
+        <record id="m_search_view_tax" model="ir.ui.view">
+            <field name="name">Taxes Search View</field>
+            <field name="model">account.tax</field>
+            <field name="arch" type="xml">
+               <search string="Search Master">
+		    <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
+		    <field name="tax_group_id" string="Tax Group" filter_domain="[('tax_group_id','ilike',self)]"/>
+		    <field name="country_id" string="Country" filter_domain="[('country_id','ilike',self)]"/>
+		     
+		    <filter name="my_master" string="My Master" domain="[('user_id', '=', uid)]"/> 
+		    <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+		    <filter name="Editable" domain="[('status', '=', 'editable')]"/>
+		    <filter name="Active" domain="[('status', '=', 'active')]"/>
+		    <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+		    <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
+		    <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
+		    <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
+		    <filter name="My Inactive" string="My Inactive" domain="[('user_id', '=', uid),('status', '=', 'inactive')]"/>
+		    <filter name="Inactive List" domain="[('active', '=', False)]"/>
+		    
+		    <group expand="0" string="Group By">
+            <filter string="Tax Group" name="tax_group_id" domain="[]" context="{'group_by':'tax_group_id'}"/>
+            <filter string="Country" name="country_id" domain="[]" context="{'group_by':'country_id'}"/>
+			<filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+			<filter string="Approved By" name="status" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+			<filter string="Approved Date" name="status" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+			
+		    </group>
+            </search>
+            </field>
+        </record>
+        
+		 <!-- Search view ends -->
+		 
+         <!-- action menu starts -->
+
+        <record id="mma_res_tax_new" model="ir.actions.act_window">
+            <field name="name">Taxes</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">account.tax</field>
+             <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="search_view_id" ref="m_search_view_tax"/>
+        </record>
+        
+         <!-- action menu ends -->
+         
+         <!-- action menu-tree starts -->
+
+       <record id="res_tax_new_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="m_tree_view_tax"/>
+            <field name="act_window_id" ref="mma_res_tax_new"/>
+        </record>
+        
+         <!-- action menu-tree ends -->
+         
+         <!-- action menu-form starts -->
+
+        <record id="res_tax_new_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="m_form_v_tax_form"/>
+            <field name="act_window_id" ref="mma_res_tax_new"/>
+        </record>
+    
+    <menuitem name="Taxes" id="cm_tax_act_menu" parent="cm_master.cm_master_m_parent" action="mma_res_tax_new" sequence="70"/>
+
+    </data>
+</odoo>

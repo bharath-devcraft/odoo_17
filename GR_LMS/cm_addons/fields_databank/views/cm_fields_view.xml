@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <record id="view_fields_databank_form_one" model="ir.ui.view">
+        <field name="name">fields databank form</field>
+        <field name="model">fields.databank</field>
+        <field name="arch" type="xml">
+            <form string="Fields Databank" create="0">
+               <header>
+                     <button name="button_action" type="object" string="Validate" icon="fa-bug" data-hotkey="t"/>
+                </header>
+                <sheet>
+                  <group string="Char">
+                     <group>
+                        <field name="name" class="animate-charcter" widget="CopyClipboardChar"/>
+                        <field name="short_name" widget="upper_case"/>
+                        <field name="quote_ref"/>
+                        <field name="address"/>
+                        <field name="del_address"/>
+                        <field name="entry_spec"/>
+                        <field name="mobile_no" widget="numeric"/>
+                        <field name="phone_no" widget="numeric"/>
+                        <field name="pin_code" widget="no_special_char"/>
+                        <field name="description"/>
+                        <field name="attach_desc"/>
+                        <field name="invoice_status"/>
+                        <field name="payment_status"/>
+                        <field name="contact_person" widget="proper_case"/>
+                        <field name="fax" widget="numeric"/>
+                        <field name="website" widget="url"/>
+                        <field name="aadhaar_no" widget="numeric"/>
+                        <field name="landmark"/>
+                        <field name="bank_name" widget="proper_case"/>
+                        <field name="ifsc_code" widget="upper_case"/>
+                        <field name="branch_name" widget="proper_case"/>
+                        <field name="tax_name"/>
+                        <field name="mail_from"/>
+                        <field name="mail_cc"/>
+                        <field name="mail_bcc"/>
+                        <field name="subject"/>
+                        <field name="ext_no"/>
+                        <field name="seq_year"/>
+                        <!-- Catalysts-->
+                        <field name="iom_no" widget='numeric'/>
+                        <field name="exp_years" widget="no_special_char"/>
+                        <field name="whatsapp_no" widget="no_special_char"/>
+                        <field name="secondary_mobile_no" widget="no_special_char"/>
+                        <field name="occasion" widget="no_special_char"/>
+                        <field name="term_name" widget="no_special_char"/>
+                        <field name="engine_no" widget="no_special_char"/>
+                        <field name="chassis_no" widget="no_special_char"/>
+                        <field name="ins_company_name" widget="no_special_char"/>
+                        <field name="trc_no" widget="no_special_char"/>
+                        <field name="certification_no" widget="no_special_char"/>
+                        <field name="edi_code" widget="no_special_char"/>
+                        <field name="skype" widget="no_special_char"/>
+                        <field name="dep_name" widget="no_special_char"/>
+                        <field name="specific_days" widget="no_special_char"/>
+                        <field name="stage" widget="no_special_char"/>
+                        <field name="terminal_restrictions" widget="no_special_char"/>
+                        <field name="tax_reg_no" widget="no_special_char"/>
+                        <field name="branch_code" widget="no_special_char"/>
+                        <field name="driver_lic_no" widget="no_special_char"/>
+                     </group>
+                     <group>
+                        <field name="vendor_inv_no"/>
+                        <field name="ref_no"/>
+                        <field name="draft_name" class="bold-text" widget="CopyClipboardChar"/>
+                        <field name="ack_no"/>
+                        <field name="cheque_favor"/>
+                        <field name="tin_no" widget="numeric"/>
+                        <field name="pan_no" widget="upper_case"/>
+                        <field name="cst_no" widget="numeric"/>
+                        <field name="vat_no"/>
+                        <field name="tan_no" widget="upper_case"/>
+                        <field name="purpose"/>
+                        <field name="email"/>
+                        <field name="gst_no" widget="upper_case"/>
+                        <field name="street"/>
+                        <field name="street1"/>
+                        <field name="account_no" widget="numeric"/>
+                        <field name="state_code" widget="upper_case"/>
+                        <field name="acc_holder_name" widget="upper_case"/>
+                        <field name="alias_name"/>
+                        <field name="cin_no" widget="upper_case"/>
+                        <field name="mail_to"/>
+                        <field name="from_mail_id"/>
+                        <field name="watcher_mail_id"/>
+                        <field name="seq_month"/>
+                        <field name="fiscal_year_code"/>
+                        <!-- Catalysts-->
+                        <field name="other_facility" widget="no_special_char"/>
+                        <field name="continent" widget="no_special_char"/>
+                        <field name="usci_no" widget="no_special_char"/>
+                        <field name="fmc_no" widget="no_special_char"/>
+                        <field name="thickness" widget="no_special_char"/>
+                        <field name="dry_box_type" widget="no_special_char"/>
+                        <field name="owner_name" widget="no_special_char"/>
+                        <field name="container_no" widget="no_special_char"/>
+                        <field name="iso_code" widget="no_special_char"/>
+                        <field name="working_day_hrs" widget="no_special_char"/>
+                        <field name="annual_turnover" widget="no_special_char"/>
+                        <field name="iec_no" widget="no_special_char"/>
+                        <field name="dpd" widget="no_special_char"/>
+                        <field name="dpd_cfs" widget="no_special_char"/>
+                        <field name="designation" widget="proper_case"/>
+                        <field name="micr_no" widget="no_special_char"/>
+                        <field name="swift_code" widget="no_special_char"/>
+                        <field name="iban_no" widget="no_special_char"/>
+                        <field name="work_location" widget="no_special_char"/>
+                        <field name="blood_group" widget="no_special_char"/>
+                     </group>
+                  </group>
+                </sheet>
+                <sheet>
+                  <group string="Selection">
+                     <group>
+                        <field name="status"/>
+                        <field name="pay_mode"/>
+                        <field name="grn_type"/>
+                        <field name="entry_from"/>
+                        <field name="warranty"/>
+                        <field name="sms_status"/>
+                        <field name="jc_status"/>
+                        <field name="seq_num_reset"/>
+                        <!-- Catalysts-->
+                        <field name="transport_service"/>
+                        <field name="contract_type"/>
+                        <field name="container_size"/>
+                        <field name="paver_blocked"/>
+                        <field name="package_deal"/>
+                        <field name="surveillance_systems"/>
+                        <field name="pub_transport_avl"/>
+                        <field name="inv_track_sys"/>
+                        <field name="eva_procedure"/>
+                        <field name="waste_disp_procedure"/>
+                        <field name="steam_heat_fac"/>
+                        <field name="laden_storage_fac"/>
+                        <field name="degas_fac"/>
+                        <field name="halal_wash"/>
+                        <field name="kosher_wash"/>
+                        <field name="emergency_plan"/>
+                        <field name="compt_cert"/>
+                        <field name="etp"/>
+                        <field name="periodic_audit"/>
+                        <field name="port_type"/>
+                        <field name="bus_location"/>
+                        <field name="charges_category"/>
+                        <field name="flexi_type"/>
+                        <field name="layer_type"/>
+                        <field name="capacity"/>
+                        <field name="valve_type"/>
+                        <field name="halal_certification"/>
+                        <field name="bag_costing_method"/>
+                        <field name="moc_val"/>
+                        <field name="dg_product"/>
+                        <field name="pdc_waived"/>
+                        <field name="security_chk_obt"/>
+                        <field name="cheque_bounced"/>
+                        <field name="credit_agreement"/>
+                        <field name="interest_cal_date"/>
+                        <field name="auto_draft_inv"/>
+                        <field name="profit_share"/>
+                        <field name="tank_t_code"/>
+                        <field name="sub_type"/>
+                        <field name="sub_type2"/>
+                        <field name="company_type"/>
+                        <field name="sez_zone"/>
+                        <field name="business_category"/>
+                        <field name="business_grade"/>
+                        <field name="business_segments"/>
+                        <field name="contract_customer"/>
+                        <field name="payment_type"/>
+                        <field name="agent_category"/>
+                        <field name="providing_services"/>
+                        <field name="past_legal_action"/>
+                        <field name="emergency_plan"/>
+                        <field name="port_bound"/>
+                        <field name="service_availability"/>
+                        <field name="vessel_service_providers"/>
+                        <field name="vessel_type"/>
+                        <field name="stcw_huwet_training"/>
+                        <field name="terminal_type"/>
+                        <field name="safety_manual"/>
+                        <field name="contract_agree"/>
+                     </group>
+                     <group>
+                        <field name="invoice_control"/>
+                        <field name="entry_mode"/>
+                        <field name="wages_type"/>
+                        <field name="priority"/>
+                        <field name="tds"/>
+                        <field name="email_status"/>
+                        <field name="gst_category"/>
+                        <field name="grade"/>
+                        <field name="rating" widget="priority"/>
+                        <field name="format_type"/>
+                        <!-- Catalysts-->
+                        <field name="week_day"/>
+                        <field name="visible_official_doc"/>
+                        <field name="fuel_type"/>
+                        <field name="transmission"/>
+                        <field name="axle"/>
+                        <field name="gps_enabled"/>
+                        <field name="first_aid_box"/>
+                        <field name="driver_mon_sys"/>
+                        <field name="fire_ext"/>
+                        <field name="ppe_kit"/>
+                        <field name="diesel_tk_saft_gurd"/>
+                        <field name="battery_saft_gurd"/>
+                        <field name="spill_kit"/>
+                        <field name="mudguard"/>
+                        <field name="insurance"/>
+                        <field name="permit"/>
+                        <field name="national_permit"/>
+                        <field name="fc"/>
+                        <field name="road_tax"/>
+                        <field name="puc"/>
+                        <field name="green_tax"/>
+                        <field name="speed_govener"/>
+                        <field name="amc"/>
+                        <field name="validity"/>
+                        <field name="stage"/>
+                        <field name="carrier_type"/>
+                        <field name="frequency_of_sailing"/>
+                        <field name="service_prov_level"/>
+                        <field name="digital_service_name"/>
+                        <field name="toll_plaza"/>
+                        <field name="travel_type"/>
+                        <field name="entry_type"/>
+                        <field name="type_of_company"/>
+                        <field name="iso_certified"/>
+                        <field name="dg_trained_drivers"/>
+                        <field name="driver_periodic_mhc"/>
+                        <field name="safty_tra_prog"/>
+                        <field name="depot_service"/>
+                        <field name="feedback_type"/>
+                        <field name="relationship"/>
+                        <field name="health_certificate"/>
+                        <field name="health_insurance"/>
+                        <field name="license_type"/>
+                        <field name="port_category"/>
+                        <field name="icd_connected"/>
+                        <field name="sea_connected"/>
+                        <field name="free_zone"/>
+                        <field name="sanctioned_port"/>
+                        <field name="agent_type"/>
+                        <field name="discount_provision"/>
+                        <field name="restricted_category"/>
+                        <field name="service_provider"/>
+                        <field name="mandatory"/>
+                        <field name="import_export"/>
+                        <field name="container_category"/>
+                        <field name="cargo_category"/>
+                        <field name="is_registered"/>
+                        <field name="agent_service"/>  
+                        <field name="validity_range"/>                        
+                     </group>
+                  </group>
+                </sheet>
+                <sheet>
+                  <group string="Boolean">
+                     <group>
+                        <field name="active" widget="boolean_toggle"/>
+                        <field name="active_rpt" widget="boolean_toggle"/>
+                        <field name="active_trans" widget="boolean_toggle"/>
+                        <!-- Catalysts-->
+                        <field name="sun" widget="boolean_toggle"/>
+                        <field name="mon" widget="boolean_toggle"/>        
+                        <field name="tue" widget="boolean_toggle"/>
+                        <field name="wed" widget="boolean_toggle"/>
+                        <field name="thu" widget="boolean_toggle"/>
+                        <field name="fri" widget="boolean_toggle"/>     
+                        <field name="sat" widget="boolean_toggle"/>
+                        <field name="external" widget="boolean_toggle"/>                                                                                      
+                     </group>
+                     <group>
+                        <field name="manual_round_off" widget="boolean_toggle"/>
+                        <field name="trigger_del" widget="boolean_toggle"/>
+                        <!-- Catalysts-->
+                        <field name="cleaning" widget="boolean_toggle"/>
+                        <field name="condition" widget="boolean_toggle"/>        
+                        <field name="on_hire" widget="boolean_toggle"/>
+                        <field name="off_hire" widget="boolean_toggle"/>
+                        <field name="lang_read" widget="boolean_toggle"/>
+                        <field name="lang_write" widget="boolean_toggle"/>     
+                        <field name="lang_speak" widget="boolean_toggle"/>
+                        <field name="repair_stage_inspect" widget="boolean_toggle"/>
+                     </group>
+                  </group>
+                </sheet>
+                <sheet>
+                  <group string="Many2one">
+                     <group>
+                        <field name="confirm_user_id" options="{'no_create': True}"/>
+                     </group>
+                     <group>
+                        <field name="company_id" options="{'no_create': True}"/>
+                     </group>
+                  </group>
+                </sheet>
+                <sheet>
+                  <group string="Many2many">
+                     <group>
+                        <field name="tax_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                     </group>
+                     <group>
+                     </group>
+                  </group>
+                </sheet>
+                <sheet>
+                  <group string="Float">
+                     <group>
+                        <field name="qty"/>
+                        <field name="bal_qty"/>
+                        <field name="rec_qty"/>
+                        <field name="approve_qty"/>
+                        <field name="reject_qty"/>
+                        <field name="unit_price"/>
+                        <field name="unitprice_wt"/>
+                        <field name="disc_amt"/>
+                        <field name="disc_per"/>
+                        <field name="amt"/>
+                        <field name="tot_dis_amt"/>
+                        <field name="taxable_amt"/>
+                        <field name="round_off_amt"/>
+                        <!-- Catalysts-->
+                        <field name="operating_hrs_start"/>
+                        <field name="operating_hrs_end"/>
+                        <field name="weight"/>
+                        <field name="paid_up_capital"/>
+                        <field name="proj_bus_volume"/>
+                        <field name="credit_limit"/>
+                        <field name="border_entry_fee"/>
+                     </group>
+                     <group>
+                        <field name="tot_amt"/>
+                        <field name="net_amt"/>
+                        <field name="tax_amt"/>
+                        <field name="bal_amt"/>
+                        <field name="other_amt"/>
+                        <field name="line_tot_amt"/>
+                        <field name="tds_amt"/>
+                        <field name="freight_amt"/>
+                        <field name="amc_period"/>
+                        <field name="cgst_amt"/>
+                        <field name="sgst_amt"/>
+                        <field name="igst_amt"/>
+                        <field name="fixed_disc_amt"/>
+                        <field name="grand_tot_amt"/>
+                        <!-- Catalysts-->
+                        <field name="profit_val"/>
+                        <field name="unit_value"/>
+                        <field name="maximum_cost"/>
+                        <field name="actual_cost"/>
+                        <field name="gr_cost"/>
+                     </group>
+                  </group>
+                </sheet>
+                <sheet>
+                  <group string="HTML">
+                     <group>
+                     </group>
+                     <group>
+                     </group>
+                  </group>
+                </sheet>
+                <sheet>
+                  <group string="Integer">
+                     <group>
+                        <field name="entry_seq"/>
+                        <field name="version_no"/>
+                        <field name="revise_version"/>
+                        <!-- Catalysts-->
+                        <field name="no_of_employee"/>
+                        <field name="msme_no"/>
+                        <field name="total_area"/>
+                        <field name="escalation_days"/>
+                        <field name="lease_duration"/>
+                        <field name="rental_value"/>
+                        <field name="warranty_period"/>
+                        <field name="mfg_lead_time"/>
+                        <field name="credit_days"/>
+                        <field name="tentative_value"/>
+                        <field name="vehicle_age"/>
+                        <field name="engine_capacity"/>
+                        <field name="vehicle_tare_weight"/>
+                        <field name="vehicle_gross_weight"/>
+                        <field name="standard_mileage"/>
+                        <field name="validity_months"/>
+                        <field name="validity_days"/>
+                        <field name="nat_validity_month"/>
+                        <field name="nat_validity_days"/>
+                        <field name="nat_esc_mail_days"/>
+                        <field name="fc_validity_months"/>
+                        <field name="fc_validity_days"/>
+                        <field name="fc_escalation_mail_days"/>
+                        <field name="rt_validity_months"/>
+                        <field name="rt_validity_days"/>
+                        <field name="rt_escalation_mail_days"/>
+                        <field name="puc_validity_months"/>
+                        <field name="puc_validity_days"/>
+                        <field name="puc_escalation_mail_days"/>
+                        <field name="green_tax_validity_months"/>
+                        <field name="green_tax_validity_days"/>
+                        <field name="green_tax_escalation_mail_days"/>
+                        <field name="speed_limit_per"/>                     
+                     </group>
+                     <group>
+                        <field name="cr_days"/>
+                        <field name="line_count"/>
+                        <field name="seq_next_number"/>
+                        <!-- Catalysts-->
+                        <field name="speed_govener_validity_months"/>
+                        <field name="speed_govener_validity_days"/>
+                        <field name="speed_govener_escalation_mail_days"/>
+                        <field name="amc_validity_months"/>
+                        <field name="amc_validity_days"/>
+                        <field name="amc_escalation_mail_days"/>
+                        <field name="validity_period"/>
+                        <field name="minimum"/>
+                        <field name="maximum"/>
+                        <field name="fuel_avg_cost"/>
+                        <field name="vehicle_avg_mileage_empty"/>
+                        <field name="vehicle_avg_mileage_laden"/>
+                        <field name="avg_mileage"/>
+                        <field name="per_day_trip_margin"/>
+                        <field name="trip_duration"/>
+                        <field name="toll_fee"/>
+                        <field name="total_trip"/>
+                        <field name="own_trailer_count"/>
+                        <field name="attached_trailer_count"/>
+                        <field name="monthly_salary"/>
+                        <field name="berthing_days"/>
+                        <field name="trans_days"/>
+                        <field name="avg_time"/>
+                        <field name="vessel_capacity"/>
+                        <field name="year_built"/>
+                        <field name="time_duration"/>
+                        <field name="minimum_days"/>
+                        <field name="maximum_days"/>
+                        <field name="interval"/>
+                        <field name="distance"/>
+
+                     </group>
+                  </group>
+                </sheet>
+                <sheet>
+                  <group string="Text">
+                     <group>
+                        <field name="cancel_remark"/>
+                        <field name="inactive_remark"/>
+                        <field name="batch_info"/>
+                        <field name="nature_of_work"/>
+                        <field name="ap_rej_remark"/>
+                        <!-- Catalysts-->
+                        <field name="key_remarks"/>
+                        <field name="parking_name"/>
+                        <field name="reason"/>
+                        <field name="note"/>
+                        <field name="customs_note"/>
+                        <field name="remarks"/>                        
+                     </group>
+                     <group>
+                        <field name="round_off_remark"/>
+                        <field name="closer_note"/>
+                        <field name="feedback"/>
+                        <field name="revise_remark"/>
+                        <field name="remark"/>
+                        <!-- Catalysts-->
+                        <field name="detail_desc"/>
+                        <field name="commodity_desc"/>
+                        <field name="sec_msure_note"/>
+                        <field name="port_auth_regul"/>                        
+                     </group>
+                  </group>
+                </sheet>
+                <sheet>
+                  <group string="Date">
+                     <group>
+                        <field name="from_date" options="{'max_date': today}"/>
+                        <field name="dc_date"/>
+                        <field name="entry_date"/>
+                        <field name="request_date" options="{'max_date': today}"/>
+                        <field name="draft_date" options="{'max_date': today}"/>
+                        <field name="due_date"/>
+                        <field name="remind_date" options="{'min_date': today}"/>
+                        <field name="vendor_inv_date"/>
+                        <field name="cheque_date" options="{'min_date': today}"/>
+                        <field name="clearing_date" options="{'min_date': today}"/>
+                        <field name="quote_date"/>
+                        <field name="eff_from_date" options="{'min_date': today}"/>
+                        <field name="ack_date" options="{'max_date': today}"/>
+                        <field name="comply_date" options="{'max_date': today}"/>
+                        <field name="receive_date" options="{'max_date': today}"/>
+                        <field name="fy_control_date"/>
+                        <!-- Catalysts-->
+                        <field name="last_audit_date"/>
+                        <field name="next_audit_date"/>
+                        <field name="lease_valid_from_date"/>
+                        <field name="lease_valid_to_date"/>
+                        <field name="con_start_date"/>
+                        <field name="con_end_date"/>
+                        <field name="holiday_date"/>
+                        <field name="purchase_date"/>
+                        <field name="national_from_date"/>
+                        <field name="national_to_date"/>
+                        <field name="last_fc_date"/>
+                        <field name="next_fc_date"/>
+                        <field name="next_inspection_date"/>
+                        <field name="road_tax_paid_date"/>
+                     </group>
+                     <group>
+                        <field name="to_date" options="{'warn_future': true}"/>
+                        <field name="ship_date" options="{'max_date': today}"/>
+                        <field name="stmt_date" options="{'min_date': today}"/>
+                        <field name="delivery_date" options="{'min_date': today}"/>
+                        <field name="cr_date"/>
+                        <field name="dr_date"/>
+                        <field name="enq_date" options="{'max_date': today}"/>
+                        <field name="customer_po_date"/>
+                        <field name="join_date" options="{'max_date': today}"/>
+                        <field name="relive_date" options="{'min_date': today}"/>
+                        <field name="crt_date"/>
+                        <field name="birth_date" options="{'max_date': today}"/>
+                        <field name="attach_date"/>
+                        <field name="as_on_date"/>
+                        <field name="expiry_date" options="{'min_date': today}"/>
+                        <!-- Catalysts-->
+                        <field name="rt_validity_to_date"/>
+                        <field name="puc_from_date"/>
+                        <field name="puc_to_date"/>
+                        <field name="green_tax_from_date"/>
+                        <field name="green_tax_to_date"/>
+                        <field name="spd_gov_from_date"/>
+                        <field name="spd_gov_to_date"/>
+                        <field name="amc_from_date"/>
+                        <field name="amc_to_date"/>
+                        <field name="eff_from_date"/>
+                        <field name="mhc_date"/>
+                        <field name="next_mhc_date"/>
+                        <field name="lic_expire_date"/>
+                     </group>
+                  </group>
+                </sheet>
+                <sheet>
+                  <group string="Datetime">
+                     <group>
+                        <field name="confirm_date"/>
+                        <field name="ap_rej_date"/>
+                        <field name="inactive_date"/>
+                        <field name="revised_date"/>
+                     </group>
+                     <group>
+                        <field name="cancel_date"/>
+                        <field name="update_date"/>
+                        <field name="generate_date"/>
+                        <field name="applied_on"/>
+                     </group>
+                  </group>
+                </sheet>
+                <sheet>
+                  <group string="Image">
+                     <group>
+                        <field name="sign_img"/>
+                     </group>
+                     <group>
+                     </group>
+                  </group>
+                </sheet>
+               <sheet>
+                  <group string="One2many">
+                        <field name="line_ids" nolabel="1" style="width:1000px;"/>
+                  </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+   <record id="action_fields_databank" model="ir.actions.act_window">
+      <field name="name">Fields Databank</field>
+      <field name="res_model">fields.databank</field>
+      <field name="view_mode">form</field>
+   </record>
+
+    <!-- Top menu item -->
+    <menuitem name="Fields Databank" id="fields_databank.menu_root" web_icon="fields_databank,static/description/icon.png"
+              sequence="100" action="fields_databank.action_fields_databank"/>
+  </data>
+</odoo>

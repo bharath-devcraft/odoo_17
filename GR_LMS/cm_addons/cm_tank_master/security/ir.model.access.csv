@@ -1,0 +1,13 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_cm_tank_master_admin","cm.tank.master.admin","model_cm_tank_master","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tank_master_line_admin","cm.tank.master.line.admin","model_cm_tank_master_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tank_master_attachment_line_admin","cm.tank.master.attachment.line.admin","model_cm_tank_master_attachment_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tank_master_insurance_details_line_admin","cm.tank.master.insurance.details.line.admin","model_cm_tank_master_insurance_details_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tank_master_recently_used_product_line_admin","cm.tank.master.recently.used.product.line.admin","model_cm_tank_master_recently_used_product_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tank_master_batch_inactive_admin","cm.tank.master.batch.inactive.admin","model_cm_tank_master_batch_inactive","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tank_master_user","cm.tank.master.user","model_cm_tank_master","custom_properties.group_master_user",1,0,0,0
+"access_cm_tank_master_line_user","cm.tank.master.line.user","model_cm_tank_master_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_tank_master_insurance_details_line_user","cm.tank.master.insurance.details.line.user","model_cm_tank_master_insurance_details_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_tank_master_recently_used_product_line_user","cm.tank.master.recently.used.product.line.user","model_cm_tank_master_recently_used_product_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_tank_master_attachment_line_user","cm.tank.master.attachment.line.user","model_cm_tank_master_attachment_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_tank_master_batch_inactive_user","cm.tank.master.batch.inactive.user","model_cm_tank_master_batch_inactive","custom_properties.group_master_user",1,0,0,0

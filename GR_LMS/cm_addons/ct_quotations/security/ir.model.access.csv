@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_quotations,ct.quotations.lead,model_ct_quotations,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotations_flexi_acc_line,ct.quotations.flexi.acc.line,model_ct_quotations_flexi_acc_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotations_details_line,ct.quotations.details.line,model_ct_quotations_details_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotations_attachment_line,ct.quotations.lead.attachment.line,model_ct_quotations_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotations_flexi_bag_pricing_line,ct.quotations.flexi.bag.pricing.line,model_ct_quotations_flexi_bag_pricing_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotations_acc_details_line,ct.quotations.acc.details.line,model_ct_quotations_acc_details_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotations_pricing_details_line,ct.quotations.pricing.details.line,model_ct_quotations_pricing_details_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotations_add_services_cost_line,ct.quotations.add.services.cost.line,model_ct_quotations_add_services_cost_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotations_shipper_data_line,ct.quotations.shipper.data.line,model_ct_quotations_shipper_data_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotations_tax_line,ct.quotations.tax.line,model_ct_quotations_tax_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotations_child_line,ct.quotations.child.line,model_ct_quotations_child_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotations_mail_preview,ct.quotations.mail.preview,model_ct_quotations_mail_preview,custom_properties.group_erp_admin,1,1,1,1
+
+
+
+

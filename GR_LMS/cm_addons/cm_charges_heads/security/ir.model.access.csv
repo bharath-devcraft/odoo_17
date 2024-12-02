@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_charges_heads_admin,cm.charges.heads.admin,model_cm_charges_heads,custom_properties.group_master_admin,1,1,1,1
+access_cm_charges_heads_attachment_line_admin,cm.charges.heads.attachment.line.admin,model_cm_charges_heads_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_charges_heads_batch_inactive_admin,cm.charges.heads.batch.inactive.admin,model_cm_charges_heads_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_charges_heads_user,cm.charges.heads.user,model_cm_charges_heads,custom_properties.group_master_user,1,0,0,0
+access_cm_charges_heads_attachment_line_user,cm.charges.heads.attachment.line.user,model_cm_charges_heads_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_charges_heads_batch_inactive_user,cm.charges.heads.batch.inactive.user,model_cm_charges_heads_batch_inactive,custom_properties.group_master_user,1,0,0,0

@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="cm_transport_location.CmTransportLocationListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CmTransportLocationDashBoard />
+        </xpath>
+    </t>
+</templates>

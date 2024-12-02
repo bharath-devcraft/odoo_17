@@ -1,0 +1,12 @@
+
+<style>
+    .o_weekday_checkbox_container {
+        display: flex;
+        gap: 10px; 
+        align-items: center;
+        flex-wrap: wrap; 
+    }
+    .o_weekday_checkbox_container label {
+        margin-right: 15px;
+    }
+</style>
