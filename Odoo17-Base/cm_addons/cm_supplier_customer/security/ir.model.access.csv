@@ -1,0 +1,8 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_cm_supplier_customer","cm.supplier.customer","model_cm_supplier_customer","custom_properties.group_master_admin",1,1,1,1
+"access_cm_supplier_customer_line","cm.supplier.customer.line","model_cm_supplier_customer_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_supplier_customer_attachment_line","cm.supplier.customer.attachment.line","model_cm_supplier_customer_attachment_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_supplier_customer_billing_address_line","cm.supplier.customer.billing.address.line","model_cm_supplier_customer_billing_address_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_supplier_customer_bank_details_line","cm.supplier.customer.bank.details.line","model_cm_supplier_customer_bank_details_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_supplier_customer_delivery_address_line","cm.supplier.customer.delivery.address.line","model_cm_supplier_customer_delivery_address_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_supplier_customer_batch_inactive","cm.supplier.customer.batch.inactive","model_cm_supplier_customer_batch_inactive","custom_properties.group_master_admin",1,1,1,1

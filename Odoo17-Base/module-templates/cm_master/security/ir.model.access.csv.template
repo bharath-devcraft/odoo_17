@@ -1,0 +1,18 @@
+{%- set snake_name = name|snake -%}
+{%- set id = "access_%s"|format(snake_name) -%}
+{%- set model_name = "%s"|format( name | replace("_", ".")) -%}
+{%- set group_name = "model_%s"|format(snake_name) -%}
+{%- set id_line = "access_%s_line"|format(snake_name) -%}
+{%- set name_line = "%s.line"|format(name | replace("_", ".")) -%}
+{%- set group_name_line = "model.%s_line"|format(snake_name) -%}
+{%- set id_attachment_line = "access_%s_attachment_line"|format(snake_name) -%}
+{%- set name_attachment_line = "%s.attachment.line"|format(name | replace("_", ".")) -%}
+{%- set model_id_attachment_line = "model_%s_attachment_line"|format(snake_name) -%}
+{%- set id_batch_inactive = "access_%s_batch_inactive"|format(snake_name) -%}
+{%- set name_batch_inactive = "%s.batch.inactive"|format(name | replace("_", ".")) -%}
+{%- set model_id_batch_inactive = "model_%s_batch_inactive"|format(snake_name) -%}
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+{{ id }},{{ model_name }},{{ group_name }},base.group_user,1,1,1,1
+{{ id_line }},{{ name_line }},{{ group_name_line }},base.group_user,1,1,1,1
+{{ id_attachment_line }},{{ name_attachment_line }},{{ model_id_attachment_line }},base.group_user,1,1,1,1
+{{ id_batch_inactive }},{{ name_batch_inactive }},{{ model_id_batch_inactive }},base.group_user,1,1,1,1

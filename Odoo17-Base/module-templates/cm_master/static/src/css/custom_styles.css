@@ -1,0 +1,12 @@
+.name-class {
+    color: #C10B7A;
+}
+.name-class:hover {
+  font-weight: bold;
+  color: #C10B7A;
+  font-size: 14px;
+}
+.name-lable {
+    color: #C10B7A;
+    font-weight: bold;
+}

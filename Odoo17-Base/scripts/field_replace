@@ -1,0 +1,15 @@
+#!/bin/bash
+
+
+# Assign arguments to variables
+echo "Enter the folder path you want to replace"
+read folder_path
+echo "Enter what you want to replace"
+read search_string
+echo "Enter what you want to replace as"
+read replace_string
+
+# Find and replace in files
+find "$folder_path" -type f -exec sed -i "s/$search_string/$replace_string/g" {} +
+
+echo "Replacement complete."
