@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Travel-related subtypes for messaging / Chatter -->
+        <record id="tr_confirmed" model="mail.message.subtype">
+            <field name="name">Travel Confirmed</field>
+            <field name="res_model">travel_management.travel_management</field>
+            <field name="default" eval="False"/>
+            <field name="description">Travel Confirmed</field>
+        </record>
+        <record id="tr_validate" model="mail.message.subtype">
+            <field name="name">Validated</field>
+            <field name="res_model">travel_management.travel_management</field>
+            <field name="default" eval="False"/>
+            <field name="description">Guest details validated</field>
+        </record>
+        <record id="tr_payment_request" model="mail.message.subtype">
+            <field name="name">Payment Request</field>
+            <field name="res_model">travel_management.travel_management</field>
+            <field name="default" eval="False"/>
+            <field name="description">Payment request sent to customer</field>
+        </record>
+        <record id="tr_payment_received" model="mail.message.subtype">
+            <field name="name">Payment Received</field>
+            <field name="res_model">travel_management.travel_management</field>
+            <field name="default" eval="False"/>
+            <field name="description">Payment received from customer</field>
+        </record>
+        <record id="tr_payment_approved" model="mail.message.subtype">
+            <field name="name">Travel Booked</field>
+            <field name="res_model">travel_management.travel_management</field>
+            <field name="default" eval="False"/>
+            <field name="description">Travel booked successfully</field>
+        </record>
+        <record id="tr_payment_reject" model="mail.message.subtype">
+            <field name="name">Rejected</field>
+            <field name="res_model">travel_management.travel_management</field>
+            <field name="default" eval="False"/>
+            <field name="description">Travel has been rejected</field>
+        </record>
+        <record id="tr_payment_refund" model="mail.message.subtype">
+            <field name="name">Refund</field>
+            <field name="res_model">travel_management.travel_management</field>
+            <field name="default" eval="False"/>
+            <field name="description">Amount has been refunded</field>
+        </record>
+        <record id="tr_payment_wf_cancel" model="mail.message.subtype">
+            <field name="name">WF Cancelled</field>
+            <field name="res_model">travel_management.travel_management</field>
+            <field name="default" eval="False"/>
+            <field name="description">Initial stage travel has been cancelled</field>
+        </record>
+        <record id="tr_payment_cancel" model="mail.message.subtype">
+            <field name="name">Cancelled</field>
+            <field name="res_model">travel_management.travel_management</field>
+            <field name="default" eval="False"/>
+            <field name="description">Travel has been cancelled</field>
+        </record>
+
+        <!-- Salesteam-related subtypes for messaging / Chatter -->
+<!--
+        <record id="mt_salesteam_order_sent" model="mail.message.subtype">
+            <field name="name">Quotation sent</field>
+            <field name="sequence">20</field>
+            <field name="res_model">crm.team</field>
+            <field name="default" eval="True"/>
+            <field name="parent_id" ref="sale.mt_order_sent"/>
+            <field name="relation_field">team_id</field>
+        </record>
+        <record id="mt_salesteam_order_confirmed" model="mail.message.subtype">
+            <field name="name">Sales Order Confirmed</field>
+            <field name="sequence">21</field>
+            <field name="res_model">crm.team</field>
+            <field name="default" eval="True"/>
+            <field name="parent_id" ref="sale.mt_order_confirmed"/>
+            <field name="relation_field">team_id</field>
+        </record>
+        <record id="mt_salesteam_invoice_created" model="mail.message.subtype">
+            <field name="name">Invoice Created</field>
+            <field name="sequence">22</field>
+            <field name="res_model">crm.team</field>
+            <field name="parent_id" ref="account.mt_invoice_created"/>
+            <field name="relation_field">team_id</field>
+        </record>
+        <record id="mt_salesteam_invoice_confirmed" model="mail.message.subtype">
+            <field name="name">Invoice Confirmed</field>
+            <field name="sequence">23</field>
+            <field name="res_model">crm.team</field>
+            <field name="parent_id" ref="account.mt_invoice_validated"/>
+            <field name="relation_field">team_id</field>
+        </record>
+-->
+    </data>
+</odoo>

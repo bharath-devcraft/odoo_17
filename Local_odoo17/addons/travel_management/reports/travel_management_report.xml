@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="action_report_travel_management" model="ir.actions.report">
+            <field name="name">Travel Details</field>
+            <field name="model">travel_management.travel_management</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">travel_management.report_travel_management</field>
+            <field name="report_file">purchase.report_travel_management</field>
+            <field name="print_report_name">
+                (object.state in ('approved') and 'Travel PDF - %s' % (object.name) or
+                'Travel PDF')</field>
+            <field name="binding_model_id" ref="model_travel_management_travel_management"/>
+            <field name="binding_type">report</field>
+        </record>
+    </data>
+</odoo>

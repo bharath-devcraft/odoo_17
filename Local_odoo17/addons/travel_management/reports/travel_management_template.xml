@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="report_travel_management_document">
+    <t t-call="web.external_layout">
+<!--
+        <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
+        <t t-set="address">
+            <div t-field="o.partner_id"
+                 t-options='{"widget": "contact", "fields": ["address", "name", "phone", "vat"], "no_marker": True, "phone_icons": True}'/>
+        </t>
+        <t t-if="o.dest_address_id">
+            <t t-set="information_block">
+                <strong>Shipping address:</strong>
+                <div t-if="o.dest_address_id">
+                    <div t-field="o.dest_address_id"
+                        t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}' name="purchase_shipping_address"/>
+                </div>
+
+            </t>
+        </t>
+-->
+        <div class="page">
+            <div class="oe_structure"/>
+
+            <div class="mt-4">
+                <h2 t-if="o.state in ['approved']">Booking No #<span t-field="o.name"/></h2>
+                <h2 t-if="o.state == 'reject'">Cancelled Details #<span t-field="o.name"/></h2>
+            </div>
+
+            <div id="informations" class="row mt-4 mb32">
+                <div class="col-3 bm-2">
+                    <strong>Customer Name:</strong>
+                    <p t-field="o.customer_name" class="m-0"/>
+                </div>
+                <div class="col-3 bm-2">
+                    <strong>Email:</strong>
+                    <p t-field="o.customer_mail" class="m-0"/>
+                </div>
+                <div class="col-3 bm-2">
+                    <strong>Mobile:</strong>
+                    <p t-field="o.customer_mobile" class="m-0"/>
+                </div>
+            </div>
+            
+            <div id="informations" class="row mt-4 mb32">
+                <div class="col-3 bm-2">
+                    <strong>Package Code:</strong>
+                    <p t-field="o.package_id" class="m-0"/>
+                    <strong>Package Name:</strong>
+                    <p t-field="o.package_name" class="m-0"/>
+                    <strong>Package Amount:</strong>
+                    <p t-field="o.pkg_amt_per_person" class="m-0"/>
+                    <strong>Total Amount:</strong>
+                    <p class="m-0" style="display: inline;"><t t-esc="o.currency_id.symbol"/></p>
+                    <p class="m-0" style="display: inline;"><t t-esc="o.total_amount"/></p>
+                </div>
+                <div class="col-3 bm-2">
+                    <strong>No of guest:</strong>
+                    <p t-field="o.no_of_guest" class="m-0"/>
+                    <strong>From Date:</strong>
+                    <p t-field="o.from_date" class="m-0"/>
+                    <strong>To Date:</strong>
+                    <p t-field="o.to_date" class="m-0"/>
+                </div>
+            </div>
+
+            <table class="table table-sm o_main_table table-borderless mt-4">
+                <thead style="display: table-row-group">
+                    <tr><span>Guest Details:</span>
+                        <th name="th_description"><strong>Guest Name</strong></th>
+                        <th name="th_taxes" class="text-end"><strong>Age</strong></th>
+                        <th name="th_date_req" class="text-start"><strong>Sex</strong></th>
+                        <th name="th_quantity" class="text-start"><strong>Mobile No</strong></th>
+                        <th name="th_price_unit" class="text-start"><strong>Email</strong></th>
+                        <th name="th_subtotal" class="text-start"><strong>Aadhar No</strong>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="o.line_ids" t-as="line">
+
+                        <tr t-att-class="'bg-200 fw-bold o_line_section'">
+                            <td class="text-start">
+                                <span t-field="line.name"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="line.age"/>
+                            </td>
+                            <td class="text-start">
+                                <span t-field="line.sex"/>
+                            </td>
+                            <td class="text-start">
+                                <span t-field="line.mobile_no"/>
+                            </td>
+                            <td class="text-start">
+                                <span t-field="line.email"/>
+                            </td>
+                            <td class="text-start">
+                                <span t-field="line.aadhar_no"/>
+                            </td>
+                
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+            <div class="oe_structure"/>
+        </div>
+    </t>
+</template>
+
+<template id="report_travel_management">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="travel_management.report_travel_management_document"/>
+        </t>
+    </t>
+</template>
+
+ <!-- Allow edits (e.g. studio) without changing the often inherited base template -->
+<!--
+<template id="document_tax_totals" inherit_id="account.document_tax_totals_template" primary="True"></template>
+-->
+
+</odoo>

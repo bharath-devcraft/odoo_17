@@ -1,0 +1,163 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+
+    <record model="ir.ui.view" id="travel_package_master.form">
+      <field name="name">travel_package_master form</field>
+      <field name="model">travel_package_master.travel_package_master</field>
+      <field name="arch" type="xml">
+        <form string="Travel Package">
+            <header>
+                <button string="Confirm"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_confirm" invisible = "state != 'draft'"/>
+                <button string="Approve"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_approve" invisible = "state != 'confirm'"/>
+                <button string="Reject"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_reject" invisible = "state != 'approved'"/>
+                <field name="state" widget="statusbar" />
+                
+<!--
+                <template id="travel_package_master_ssets_backend" inherit_id="web.assets_backend">
+                <xpath expr="." position="inside">
+                    <script type="text/javascript" src="/travel_package_master/static/src/js/custom_script.js"/>
+                </xpath>
+                </template>
+-->
+            </header>
+            <sheet>
+                <group>
+                    <group>
+                        <field name="name" required="1" class="o_required_field" readonly = "state in ('approved','reject')"/>
+                    </group>
+                    <group>
+                        <field name="code" required="1" class="o_required_field" readonly = "state in ('approved','reject')"/>
+                    </group>
+                </group>
+                <group>
+                    <field name="description" required="1" class="o_required_field" widget="char_emojis" readonly = "state in ('approved','reject')" />
+                </group>
+                <group>
+                    <group>
+                        <field name="starting_point" required="1" class="o_required_field" readonly = "state in ('approved','reject')"/>
+                        <field name="max_guest" required="1" class="o_required_field" readonly = "state in ('approved','reject')"/>
+                        <field name="pkg_amount" widget="monetary" required="1" class="o_required_field" readonly = "state in ('approved','reject')"/>
+<!--
+                        <field name="state"/>
+-->
+                    </group>
+                    <group>
+                        <field name="max_days" required="1" class="o_required_field" readonly = "state in ('approved','reject')"/>
+                        <field name="slot_availability" />
+                    </group>
+                </group>
+                
+                <notebook>
+                    <page string="Reject Remark" invisible = "state not in ('approved','reject')">
+                        <group>
+                            <field name="reject_remark" readonly = "state in ('reject')"/>
+                        </group>
+                    </page>
+                    <page string="Entry Info">
+                        <group>
+                            <group>
+                                <field name="company_id"/>
+                            </group>
+                            <group>
+                                <field name="active"/>
+                            </group>
+                        
+
+                            <group>
+                                <field name="user_id"/>
+                                <field name="confirm_user_id"/>
+                                <field name="approved_user_id"/>
+                                <field name="rejected_user_id"/>
+                                <field name="update_user_id"/>
+                            </group>
+                            <group>
+                                <field name="crt_date"/>
+                                <field name="confirm_date"/>
+                                <field name="approved_date"/>
+                                <field name="rejected_date"/>
+                                <field name="update_date"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+                
+            </sheet>
+        </form>
+      </field>
+    </record>
+    
+    
+    <record id='travel_package_view_tree' model='ir.ui.view'>
+        <field name="name">travel.package.tree</field>
+        <field name="model">travel_package_master.travel_package_master</field>
+        <field name="arch" type="xml">
+            <tree string="Travel Package"
+                multi_edit="1"
+                sample="1"
+                decoration-danger = "state == 'confirm'"
+                decoration-success = "state == 'approved'"
+                decoration-muted = "state == 'reject'"
+                >
+                
+                <field name="name"/>
+                <field name="code"/>
+                <field name="description"/>
+                <field name="max_days"/>
+                <field name="starting_point"/>
+                <field name="max_guest"/>
+                <field name="pkg_amount"/>
+                <field name="slot_availability"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    
+    <!-- Search View -->
+    <record id="travel_package_master_view_search" model="ir.ui.view">
+        <field name="name">travel_package_master.search</field>
+        <field name="model">travel_package_master.travel_package_master</field>
+        <field name="arch" type="xml">
+            <search string="Travel Package">
+                <field string="Name" name="name"/>
+
+                <filter name="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="WFA" domain="[('state', '=', 'confirm')]"/>
+                <filter name="Approved" domain="[('state', '=', 'approved')]"/>
+                <filter name="Reject" domain="[('state', '=', 'reject')]"/>
+
+                <group expand="1" string="Group By">
+                    <filter string="Status" name="state" context="{'group_by': 'state'}"/>
+                    <filter string="Name" name="name" context="{'group_by': 'name'}"/>
+                    <filter string="Code" name="code" context="{'group_by': 'code'}"/>
+                </group>
+           </search>
+        </field>
+    </record>
+
+    <!-- actions opening views on models -->
+
+    <record model="ir.actions.act_window" id="travel_package_master.action_window">
+      <field name="name">Travel Package</field>
+      <field name="res_model">travel_package_master.travel_package_master</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <!-- Top menu item -->
+    
+    <menuitem name="Travel" id="travel_management" sequence="221"/>
+    <menuitem action="travel_package_master.action_window" parent="travel_management" name="Travel Package Master"
+        id="travel_package_master_menu" sequence="0"/>
+
+  </data>
+</odoo>

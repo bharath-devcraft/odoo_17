@@ -1,0 +1,482 @@
+<odoo>
+  <data>
+    <!-- explicit form view definition -->
+    <record model="ir.ui.view" id="travel_management_form">
+      <field name="name">travel_management form</field>
+      <field name="model">travel_management.travel_management</field>
+      <field name="arch" type="xml">
+        <form string="Travel Management">
+            <header>
+                <button string="Confirm"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_confirm" invisible = "state != 'draft'"/>
+                <button string="Validate"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_validate" invisible = "state != 'confirmed'"/>
+                <button string="Payment Request"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_payment_request" invisible = "state != 'validate'"/>
+                <button string="Payment Received"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_payment_received" invisible = "state != 'payment_request'"/>
+                <button string="Approve"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_approve" invisible = "state != 'payment_received' or initial_cancel == True"/>
+                <button string="Reject"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_reject" invisible = "state not in ('confirmed','validate','payment_request')"/>
+                <button string="Initial Cancel"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_initial_cancel" invisible = "state not in ('payment_received','approved') or initial_cancel == True"/>
+                <button string="Refund"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_refund" invisible = "initial_cancel == False or refund_status == True"/>
+                <button string="Cancel"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_cancel" invisible = "refund_status == False or state in ('cancel','closed') "/>
+                <button string="Feedback"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_feedback" invisible = "state not in ('closed') or feedback_done == True "/>
+                <field name="state" widget="statusbar" style="width:700px;"/>                
+            </header>
+            <sheet>
+                <widget name="web_ribbon" title="Booked" bg_color="bg-success" invisible = "state != 'approved' or initial_cancel == True"/>
+                <group>
+                    <div class="oe_title">
+                        <div class="animate-charcter">
+                        <field name="name" readonly="1"/>
+                        </div>
+                    </div>
+                </group>
+                <group>
+                    <group>
+                        <field name="customer_name" required="1" readonly = "state in ('validate','payment_request','payment_received','approved','reject','wf_cancel','cancel','closed')"/>
+                        <field name="customer_mail" widget="email" required="1" readonly = "state in ('validate','payment_request','payment_received','approved','reject','wf_cancel','cancel','closed')"/>
+                        <field name="customer_mobile" widget="phone" required="1" readonly = "state in ('validate','payment_request','payment_received','approved','reject','wf_cancel','cancel','closed')"/>
+                    </group>
+                    <group>
+                        <field name="customer_address" required="1" readonly = "state in ('validate','payment_request','payment_received','approved','reject','wf_cancel','cancel','closed')"/>
+                        <field name="booked_date" readonly = "1" invisible = "booked_date == False"/>
+                    </group>
+                </group>
+                <group string="Booking Info" options="{'color': 'red'}">
+                    <group>
+                        <field name="package_id" required="1" readonly = "state in ('validate','payment_request','payment_received','approved','reject','wf_cancel','cancel','closed')" 
+                        domain="[('state', '=', 'approved' )]"/>
+                        <field name="allowed_guest" readonly="1" force_save="1"/>
+                        <field name="allowed_days" readonly="1" force_save="1"/> 
+                        <field name="pkg_amt_per_person" widget="monetary" readonly="1" force_save="1"/>
+                        <field name="total_amount" widget="monetary" readonly="1" force_save="1"/>
+                    </group>
+                    <group>
+                        <field name="package_name" required="1" readonly="1" force_save="1"/>
+                        <field name="no_of_guest" required="1" readonly = "state in ('validate','payment_request','payment_received','approved','reject','wf_cancel','cancel','closed')"/>
+<!--
+                        <field name="from_date" widget="daterange" class="oe_inline" options="{'related_end_date': 'to_date'}"/>
+                        <field name="to_date" widget="daterange" class="oe_inline" options="{'related_start_date': 'from_date'}"/>
+-->
+                        
+                        <field name="from_date" readonly = "state in ('validate','payment_request','payment_received','approved','reject','wf_cancel','cancel','closed')" required="1"/>
+                        <field name="to_date" widget="remaining_days" readonly = "state in ('validate','payment_request','payment_received','approved','reject','wf_cancel','cancel','closed')" required="1"/>
+                        <field name="attachment_ids" widget="many2many_binary" options="{'no_create_edit': True}" readonly = "state in ('validate','payment_request','payment_received','approved','reject','wf_cancel','cancel','closed')"/>
+                        <field name="attachment_char" widget="image" invisible="1"/>
+                    </group>
+                </group>
+                
+                <group string="Received Payment Info" invisible = "state in ('draft','confirmed','validate')">
+                    <group>
+                        <field name="payment_mode" required="state in ('payment_request')" readonly = "state not in ('payment_request')"/>
+                        <field name="payment_received_amount" widget="monetary" required="state in ('payment_request')" readonly = "state not in ('payment_request')"/>
+                    </group>
+                    <group>
+                        <field name="payment_attachment" required="state in ('payment_request')" widget="many2many_binary" options="{'no_create_edit': True}" readonly = "state not in ('payment_request')"/>
+                    </group>
+                </group>
+                
+                <group string="Customer Refund Info" invisible = "initial_cancel != True">
+                    <group>
+                        <field name="initial_cancel" readonly = "1" force_save="1" invisible="1"/>
+                        <field name="cus_payment_option" widget="radio" options="{'horizontal': True}" required="initial_cancel == True" readonly = "state in ('cancel','closed') or refund_status == True"/>
+                        <field name="cus_account_no" required="initial_cancel == True and cus_payment_option == 'bank'" readonly = "state in ('cancel','closed') or refund_status == True"/>
+                        <field name="cus_bank" required="initial_cancel == True and cus_payment_option == 'bank'" readonly = "state in ('cancel','closed') or refund_status == True"/>
+                        <field name="cus_account_holder_name" required="initial_cancel == True and cus_payment_option == 'bank'" readonly = "state in ('cancel','closed') or refund_status == True"/>
+                        <field name="refund_status" readonly = "1" force_save="1" invisible="1"/>
+                        <field name="refund_attachment" required="refund_status == True" invisible="refund_status != True" widget="many2many_binary" options="{'no_create_edit': True}" readonly = "state in ('cancel','closed')"/>
+                    </group>
+                    <group>
+                        <field name="cus_branch_name" required="initial_cancel == True and cus_payment_option == 'bank'" readonly = "state in ('cancel','closed') or refund_status == True"/>
+                        <field name="cus_bank_ifsc_code" required="initial_cancel == True and cus_payment_option == 'bank'" readonly = "state in ('cancel','closed') or refund_status == True"/>
+                        <field name="cus_upi_id" required="initial_cancel == True and cus_payment_option == 'upi'" readonly = "state in ('cancel','closed') or refund_status == True"/>
+                        <field name="cancelled_by" required="initial_cancel == True" readonly = "state in ('cancel','closed') or refund_status == True"/>
+                        <field name="cancellation_fee" widget="monetary" readonly = "1" force_save="1"/>
+                        <field name="refund_amount" widget="monetary" readonly = "1" force_save="1"/>
+                    </group>
+                </group>
+                
+                <notebook>
+                    <page string="Guest Details" >
+                        <field name="line_ids" colspan="4" nolabel="1"  required="1" readonly = "state in ('validate','payment_request','payment_received','approved','reject','wf_cancel','cancel','closed')">
+                            <tree string="Guest Details Tree" editable="top">
+                                <field name="state" widget="handle" invisible="1"/>
+                                <field name="name" required="1"/>
+                                <field name="age" required="1"/>
+                                <field name="sex" required="1"/>
+                                <field name="mobile_no" widget="phone"/>
+                                <field name="email" widget="email"/>
+                                <field name="aadhar_no" required="1"/>
+                                <field name="passport_no" required="1"/>
+                                <field name="images" required="1" widget="many2many_binary" options="{'no_create_edit': True, 'accepted_file_extensions': '.jpg'}"/>
+                                <field name="verified" readonly = "state != 'confirmed'"/>
+                                </tree>
+                        </field>
+                    </page>
+                    <page string="Verification Remark" invisible = "state in ('draft')">
+                        <group>
+                            <field name="verification_remark" required = "state in ('confirmed')" readonly = "state not in ('confirmed')"/>
+                        </group>
+                    </page>
+                    <page string="Reject Remark" invisible = "state not in ('confirmed','validate','payment_request','reject')">
+                        <group>
+                            <field name="reject_remark" readonly = "state in ('reject','cancel','closed')"/>
+                        </group>
+                    </page>
+                    <page string="Cancel Remark" invisible = "refund_status != True">
+                        <group>
+                            <field name="cancel_remark" readonly = "state in ('reject','cancel','closed')"/>
+                        </group>
+                    </page>
+                    <page string="Feedback" invisible = "state != 'closed'">
+                        <group>
+                            <field name="rating" widget="priority" readonly="feedback_done == True"/>
+                            <field name="feedback_url" widget="url" readonly="1" froce_save="1"/>
+                            <field name="feedback_done" invisible="1"/>
+                            <field name="feedback" readonly="feedback_done == True"/>
+                        </group>
+                    </page>
+                    <page string="Entry Info">
+                        <group>
+                            <group>
+                                <field name="company_id"/>
+                                <field name="currency_id" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="active" widget="boolean_toggle"/>
+<!--
+                                <field name="is_booked" invisible="1"/>
+-->
+                            </group>
+                        
+
+                            <group>
+<!--
+                                <field name="user_id" widget="many2one_avatar_employee"/>
+                                <field name="mant2many res user " widget="widget="many2many_tags_avatar""/>
+-->
+                                <field name="user_id" widget="many2one_avatar_user"/>
+                                <field name="confirm_user_id" widget="many2one_avatar_user"/>
+                                <field name="validated_user_id" widget="many2one_avatar_user"/>
+                                <field name="payment_req_user_id" widget="many2one_avatar_user"/>
+                                <field name="payment_rec_user_id" widget="many2one_avatar_user"/>
+                                <field name="approved_user_id" widget="many2one_avatar_user"/>
+                                <field name="rejected_user_id" widget="many2one_avatar_user"/>
+                                <field name="cancel_user_id" widget="many2one_avatar_user"/>
+                                <field name="update_user_id" widget="many2one_avatar_user"/>
+                            </group>
+                            <group>
+                                <field name="crt_date"/>
+                                <field name="confirm_date"/>
+                                <field name="validated_date"/>
+                                <field name="payment_req_date"/>
+                                <field name="payment_rec_date"/>
+                                <field name="approved_date"/>
+                                <field name="rejected_date"/>
+                                <field name="cancel_date"/>
+                                <field name="update_date"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+                
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>  
+            </sheet>
+        </form>
+      </field>
+    </record>
+    
+    
+    <!-- Tree view -->
+    <record id="travel_management_view_tree" model="ir.ui.view">
+        <field name="name">travel.management.tree</field>
+        <field name="model">travel_management.travel_management</field>
+        <field name="arch" type="xml">
+            <tree string="Travel Management"
+                multi_edit="1"
+                sample="1"
+                decoration-bf = "state == 'draft'"
+                decoration-info = "state == 'confirmed'"
+                decoration-primary = "state == 'validate'"
+                decoration-danger = "state == 'payment_request'"
+                decoration-warning = "state == 'payment_received'"
+                decoration-success = "state == 'approved'"
+                decoration-muted = "state in ('reject','wf_cancel','cancel','closed')"
+                decoration-it = "state == 'closed'">
+                
+                <field name="name" string="Travel No" decoration-bf="1"/>
+                <field name="customer_name"/>
+                <field name="booked_date"/>
+                <field name="package_id" widget="many2one_avatar"/>
+                <field name="package_name"/>
+                <field name="no_of_guest"/>
+                <field name="from_date"/>
+                <field name="to_date"/>
+                <field name="approved_user_id" string="Approver" widget="many2one_avatar_user"/>
+                <field name="total_amount" widget="monetary"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge" decoration-info = "state == 'confirmed'" decoration-primary = "state == 'validate'" 
+                        decoration-danger = "state == 'payment_request'" decoration-warning = "state == 'payment_received'"
+                        decoration-success = "state == 'approved'" decoration-muted = "state in ('reject','wf_cancel','cancel','closed')" decoration-it = "state == 'closed'"/>
+            </tree>
+        </field>
+    </record>
+    
+    
+    <!-- Search View -->
+        <record id="travel_management_view_search" model="ir.ui.view">
+        <field name="name">travel_management.search</field>
+        <field name="model">travel_management.travel_management</field>
+        <field name="arch" type="xml">
+            <search string="Travel Details">
+                <field string="Package Code" name="package_id"/>
+                <field string="Package Name" name="package_name"/>
+
+                <filter name="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="Confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter name="Validated" domain="[('state', '=', 'validate')]"/>
+                <filter name="Payment Pending" domain="[('state', '=', 'payment_request')]"/>
+                <filter name="Payment Received" domain="[('state', '=', 'payment_received')]"/>
+                <filter name="Booked" domain="[('state', '=', 'approved')]"/>
+                <filter name="Reject" domain="[('state', '=', 'reject')]"/>
+                <filter name="WF Cancel" domain="[('state', '=', 'wf_cancel')]"/>
+                <filter name="Cancel" domain="[('state', '=', 'cancel')]"/>
+                <filter name="Closed" domain="[('state', '=', 'closed')]"/>
+
+                <group expand="1" string="Group By">
+                    <filter string="Status" name="state" context="{'group_by': 'state'}"/>
+                    <filter string="Package Code" name="package_id" context="{'group_by': 'package_id'}"/>
+                    <filter string="Package Name" name="package_name" context="{'group_by': 'package_name'}"/>
+                    <filter string="From date" name="from_date" context="{'group_by': 'from_date'}"/>
+                    <filter string="To Date" name="to_date" context="{'group_by': 'to_date'}"/>
+                    <filter string="Booked Date" name="booked_date" context="{'group_by': 'booked_date'}"/>
+                </group>
+           </search>
+        </field>
+    </record>
+    
+    <!-- Graph View -->
+    <record id="travel_management_view_graph" model="ir.ui.view">
+       <field name="name">travel_management.graph</field>
+       <field name="model">travel_management.travel_management</field>
+       <field name="arch" type="xml">
+            <graph string="Total amount package wise" sample="1" disable_linking="True">
+                <field name="booked_date"/>
+                <field name="package_id"/>
+                <field name="total_amount" type="measure"/> 
+            </graph>
+        </field>
+    </record>
+    
+    <!-- Kanban View -->
+    <record id="travel_management_view_kanban" model="ir.ui.view">
+        <field name="name">travel_management.kanban</field>
+        <field name="model">travel_management.travel_management</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1" quick_create="false">
+                <field name="name"/>
+                <field name="package_id"/>
+                <field name="package_name"/>
+                <field name="from_date"/>
+                <field name="to_date"/>
+                <field name="no_of_guest"/>
+                <field name="total_amount"/>
+                <progressbar field="state"
+                    colors='{"draft": "secondary", "approved": "success", "confirmed": "info", "reject": "mutued", "validate": "primary", "payment_request": "danger", "payment_received": "warning","wf_cancel": "mutued","cancel": "mutued", "closed": "mutued"}'/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click" style="background-color: #F0FFFF">
+                            <div class="o_kanban_record_top mb16">
+                                <div class="o_kanban_record_headings mt4">
+                                    <strong class="o_kanban_record_title">
+                                        <field style="color:violet;" name="name"/>
+                                    </strong>
+                                </div>
+                                <strong>
+                                    <span>₹ </span><field name="total_amount" widget="monetary"/>
+                                </strong>
+                            </div>
+                            <p>
+                            <field name="package_id"/> <span> : </span> <field style="color:blue;" name="package_name"/> 
+                            <span style="float:right;"> <span style="font-size:14px" class="fa">&#xf007;</span> <field name="no_of_guest"/> </span>
+                            </p>
+                            <div>
+                            <b><field name="customer_name"/></b> <field style="color:orange;float:right;" name="booked_date"/>
+                            </div>
+                            <br></br>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left text-muted">
+                                    <span>
+                                        <t t-out="record.from_date.value"/> <span> - </span><t t-out="record.to_date.value"/>
+                                    </span>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="state"
+                                        widget="label_selection"
+                                        options="{'classes': {'draft': 'secondary', 'confirmed': 'info', 'validate': 'primary', 'payment_request': 'danger', 'payment_received': 'warning', 'reject': 'mutued', 'approved': 'success', 'cancel': 'mutued', 'closed': 'mutued','wf_cancel': 'mutued'}}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    
+    
+    <!-- Calendar View -->
+    <record id="travel_management_view_calendar" model="ir.ui.view">
+        <field name="name">travel_management.calendar</field>
+        <field name="model">travel_management.travel_management</field>
+        <field name="arch" type="xml">
+            <calendar string="Travel Management" create="0" mode="month" date_start="from_date" date_stop="to_date" color="state" event_limit="5" quick_create="0">
+                <field name="name"/>
+                <field name="customer_name"/>
+                <field name="package_id"/>
+                <field name="package_name"/>
+                <field name="booked_date"/>
+                <field name="from_date"/>
+                <field name="to_date"/>
+                <field name="no_of_guest"/>
+                <field name="total_amount" widget="monetary"/>
+
+<!--
+                <field name="activity_ids" options="{'icon': 'fa fa-clock-o'}"/>
+                <field name="partner_id" avatar_field="avatar_128" options="{'icon': 'fa fa-users'}"/>
+-->
+            </calendar>
+        </field>
+    </record>
+    
+    <!-- Pivot View -->
+    <record id="travel_management_view_pivot" model="ir.ui.view">
+            <field name="name">travel_management.Pivot</field>
+            <field name="model">travel_management.travel_management</field>
+            <field name="arch" type="xml">
+                <pivot string="Timesheet Attendance" disable_linking="1" sample="1">
+                    <field name="booked_date" interval="month" type="row"/>
+                    <field name="package_id"/>
+                    <field name="total_amount" type="measure"/>
+<!--
+                    <field name="total_timesheet" type="measure" widget="timesheet_uom"/>
+-->
+                </pivot>
+            </field>
+    </record>
+
+
+    
+    <record id="travel_management_view_order_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="travel_management.travel_management_view_tree"/>
+        <field name="act_window_id" ref="travel_management.action_window"/>
+    </record>
+    
+    <record id="travel_management_view_order_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="travel_management.travel_management_form"/>
+        <field name="act_window_id" ref="travel_management.action_window"/>
+    </record>
+    
+    <record id="travel_management_view_order_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3"/>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="travel_management.travel_management_view_kanban"/>
+        <field name="act_window_id" ref="travel_management.action_window"/>
+    </record>
+    
+    <record id="travel_management_view_order_calendar" model="ir.actions.act_window.view">
+        <field name="sequence" eval="4"/>
+        <field name="view_mode">calendar</field>
+        <field name="view_id" ref="travel_management.travel_management_view_calendar"/>
+        <field name="act_window_id" ref="travel_management.action_window"/>
+    </record>
+    
+    <record id="travel_management_view_order_graph" model="ir.actions.act_window.view">
+        <field name="sequence" eval="5"/>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="travel_management.travel_management_view_graph"/>
+        <field name="act_window_id" ref="travel_management.action_window"/>
+    </record>
+    
+    <record id="travel_management_view_order_pivot" model="ir.actions.act_window.view">
+        <field name="sequence" eval="6"/>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="travel_management.travel_management_view_pivot"/>
+        <field name="act_window_id" ref="travel_management.action_window"/>
+    </record>
+
+    
+    <!-- actions opening views on models -->
+    <record model="ir.actions.act_window" id="travel_management.action_window">
+      <field name="name">Travel Management</field>
+      <field name="res_model">travel_management.travel_management</field>
+      <field name="view_mode">tree,kanban,form,calendar,graph,pivot</field>
+    </record>
+    
+    <!-- booked status menu -->
+    <record model="ir.actions.act_window" id="travel_management.booked_menu">
+      <field name="name">Booked Details</field>
+      <field name="res_model">travel_management.travel_management</field>
+      <field name="view_mode">tree,kanban,form,calendar,graph,pivot</field>
+      <field name="domain">[('state', '=', 'approved')]</field>
+      <field name="context">{'create': False, 'delete':False}</field>
+    </record>
+    
+    <!-- closed status menu -->
+    <record model="ir.actions.act_window" id="travel_management.closed_menu">
+      <field name="name">Closed Details</field>
+      <field name="res_model">travel_management.travel_management</field>
+      <field name="view_mode">tree,kanban,form,calendar,graph,pivot</field>
+      <field name="domain">[('state', '=', 'closed')]</field>
+      <field name="context">{'create': False,'delete':False}</field>
+    </record>
+
+
+    <!-- Top menu item -->
+    <menuitem parent="travel_package_master.travel_management" name="Travel Management"
+        id="travel_management_menu" sequence="1"/>
+    <menuitem action="travel_management.action_window" parent="travel_management_menu" name="Travel Booking"
+        id="travel_booking_menu" sequence="1"/>
+    <menuitem action="travel_management.booked_menu" parent="travel_management_menu" name="Booked Details"
+        id="travel_booked_details_menu" sequence="2"/>
+    <menuitem action="travel_management.closed_menu" parent="travel_management_menu" name="Closed Details"
+        id="travel_closed_details_menu" sequence="3"/>
+    <menuitem action="board.open_board_my_dash_action" parent="travel_package_master.travel_management" name="Dashboard"
+        id="travel_management_dashboard" sequence="1"/>
+
+  </data>
+</odoo>

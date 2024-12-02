@@ -1,0 +1,19 @@
+/* Add custom styles for required fields */
+/* Add custom styles for required fields */
+.o_form_view .o_required_field {
+    border-bottom-color: #ff0000; /* Red bottom border color for required fields */
+    border-bottom-width: 1px; /* Adjust the width as needed */
+    border-bottom-style: solid; /* Use a solid line */
+}
+
+
+.o_form_view .o_required_field.readonly {
+    border-bottom: none; /* Remove bottom border for required fields after saving or in readonly mode */
+}
+
+/*
+border-color: #D2D2FF !important; 
+background-color: #cccccc;
+*/
+
+

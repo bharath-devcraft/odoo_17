@@ -1,0 +1,104 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+
+    <record model="ir.ui.view" id="organizer_bank_details_form">
+      <field name="name">organizer_bank_details form</field>
+      <field name="model">organizer_bank_details.organizer_bank_details</field>
+      <field name="arch" type="xml">
+        <form string="Travel Package">
+            <header>
+                <button string="Confirm"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_confirm" invisible = "state != 'draft'"/>
+                <button string="Approve"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_approve" invisible = "state != 'confirm'"/>
+                <button string="Reject"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_reject" invisible = "state != 'approved'"/>
+                <field name="state" widget="statusbar" />
+            </header>
+            <sheet>
+                <group>
+                    <field name="name" force_save="1"/>
+                    <field name="org_account_no" required="1" readonly ="state in ('approved','reject')"/>
+                    <field name="org_account_holder_name" required="1" readonly ="state in ('approved','reject')"/>
+                    <field name="org_bank" required="1" readonly ="state in ('approved','reject')"/>
+                    <field name="org_branch_name" required="1" readonly ="state in ('approved','reject')"/>
+                    <field name="org_bank_ifsc_code" required="1" readonly ="state in ('approved','reject')"/>
+                    <field name="org_upi_id" required="1" readonly ="state in ('approved','reject')"/>
+                </group>
+                <notebook>
+                    <page string="Reject Remark" invisible = "state not in ('approved','reject')">
+                        <group>
+                            <field name="reject_remark" readonly = "state in ('reject')"/>
+                        </group>
+                    </page>
+                    <page string="Entry Info">
+                        <group>
+                            <group>
+                            </group>
+                            <group>
+                                <field name="active"/>
+                            </group>
+                        
+
+                            <group>
+                                <field name="user_id"/>
+                                <field name="confirm_user_id"/>
+                                <field name="approved_user_id"/>
+                                <field name="rejected_user_id"/>
+                                <field name="update_user_id"/>
+                            </group>
+                            <group>
+                                <field name="crt_date"/>
+                                <field name="confirm_date"/>
+                                <field name="approved_date"/>
+                                <field name="rejected_date"/>
+                                <field name="update_date"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+            </sheet>
+        </form>
+      </field>
+    </record>
+    
+    
+    <record id="organizer_bank_details" model="ir.ui.view">
+        <field name="name">organizer_bank_details.tree</field>
+        <field name="model">organizer_bank_details.organizer_bank_details</field>
+        <field name="arch" type="xml">
+            <tree string="Bank Details"
+                multi_edit="1"
+                sample="1"
+                >
+
+                <field name="name"/>
+                <field name="org_account_no"/>
+                <field name="org_bank"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- actions opening views on models -->
+
+    <record model="ir.actions.act_window" id="organizer_bank_details_action_window">
+      <field name="name">Bank Details</field>
+      <field name="res_model">organizer_bank_details.organizer_bank_details</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+
+    <!-- Top menu item -->
+    
+    <menuitem action="organizer_bank_details_action_window" parent="travel_package_master.travel_package_master_menu" name="Bank Details"
+        id="organizer_bank_details_menu" sequence="1"/>
+
+  </data>
+</odoo>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+  <template id="portal_travel_bookings" name="Travel Bookings">
+      <t t-call="portal.portal_layout">
+          <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+          <t t-call="portal.portal_searchbar">
+              <t t-set="title">Travel Management</t>
+          </t>
+          <t t-if="not bookings">
+              <p class="alert alert-warning">There are currently no bookings for your account.</p>
+          </t>
+          <t t-if="bookings" t-call="portal.portal_table">
+              <thead>
+                  <tr class="active">
+                      <th>
+                          <span class='d-none d-md-inline'>Travel Booking #</span>
+                          <span class='d-block d-md-none'>Ref.</span>
+                      </th>
+                      <th class="text-end">
+                          <span class='d-none d-md-inline'>Created Date</span>
+                          <span class='d-block d-md-none'>Created</span>
+                      </th>
+                      <th class="text-center"/>
+                      <th class="text-end">Total</th>
+                  </tr>
+              </thead>
+              <t t-foreach="bookings" t-as="book">
+                  <tr>
+                      <td><a>
+<!--
+                      <td><a t-att-href="order.get_portal_url()">
+-->
+                      <t t-esc="book.name"/></a></td>
+                      <td class="text-end">
+                          <span t-field="book.crt_date" t-options="{'widget': 'date'}"/>&amp;nbsp;
+                          <span class='d-none d-md-inline' t-field="book.crt_date" t-options="{'time_only': True}"/>
+                      </td>
+                      <td class="text-center">
+                          <span t-if="book.state == 'cancel'" class="badge rounded-pill text-bg-info">
+                              <i class="fa fa-fw fa-file-text" role="img" aria-label="Cancelled" title="Cancelled"></i><span class="d-none d-md-inline"> Cancelled</span>
+                          </span>
+                          <span t-if="book.state == 'closed'" class="badge rounded-pill text-bg-secondary">
+                              <i class="fa fa-fw fa-remove" role="img" aria-label="Closed" title="Closed"></i><span class="d-none d-md-inline"> Closed</span>
+                          </span>
+                          <span t-if="book.state == 'approved'" class="badge rounded-pill text-bg-success">
+                              <i class="fa fa-fw fa-check" role="img" aria-label="Booked" title="Booked"></i><span class="d-none d-md-inline"> Booked</span>
+                          </span>
+                      </td>
+                      <td class="text-end"><span t-field="book.total_amount"/></td>
+                  </tr>
+              </t>
+          </t>
+      </t>
+  </template>
+
+</odoo>

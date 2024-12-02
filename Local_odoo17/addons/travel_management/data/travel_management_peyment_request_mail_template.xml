@@ -1,0 +1,45 @@
+<odoo>
+   <data>
+       <record id="payment_request_mail" model="mail.template">
+           <field name="name">Payment Request</field>
+           <field name="model_id" ref="travel_management.model_travel_management_travel_management"/>
+           <field name="subject">Payment request details</field>
+           <field name="email_from">{{ (object.user_id.email) }}</field>
+           <field name="email_to">{{ (object.customer_mail) }}</field>
+           <field name="email_cc">{{ (object.user_id.email) }}</field>
+           <field name="partner_to">{{ object.user_id.id }}</field>
+           <field name="description">Kindly find the below payment details about your package.</field>
+           <field name="body_html" type="html">
+               <div>
+                    <p>Based on your package payment details are given below.</p>
+                    <p><b>Details :</b></p>
+                    <table>
+                        <tr><th style="border: hidden;">Customer Name</th><th style="border: hidden;">:</th><td style="border: hidden;"><t t-out="object.customer_name"></t></td></tr>
+                        <tr><th style="border: hidden;">Mobile No</th><th style="border: hidden;">:</th><td style="border: hidden;"><t t-out="object.customer_mobile"></t></td></tr>
+                        <tr><th style="border: hidden;">Email</th><th style="border: hidden;">:</th><td style="border: hidden;"><t t-out="object.customer_mail"></t></td></tr>
+                        <tr><th style="border: hidden;">Package Code</th><th style="border: hidden;">:</th><td style="border: hidden;"><t t-out="object.package_id.code"></t></td></tr>
+                        <tr><th style="border: hidden;">Package Name</th><th style="border: hidden;">:</th><td style="border: hidden;"><t t-out="object.package_name"></t></td></tr>
+                        <tr><th style="border: hidden;">No of guest</th><th style="border: hidden;">:</th><td style="border: hidden;"><t t-out="object.no_of_guest"></t></td></tr>
+                        <tr><th style="border: hidden;">From date</th><th style="border: hidden;">:</th><td style="border: hidden;"><t t-out="object.from_date.strftime('%d/%m/%Y')"></t></td></tr>
+                        <tr><th style="border: hidden;">To date</th><th style="border: hidden;">:</th><td style="border: hidden;"><t t-out="object.to_date.strftime('%d/%m/%Y')"></t></td></tr>
+                        <tr><th style="border: hidden;">Package amount<br></br>(1 day per person)</th><th style="border: hidden;">:</th><td style="border: hidden;"><t t-out="object.pkg_amt_per_person"></t></td></tr>
+                        <tr><th style="border: hidden;color:blue;">Total amount</th><th style="border: hidden;">:</th><td style="border: hidden;color:red;"><t t-out="object.total_amount"></t></td></tr>
+                    </table><br></br>
+                    <p><b>Pay Via UPI or Bank</b></p>
+                    <p>UPI ID - <t t-out="object._get_bank_details_to_report().org_upi_id"></t></p>
+                    <p><b>Bank Details:</b></p>
+                    <p>Account No - <t t-out="object._get_bank_details_to_report().org_account_no"></t></p>
+                    <p>Account Holder - <t t-out="object._get_bank_details_to_report().org_account_holder_name"></t></p>
+                    <p>Bank Name - <t t-out="object._get_bank_details_to_report().org_bank"></t></p>
+                    <p>IFSC Code - <t t-out="object._get_bank_details_to_report().org_bank_ifsc_code"></t></p>
+                    <p style="color:red">Note: Send a payment screenshot via what's app or mail.</p>
+                    <div>What's app no : <t t-out="object.company_id.phone"></t></div>
+                    <div>Mail : <t t-out="object.company_id.email"></t></div>
+               </div>
+           </field>
+        <field name="report_template_ids" eval="[(4, ref('travel_management.action_report_travel_management'))]"/>
+        <field name="lang">{{ object.user_id.lang }}</field>
+        <field name="auto_delete" eval="True"/>
+       </record>
+   </data>
+</odoo>
