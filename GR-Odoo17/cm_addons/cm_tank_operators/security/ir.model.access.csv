@@ -1,0 +1,13 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_cm_profile_master_admin","cm.profile.master.admin","model_cm_tank_operators","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tank_operators_line_admin","cm.tank.operators.line.admin","model_cm_tank_operators_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tank_operators_attachment_line_admin","cm.tank.operators.attachment.line.admin","model_cm_tank_operators_attachment_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tank_operators_bank_details_line_admin","cm.tank.operators.bank.details.line.admin","model_cm_tank_operators_bank_details_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tank_operators_intermediatory_bank_line_admin","cm.tank.operators.intermediatory.bank.line.admin","model_cm_tank_operators_intermediatory_bank_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tank_operators_batch_inactive_admin","cm.tank.operators.batch.inactive.admin","model_cm_tank_operators_batch_inactive","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tank_operators_user","cm.tank.operators.user","model_cm_tank_operators","custom_properties.group_master_user",1,0,0,0
+"access_cm_tank_operators_line_user","cm.tank.operators.line.user","model_cm_tank_operators_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_tank_operators_attachment_line_user","cm.tank.operators.attachment.line.user","model_cm_tank_operators_attachment_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_tank_operators_bank_details_line_user","cm.tank.operators.bank.details.line.user","model_cm_tank_operators_bank_details_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_tank_operators_intermediatory_bank_line_user","cm.tank.operators.intermediatory.bank.line.user","model_cm_tank_operators_intermediatory_bank_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_tank_operators_batch_inactive_user","cm.tank.operators.batch.inactive.user","model_cm_tank_operators_batch_inactive","custom_properties.group_master_user",1,0,0,0

@@ -1,0 +1,10 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+access_cm_kyc_admin,KYC Admin,model_cm_kyc,custom_properties.group_master_admin,1,1,1,1
+access_cm_kyc_line_admin,KYC Line Admin,model_cm_kyc_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_kyc_attachment_line_admin,KYC Attachment Line Admin,model_cm_kyc_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_kyc_batch_inactive_admin,KYC Inactive Admin,model_cm_kyc_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_kyc_user,KYC User,model_cm_kyc,custom_properties.group_master_user,1,0,0,0
+access_cm_kyc_line_user,KYC Line User,model_cm_kyc_line,custom_properties.group_master_user,1,0,0,0
+access_cm_kyc_attachment_line_user,KYC Attachment Line User,model_cm_kyc_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_kyc_batch_inactive_user,KYC Inactive User,model_cm_kyc_batch_inactive,custom_properties.group_master_user,1,0,0,0
+

@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="cm_profile_master_form" model="ir.ui.view">
+            <field name="name">Form view</field>
+            <field name="model">cm.profile.master</field>
+            <field name="arch" type="xml">
+                <form string="Profile Master Template">
+                    
+                    <header>
+                        <button string="Approve"
+                            class="btn btn-success"
+                            icon="fa-thumbs-up"
+                            type="object"
+                            name="entry_approve"
+                            invisible = "status not in ('draft','editable')"
+                            confirm="Are you sure to proceed ?"/>
+                        <button string="Set To Draft" 
+                            class="btn btn-primary"
+                            type="object"
+                            name="entry_draft"
+                            invisible = "status != 'active'"
+                            confirm="Are you sure to proceed ?"/>
+                        <button string="Inactive" 
+                            class="btn btn-danger"
+                            icon="fa-thumbs-down"
+                            type="object"
+                            name="entry_inactive"
+                            invisible = "status != 'active'"
+                            confirm="Are you sure to proceed ?"/>
+                        <field name="status" widget="statusbar" style="width:700px;"/>                
+                    </header>
+                    
+                    <sheet>
+                        <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+                        <group>
+                            <group>
+                                <label for="name" class="name-lable"/>
+                                <div>
+                                    <field name="name" class ="name-value" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+                                </div>
+                            </group>
+                            <group>
+                                <field name="short_name" widget="upper_case" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="status" readonly = "1" invisible="1"/>
+                            </group>
+                        </group>
+                        
+                        <group string = "General Information">
+                            <group>
+                                <field name="contact_person"   widget="proper_case"  required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="mobile_no" widget="numeric" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="street" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="street1" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="landmark" readonly = "status not in ('draft','editable')"/>
+                                <field name="city_id" required="1" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
+                                <field name="pin_code" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="phone_no" widget="numeric" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="email" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="website" readonly = "status not in ('draft','editable')"/>
+                                <field name="fax" widget="numeric" readonly = "status not in ('draft','editable')"/>
+                                <field name="state_id" required="1" force_save="1" readonly = "1" options="{'no_create': True}"/>
+                                <field name="country_id" required="1" force_save="1" readonly = "1" options="{'no_create': True}"/>
+                                <field name="currency_id" required="1" readonly = "1" options="{'no_create': True}"/>
+                            </group>
+                        </group>
+                        
+                        <group string = "Official Information" >
+                            <group>
+                                <field name="tds" readonly = "status not in ('draft','editable')"/>
+                                <field name="tan_no" widget="upper_case" readonly = "status not in ('draft','editable')"/>
+                                <field name="cst_no" widget="numeric" readonly = "status not in ('draft','editable')"/>
+                                <field name="tin_no" widget="numeric" readonly = "status not in ('draft','editable')"/>
+                                <field name="cheque_favor" readonly = "status not in ('draft','editable')"/>
+                                <field name="same_as_bill_address" readonly = "status not in ('draft','editable')"/>
+                                <field name="same_as_del_address" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="company_type" readonly = "status not in ('draft','editable')"/>
+                                <field name="pan_no" widget="upper_case" readonly = "status not in ('draft','editable')"/>
+                                <field name="aadhaar_no" widget="numeric" readonly = "status not in ('draft','editable')"/>
+                                <field name="gst_category" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="gst_no" widget="upper_case" required="gst_category == 'registered'" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                        </group>
+
+                        
+                        <notebook>
+                            <page string="Additional Contact Details" >
+                                <field name="line_ids" string="Additional Contact Details" nolabel="1" readonly = "status not in ('draft','editable')">
+                                    <tree string="Additional Contact Details">
+                                        <field name="contact_person" string="Contact Name"/>
+                                        <field name="title_id" options="{'no_create': True}"/>
+                                        <field name="job_position"/>
+                                        <field name="email"/>
+                                        <field name="phone_no"/>
+                                        <field name="mobile_no"/>
+                                    </tree>
+                                    <form string="Additional Contact Details">
+                                        <group>
+                                            <group>
+                                                <field name="header_id" invisible="1"/>
+                                                <field name="contact_person" widget="proper_case"  required="1"/>
+                                                <field name="title_id"/>
+                                                <field name="job_position" widget="proper_case" placeholder="eg: Sales Director"/>
+                                                <field name="note"/>
+                                                <field name="company_id" invisible="1"/>
+                                            </group>  
+                                            <group>
+                                                <field name="email" required="1"/>
+                                                <field name="mobile_no" widget="numeric" required="1"/>
+                                                <field name="phone_no" widget="numeric"/>
+                                                <field name="attachment_ids" widget="single_file_binary" options="{'no_create_edit': True}"/>
+                                            </group>
+                                        </group>
+
+                                    </form>
+                                </field>
+                            </page>
+                            <page string="Bank Details" >
+                                <field name="line_ids_c" string="Bank Details" nolabel="1" readonly = "status not in ('draft','editable')">
+                                    <tree string="Bank Details" editable="bottom">
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="account_no" widget="numeric" required="1"/>
+                                        <field name="acc_holder_name" required="1"/>
+                                        <field name="alias_name"/>
+                                        <field name="bank_name" widget="proper_case" required="1"/>
+                                        <field name="branch_name" widget="proper_case" required="1"/>
+                                        <field name="ifsc_code"  widget="upper_case" required="1"/> 
+                                        <field name="company_id" column_invisible="1"/>                               
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Billing Address" >
+                                <field name="line_ids_b" string="Billing Address" nolabel="1" readonly = "status not in ('draft','editable')">
+                                    <tree string="Billing Address">
+                                        <field name="eff_from_date" />
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="name"/>
+                                        <field name="short_name"/>
+                                        <field name="gst_no"/>
+                                        <field name="street"/>
+                                        <field name="street1"/>
+                                        <field name="city_id"/>
+                                        <field name="state_id"/>
+                                        <field name="country_id"/>        
+                                        <field name="phone_no"/>
+                                        <field name="email"/>
+                                    </tree>
+                                    <form string="Billing Address"	>
+                                        <group>
+                                            <group>
+                                                <field name="name" widget="no_special_char" required="1"/>
+                                                <field name="eff_from_date" required="1"/>
+                                                <field name="street" required="1"/>
+                                                <field name="street1" required="1"/>
+                                                <field name="city_id" required="1" options="{'no_create': True}"/>
+                                                <field name="state_id" required="1" force_save="1" readonly = "1" options="{'no_create': True}"/>
+                                                <field name="country_id" required="1" force_save="1" readonly = "1" options="{'no_create': True}"/>        
+                                                <field name="gst_no" widget="upper_case"/>
+                                            </group>
+                                            <group>
+                                                <field name="short_name" widget="upper_case" required="1"/>
+                                                <field name="pin_code" widget="no_special_char" required="1"/>                                        
+                                                <field name="email" required="1" />
+                                                <field name="phone_no" widget="numeric" required="1" />
+                                                <field name="fax" widget="numeric"/>
+                                                <field name="website" widget="url"/>
+                                                <field name="cin_no" widget="upper_case"/>
+                                                <field name="company_id" invisible="1"/>
+                                            </group>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                            <page string="Delivery Address" >
+                                <field name="line_ids_d" string="Delivery Address" nolabel="1" readonly = "status not in ('draft','editable')">
+                                    <tree>
+                                        
+                                        <field name="eff_from_date" />
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="name"/>
+                                        <field name="short_name"/>
+                                        <field name="gst_no"/>
+                                        <field name="street"/>
+                                        <field name="street1"/>
+                                        <field name="city_id"/>
+                                        <field name="state_id"/>
+                                        <field name="country_id"/>        
+                                        <field name="phone_no"/>
+                                        <field name="email"/>
+                                        
+                                    </tree>
+                                    <form>
+                                        <group>
+                                            <group>
+                                                <field name="name" widget="no_special_char" required="1"/>
+                                                <field name="eff_from_date" required="1"/>
+                                                <field name="street" string="Street" required="1"/>
+                                                <field name="street1" required="1"/>
+                                                <field name="city_id" required="1" force_save="1" readonly = "1" options="{'no_create': True}"/>
+                                                <field name="state_id" required="1" force_save="1" readonly = "1" options="{'no_create': True}"/>
+                                                <field name="country_id" required="1" options="{'no_create': True}"/>        
+                                                <field name="gst_no" widget="upper_case"/>
+                                            </group>
+                                            <group>
+                                                <field name="short_name" widget="upper_case" required="1"/>
+                                                <field name="pin_code" widget="no_special_char" required="1"/>                                        
+                                                <field name="email" required="1" />
+                                                <field name="phone_no" widget="numeric" required="1" />
+                                                <field name="fax" widget="numeric" />
+                                                <field name="website" widget="url"/>
+                                                <field name="cin_no" widget="upper_case"/>
+                                                <field name="company_id" invisible="1"/>
+                                            </group>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                            <page string="Attachments" >
+                                <field name="line_ids_a" string="Attachments" nolabel="1" readonly = "status not in ('draft','editable')">
+                                    <tree string="Attachments" editable="bottom">
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="attach_desc" required="1"/>
+                                        <field name="attachment_ids" required="1" widget="single_file_binary" options="{'no_create_edit': True}"/>
+                                        <field name="attach_user_id" force_save="1" readonly="1"/>
+                                        <field name="attach_date" force_save="1" readonly="1"/>
+                                        <field name="company_id" column_invisible="1"/>                                
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Inactive Remarks" invisible = "status not in ('active','inactive')">
+                                    <field name="inactive_remark" readonly = "status != 'active'" nolabel="1"/>
+                            </page>
+                            <page string="Entry Info">
+                                <group>
+                                    <group>
+                                        <field name="company_id"/>
+                                        <field name="active_trans"/>
+                                        <field name="active_rpt"/>
+                                    </group>
+                                    <group>
+                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="entry_mode"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group>
+                                        <field name="user_id" widget="many2one_avatar_user"/>
+                                        <field name="ap_rej_user_id" string = "Approved By" widget="many2one_avatar_user" invisible = "status not in ('active','inactive')"/>
+                                        <field name="inactive_user_id" widget="many2one_avatar_user" invisible = "status != 'inactive'" />
+                                        <field name="update_user_id" widget="many2one_avatar_user" />
+                                    </group>
+                                    <group>
+                                        <field name="crt_date"/>
+                                        <field name="ap_rej_date" string = "Approved Date" invisible = "status not in ('active','inactive')"/>
+                                        <field name="inactive_date" invisible = "status != 'inactive'"/>
+                                        <field name="update_date"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                        <group>
+                            <field name="remarks"  placeholder="Write your remarks here."/>
+                        </group>
+                        <div class="oe_chatter">
+                            <field name="message_ids"/>
+                        </div>  
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+            <record id="cm_profile_master_tree_js" model="ir.ui.view">
+            <field name="name">Dashboard View</field>
+            <field name="model">cm.profile.master</field>
+            <field name="priority" eval="10"/>
+            <field name="arch" type="xml">
+                <tree string="Profile Master Template" js_class="cm_profile_master_list"
+                        decoration-info="status == 'draft'" 
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status in ('active','draft')"
+                        decoration-primary = "status == 'inactive'">
+                    <field name="name"/>
+                    <field name="short_name"/>
+                    <field name="contact_person"/>
+                    <field name="mobile_no"/>
+                    <field name="email"/>
+                    <field name="status" widget="badge"  
+                        decoration-info = "status == 'draft'"
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status == 'active'"
+                        decoration-primary = "status == 'inactive'"/>
+                    <field name="ap_rej_user_id" string = "Approved By"/>
+                    <field name="crt_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="cm_profile_master_tree" model="ir.ui.view">
+            <field name="name">Tree View</field>
+            <field name="model">cm.profile.master</field>
+            <field name="priority" eval="1"/>
+            <field name="arch" type="xml">
+                <tree string="Profile Master Template" 
+                        decoration-info="status == 'draft'" 
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status in ('active','draft')"
+                        decoration-primary = "status == 'inactive'">
+                    <field name="name"/>
+                    <field name="short_name"/>
+                    <field name="contact_person"/>
+                    <field name="mobile_no"/>
+                    <field name="email"/>
+                    <field name="status" widget="badge"  
+                        decoration-info = "status == 'draft'"
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status == 'active'"
+                        decoration-primary = "status == 'inactive'"/>
+                    <field name="ap_rej_user_id" string = "Approved By"/>
+                    <field name="crt_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="cm_profile_master_search" model="ir.ui.view">
+            <field name="name">Search View</field>
+            <field name="model">cm.profile.master</field>
+            <field name="arch" type="xml">
+                <search string="Profile Master Template">
+                    <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
+                    <field name="short_name" string="Short Name" filter_domain="[('short_name','ilike',self)]"/>
+                    <field name="contact_person" string="Contact Person" filter_domain="[('contact_person','ilike',self)]"/>
+                    <field name="mobile_no" string="Mobile No" filter_domain="[('mobile_no','ilike',self)]"/>
+                    <field name="email" string="Email" filter_domain="[('email','ilike',self)]"/>
+                    <field name="gst_no" string="GST No" filter_domain="[('gst_no','ilike',self)]"/>
+                    <field name="pan_no" string="PAN No" filter_domain="[('pan_no','ilike',self)]"/>
+
+                    <filter name="my_master" string="My Master" domain="[('user_id', '=', uid)]"/>
+                    <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+                    <filter name="Editable" domain="[('status', '=', 'editable')]"/>
+                    <filter name="Active" domain="[('status', '=', 'active')]"/>
+                    <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
+                    <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
+                    <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
+                    <filter name="My Inactive" string="My Inactive" domain="[('user_id', '=', uid),('status', '=', 'inactive')]"/>
+                    <filter name="Hidden" domain="[('active', '=', False)]"/>
+                    
+                    <group expand="0" string="Group By">
+                        <filter string="City" name="city_id" domain="[]" context="{'group_by': 'city_id'}"/>
+                        <filter string="State" name="state_id" domain="[]" context="{'group_by': 'state_id'}"/>
+                        <filter string="Country" name="country_id" domain="[]" context="{'group_by': 'country_id'}"/>
+                        <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                        <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="cm_profile_master_win_action" model="ir.actions.act_window">
+            <field name="name">Profile Master Template</field>
+            <field name="res_model">cm.profile.master</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="view_id" ref="cm_profile_master_tree_js"/>
+            <field name="search_view_id" ref="cm_profile_master_search"/>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">No master record found. Let's create one!</p>
+            </field>
+        </record>
+
+        <menuitem name="Profile Master" id="cm_profile_master_act_menu" parent="cm_master.cm_master_m_parent" action="cm_profile_master_win_action" sequence="4"/>
+
+    </data>
+        
+</odoo>

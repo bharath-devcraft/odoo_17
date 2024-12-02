@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_res_company_admin,res.company.admin,model_res_company,custom_properties.group_master_admin,1,1,1,1
+access_cm_account_tax_admin,account.tax.admin,model_account_tax,custom_properties.group_master_admin,1,1,1,1
+access_cm_res_company_user,res.company.user,model_res_company,custom_properties.group_master_user,1,0,0,0
+access_cm_account_tax_user,account.tax.user,model_account_tax,custom_properties.group_master_user,1,0,0,0
+access_cm_country_admin,Country Admin,model_res_country,custom_properties.group_master_admin,1,1,1,1
+access_cm_country_user,Country User,model_res_country,custom_properties.group_master_user,1,0,0,0
+access_cm_country_state_admin,State Admin,model_res_country_state,custom_properties.group_master_admin,1,1,1,1
+access_cm_country_state_user,State User,model_res_country_state,custom_properties.group_master_user,1,0,0,0

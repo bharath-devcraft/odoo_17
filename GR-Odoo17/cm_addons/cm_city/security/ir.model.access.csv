@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_city_admin,City Admin,model_cm_city,custom_properties.group_master_admin,1,1,1,1
+access_cm_city_attachment_line_admin,City Attachment Admin,model_cm_city_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_city_batch_inactive_admin,City Batch Inactive Admin,model_cm_city_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_city_user,City User,model_cm_city,custom_properties.group_master_user,1,0,0,0
+access_cm_city_attachment_line_user,City Attachment User,model_cm_city_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_city_batch_inactive_user,City Batch Inactive User,model_cm_city_batch_inactive,custom_properties.group_master_user,1,0,0,0

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="cm_tank_operators_batch_inactive_form" model="ir.ui.view">
+        <field name="name">Tank Operators Template Batch Inactive</field>
+        <field name="model">cm.tank.operators.batch.inactive</field>
+        <field name="arch" type="xml">
+            <form string="Batch Inactive">
+                <field name="master_ids" invisible="1"/>
+                <h5> Note: Only active entries can be eligible for inactivation</h5>
+                <group>
+                    <field name="inactive_remark"/>
+                </group>
+                <footer>
+                    <button class="btn-primary"
+                            name="action_batch_inactive"
+                            type="object"
+                            string="Batch Inactive"/>
+                    <button string="Discard" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_cm_tank_operators_batch_inactive" model="ir.actions.act_window">
+        <field name="name">Batch Inactive</field>
+        <field name="res_model">cm.tank.operators.batch.inactive</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="cm_tank_operators_batch_inactive_form"/>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_cm_tank_operators"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+</odoo>

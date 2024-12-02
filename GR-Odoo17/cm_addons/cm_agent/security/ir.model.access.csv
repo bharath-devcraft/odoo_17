@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cm_agent_admin,Agent Admin,model_cm_agent,custom_properties.group_master_admin,1,1,1,1
+access_cm_agent_line_admin,Agent Line Admin,model_cm_agent_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_agent_attachment_line_admin,agent Attachments Line Admin,model_cm_agent_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_agent_batch_inactive_admin,agent Batch Inactive Admin,model_cm_agent_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_agent_user,Agent User,model_cm_agent,custom_properties.group_master_user,1,0,0,0
+access_cm_agent_line_user,Agent Line User,model_cm_agent_line,custom_properties.group_master_user,1,0,0,0
+access_cm_agent_attachment_line_user,Agent Attachments Line User,model_cm_agent_attachment_line,custom_properties.group_master_user,1,0,0,0
+access_cm_agent_batch_inactive_user,Agent Batch Inactive User,model_cm_agent_batch_inactive,custom_properties.group_master_user,1,0,0,0

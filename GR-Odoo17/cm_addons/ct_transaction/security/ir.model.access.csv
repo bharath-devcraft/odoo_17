@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_transaction,ct.transaction,model_ct_transaction,custom_properties.group_erp_admin,1,1,1,1
+access_ct_transaction_line,ct.transaction.line,model_ct_transaction_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_transaction_attachment_line,ct.transaction.attachment.line,model_ct_transaction_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_transaction_expenses_line,ct.transaction.expenses.line,model_ct_transaction_expenses_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_transaction_tax_line,ct.transaction.tax.line,model_ct_transaction_tax_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_transaction_batch_cancel,ct.transaction.batch.cancel,model_ct_transaction_batch_cancel,custom_properties.group_erp_admin,1,1,1,1
+access_ct_transaction_serialno_line,ct.transaction.serialno.line,model_ct_transaction_serialno_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_transaction_scheduler,ct.transaction.scheduler,model_ct_transaction_scheduler,custom_properties.group_erp_admin,1,1,1,1

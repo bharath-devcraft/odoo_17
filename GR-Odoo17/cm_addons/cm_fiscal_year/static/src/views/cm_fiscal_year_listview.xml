@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="cm_fiscal_year.CmFiscalYearListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CmFiscalYearDashBoard />
+        </xpath>
+    </t>
+</templates>

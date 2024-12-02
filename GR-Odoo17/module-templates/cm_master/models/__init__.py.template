@@ -1,0 +1,5 @@
+# -*- coding: utf-8 -*-
+
+from . import {{ name|snake }}
+from . import cm_master_line
+from . import cm_master_attachment_line

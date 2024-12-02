@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo noupdate="1">
+    <record id="default_style" model="ir.config_parameter" forcecreate="1">
+        <field name="key">style</field>
+        <field name="value">right</field>
+    </record>
+    <record id="default_background" model="ir.config_parameter" forcecreate="1">
+        <field name="key">background</field>
+        <field name="value">image</field>
+    </record>
+    <record id="default_background_image" model="ir.config_parameter" forcecreate="1">
+        <field name="key">background_image</field>
+        <field name="value">transportation-logistic.jpg</field>
+    </record>
+</odoo>

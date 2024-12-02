@@ -1,0 +1,37 @@
+{%- set mod = name|snake -%}
+{%- set model = "%s.%s"|format(mod, mod) -%}
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="{{mod}}_batch_inactive_form" model="ir.ui.view">
+        <field name="name">{{ name | replace("_", " ") | title }} Batch Inactive Form</field>
+        <field name="model">{{ name | replace("_", ".") }}.batch.inactive</field>
+        <field name="arch" type="xml">
+            <form string="Batch Inactive">
+                <field name="master_ids" invisible="1"/>
+                <h5> Note: Only active entries can be eligible for inactivation.</h5>
+                <group>
+                    <field name="inactive_remark"/>
+                </group>
+                <footer>
+                    <button class="btn-primary"
+                            name="action_batch_inactive"
+                            type="object"
+                            string="Batch Inactive"/>
+                    <button string="Discard" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_{{mod}}_batch_inactive" model="ir.actions.act_window">
+        <field name="name">{{ name | replace("_", " ") | title }} Inactive</field>
+        <field name="res_model">{{ name | replace("_", ".") }}.batch.inactive</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="{{mod}}_batch_inactive_form"/>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_{{mod}}"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+</odoo>

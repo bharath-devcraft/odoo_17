@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="custom_user_error" t-inherit="web.WarningDialog" t-inherit-mode="extension">
+        <xpath expr="//Dialog" position="replace">
+        <Dialog title="'Alert !'" size="'md'">
+          <div role="alert" id="web_dialog" class="container">
+             <div class="left">
+             <img src="/custom_properties/static/src/img/robot.gif" alt="Example Image" width="100" height="100"/>
+             </div>
+             <div class="right">
+               <p t-esc="message" class="text-prewrap"/>
+             </div>
+             <t t-set-slot="footer">
+               <button class="btn btn-primary o-default-button"  style="width:15%;" t-on-click="props.close">Close</button>
+              </t>
+           </div>
+        </Dialog>
+        </xpath>
+    </t>
+
+    <t t-name="custom_error" t-inherit="web.ErrorDialog" t-inherit-mode="extension">
+        <xpath expr="//Dialog" position="replace">
+            <Dialog title="'Technical Problem'">
+                <div class="alert alert-danger clearfix" id="web_dialog" role="alert">
+                    <div class="float-end ml8 btn-group-vertical">
+                        <button class="btn btn-primary" t-on-click="onClickClipboard" >
+                            <i class="fa fa-clipboard mr8"/><t>Copy to clipboard</t>
+                        </button>
+                    </div>
+		     <div class="right">
+		       <p t-esc="message"/>
+		     </div>
+                    <p><b>Application encountered an unexpected issue</b></p>
+                    <p>Please report this issue to the administration team for resolution.</p>
+                </div>
+            </Dialog>
+        </xpath>
+    </t>
+</templates>
+

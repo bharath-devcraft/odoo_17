@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<!-- Assets -->
+	<record id="cm_login_page.assets_login" model="ir.asset">
+		<field name="name">Login CSS</field>
+		<field name="bundle">web.assets_frontend</field>
+		<field name="path">/cm_login_page/static/src/css/web_login_style.css</field>
+	</record>
+	<record id="cm_login_page.assets_login_scss" model="ir.asset">
+		<field name="name">Login SCSS</field>
+		<field name="bundle">web.assets_frontend</field>
+		<field name="path">/cm_login_page/static/src/css/style.scss</field>
+	</record>
+</odoo>
