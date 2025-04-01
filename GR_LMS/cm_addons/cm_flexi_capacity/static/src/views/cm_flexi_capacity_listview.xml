@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="cm_flexi_capacity.CmFlexiCapacityListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CmFlexiCapacityDashBoard />
+        </xpath>
+    </t>
+</templates>

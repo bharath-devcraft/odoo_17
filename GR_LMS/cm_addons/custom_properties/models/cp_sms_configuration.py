@@ -37,10 +37,11 @@ class CpSmsConfiguration(models.Model):
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", readonly=True, store=True, copy=False, default='draft')
     interval = fields.Char('Interval')
     inactive_remark = fields.Text('Inactive Remark')
-    note = fields.Html(string="Note", copy=False)
+    remarks = fields.Text(string="Remarks", copy=False)
+
 
     ### Entry Info ###
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean('Visible in Report', default=True)
     active_trans = fields.Boolean('Visible in Transactions', default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", readonly=True, copy=False,
@@ -208,20 +209,7 @@ class CpSmsConfiguration(models.Model):
             the transaction views.
         """
 
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         
         #counts

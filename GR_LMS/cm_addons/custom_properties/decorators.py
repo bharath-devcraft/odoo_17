@@ -11,7 +11,7 @@ IR_CONFIG_PARAMETER = 'ir.config_parameter'
 
 def check_previous_entrydate(self, date):
     return bool(self.env[self._name].with_context(active_test=False).search([
-              ('entry_date','>',date),('status','in',['approved']),('id','!=',self.id)]))
+              ('entry_date','>',date),('status','not in',['draft','wfa']),('id','!=',self.id)]))
 
 def is_future_date(date):
     return True if date > fields.Date.today() else False
@@ -31,7 +31,7 @@ def is_negative(num):
     return True if num < 0 else False
 
 def valid_mobile_no(char):
-    return False if re.match("^((\+)?\d{10,15})$", char) == None else True
+    return False if re.match("^((\+)?\d{9,15})$", char) == None else True
 
 def check_age_below_eighteen(birth_date):
     """ Is age lesser than 18 means return True, Ex. format should be like --> 1999-11-09 """
@@ -316,9 +316,15 @@ def validation(method):
                     if is_negative(self.disc_per):
                         warning_msg.append("Negative value is not allowed in %s"%(self._fields.get('disc_per').string))
 
-                if 'mobile_no' in self._fields and self.mobile_no and _check_c_rule(self, 'mobile_no'):
-                    if not valid_mobile_no(self.mobile_no):
-                        warning_msg.append(f"{num_only_warning} {self._fields.get('mobile_no').string}")
+                if 'mobile_no' in self._fields and 'country_id' in self._fields and self.mobile_no and self.country_id and _check_c_rule(self, 'mobile_no'):
+                    mobile_length = len(self.mobile_no)
+                    required_length = self.country_id.mobile_no_digit
+                    if mobile_length < required_length:
+                        warning_msg.append(
+                            f"The {self._fields.get('mobile_no').string} must be at least {required_length} digits long, but it is only {mobile_length} digits.")
+                    elif mobile_length > required_length:
+                        warning_msg.append(
+                            f"The {self._fields.get('mobile_no').string} must be at most {required_length} digits long, but it is {mobile_length} digits.")
 
                 if 'mobile_no1' in self._fields and self.mobile_no1 and _check_c_rule(self, 'mobile_no1'):
                     if not valid_mobile_no(self.mobile_no1):
@@ -335,19 +341,23 @@ def validation(method):
 
             if 'request_date' in self._fields and _check_c_rule(self, 'request_date'):
                 if check_previous_entrydate(self, self.request_date):
-                    warning_msg.append(f"{self._fields.get('request_date').string} should not be less than previous approved entry date")
+                    warning_msg.append(f"{self._fields.get('request_date').string} should not be less than last number generated entry date")
 
             if 'draft_date' in self._fields and _check_c_rule(self, 'draft_date'):
                 if check_previous_entrydate(self, self.draft_date):
-                    warning_msg.append(f"{self._fields.get('draft_date').string} should not be less than previous approved entry date")
+                    warning_msg.append(f"{self._fields.get('draft_date').string} should not be less than last number generated entry date")
+
+            if 'entry_date' in self._fields and _check_c_rule(self, 'entry_date'):
+                if check_previous_entrydate(self, self.entry_date):
+                    warning_msg.append(f"{self._fields.get('entry_date').string} should not be less than last number generated entry date")
 
             if 'dc_date' in self._fields and _check_c_rule(self, 'dc_date'):
                 if check_previous_entrydate(self, self.dc_date):
-                    warning_msg.append(f"{self._fields.get('dc_date').string} should not be less than previous approved entry date")
+                    warning_msg.append(f"{self._fields.get('dc_date').string} should not be less than last number generated entry date")
 
             if 'remind_date' in self._fields and _check_c_rule(self, 'remind_date'):
                 if check_previous_entrydate(self, self.remind_date):
-                    warning_msg.append(f"{self._fields.get('remind_date').string} should not be less than previous approved entry date")
+                    warning_msg.append(f"{self._fields.get('remind_date').string} should not be less than last number generated entry date")
 
             #Alpha-num
             if 'gst_no' in self._fields and self.gst_no and _check_c_rule(self, 'gst_no'):

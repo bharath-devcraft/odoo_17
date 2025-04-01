@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_credit_note,ct.credit.note,model_ct_credit_note,custom_properties.group_erp_admin,1,1,1,1
+access_ct_credit_note_attachment_line,ct.credit.note.attachment.line,model_ct_credit_note_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_credit_note_acc_line,ct.credit.note.acc.line,model_ct_credit_note_acc_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_credit_note_acc_details_line,ct.credit.note.acc.details.line,model_ct_credit_note_acc_details_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_credit_note_pri_details_line,ct.credit.note.pri.details.line,model_ct_credit_note_pri_details_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_credit_note_tax_line,ct.credit.note.tax.line,model_ct_credit_note_tax_line,custom_properties.group_erp_admin,1,1,1,1

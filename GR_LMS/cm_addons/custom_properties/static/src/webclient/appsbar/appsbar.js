@@ -41,19 +41,30 @@ export class AppsBar extends Component {
         });
     }
     
+    togglePoweredBy() {
+    const msg = document.getElementById("powered_by_msg");
+    if (msg.style.display === "none") {
+        msg.style.display = "inline";
+    } else {
+        msg.style.display = "none";
+    }
+}
     
     closeTab(){
           const button = document.getElementById('slide');
           const icon = document.getElementById('arrow_icon');
+	  const message = document.getElementById('powered_by_msg');
 	  if (this.clickCount) {
 	    button.classList.add('mk_sidebar_type_large_custom');
 	    icon.classList.remove('fa-chevron-left');
 	    icon.classList.add('fa-chevron-right');
+	    message.style.display = 'none';
 	    this.clickCount = false;
 	  } else {
 	    button.classList.remove('mk_sidebar_type_large_custom');
 	    icon.classList.remove('fa-chevron-right');
 	    icon.classList.add('fa-chevron-left');
+	    message.style.display = 'block';
 	    this.clickCount = true;
 	  }
 	     this.expend = true 

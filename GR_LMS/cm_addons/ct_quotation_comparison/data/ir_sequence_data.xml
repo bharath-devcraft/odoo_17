@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="seq_ct_quotation_comparison" model="ir.sequence">
+        <field name="name">CT Quotation Comparison</field>
+        <field name="code">ct.quotation.comparison</field>
+        <field name="prefix">QCP/%(year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+    
+    <record id="seq_ct_quotation_comparison_draft" model="ir.sequence">
+        <field name="name">CT Quotation Comparison Draft</field>
+        <field name="code">ct.quotation.comparison.draft</field>
+        <field name="prefix">QCD/%(year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+</odoo>

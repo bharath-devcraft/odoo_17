@@ -3,6 +3,8 @@ from odoo import models, fields, api, _
 from odoo.addons.custom_properties.decorators import valid_mobile_no,valid_email,valid_phone_no
 from odoo.exceptions import UserError
 
+CM_COUNTRY_CODE = 'cm.country.code'
+
 class CmPortLine(models.Model):
     _name = 'cm.port.line'
     _description = 'Additional Contacts'
@@ -17,6 +19,10 @@ class CmPortLine(models.Model):
     whatsapp_no = fields.Char(string="WhatsApp No",copy=False, size=15)
     phone_no = fields.Char(string="Landline No / Ext", size=12)
     email = fields.Char(string="Email", copy=False, size=252)
+    mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    same_as_mobile = fields.Boolean(string="Same as Mobile No", default=False, help="Click to apply same mobile number to whatsapp number")
     skype = fields.Char(string="Skype ID", copy=False, size=50)
     company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
@@ -51,3 +57,13 @@ class CmPortLine(models.Model):
         for line in self:
             if line.phone_no and not valid_phone_no(line.phone_no):
                 raise UserError(_(f"Landline No / Ext is invalid. Please enter the correct Landline No / Ext with SDD code in additional contact tab, Ref : {line.phone_no}"))
+                
+    @api.onchange('same_as_mobile','mobile_no','mb_cc_id')
+    def onchange_same_as_mobile(self):
+        for rec in self:
+            if rec.same_as_mobile:
+                rec.whatsapp_no = rec.mobile_no
+                rec.wh_cc_id = rec.mb_cc_id
+            else:
+                rec.whatsapp_no = False
+                rec.wh_cc_id = False

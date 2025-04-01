@@ -84,7 +84,6 @@ export class CharField extends Component {
     
     onInputChange(ev) {
         var value = ev.target.value;
-        console.log("ssssssssssssssssssssssssssssss1",value, this.props.record._config.resId)
         const input = ev.target;
         var model = this.env.model.env.searchModel.resModel
         var rec_id = this.props.record._config.resId || ""
@@ -202,4 +201,4 @@ export const charField = {
     }),
 };
 
-registry.category("fields").add("auto_fill_1", charField);
+registry.category("fields").add("auto_fill", charField);

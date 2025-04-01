@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_store_issue_request,ct.store.issue.request,model_ct_store_issue_request,custom_properties.group_erp_admin,1,1,1,1
+access_ct_store_issue_request_attachment_line,ct.store.issue.request.attachment.line,model_ct_store_issue_request_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_store_issue_request_acc_line,ct.store.issue.request.acc.line,model_ct_store_issue_request_acc_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_store_issue_request_acc_details_line,ct.store.issue.request.acc.details.line,model_ct_store_issue_request_acc_details_line,custom_properties.group_erp_admin,1,1,1,1

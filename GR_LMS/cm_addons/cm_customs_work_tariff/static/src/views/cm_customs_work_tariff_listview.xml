@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="cm_customs_work_tariff.CmCustomsWorkTariffListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CmCustomsWorkTariffDashBoard />
+        </xpath>
+    </t>
+</templates>

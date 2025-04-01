@@ -1,0 +1,7 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_cm_agent_commission_admin","cm.agent.commission.admin","model_cm_agent_commission","custom_properties.group_master_admin",1,1,1,1
+"access_cm_agent_commission_attachment_line_admin","cm.agent.commission.attachment.line.admin","model_cm_agent_commission_attachment_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_agent_commission_batch_inactive_admin","cm.agent.commission.batch.inactive.admin","model_cm_agent_commission_batch_inactive","custom_properties.group_master_admin",1,1,1,1
+"access_cm_agent_commission_user","cm.agent.commission.user","model_cm_agent_commission","custom_properties.group_master_user",1,0,0,0
+"access_cm_agent_commission_attachment_line_user","cm.agent.commission.attachment.line.user","model_cm_agent_commission_attachment_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_agent_commission_batch_inactive_user","cm.agent.commission.batch.inactive.user","model_cm_agent_commission_batch_inactive","custom_properties.group_master_user",1,0,0,0

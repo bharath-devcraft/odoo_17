@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_quotation_comparison,ct.quotation.comparison,model_ct_quotation_comparison,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotation_comparison_attachment_line,ct.quotation.comparison.attachment.line,model_ct_quotation_comparison_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotation_comparison_line,ct.quotation.comparison.line,model_ct_quotation_comparison_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotation_comparison_specification_line,ct.quotation.comparison.specification.line,model_ct_quotation_comparison_specification_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotation_comparison_expenses_line,ct.quotation.comparison.expenses.line,model_ct_quotation_comparison_expenses_line,custom_properties.group_erp_admin,1,1,1,1

@@ -30,8 +30,8 @@ class CmVendorMasterDeliveryAddressLine(models.Model):
     @api.constrains('street', 'street1')
     def validate_fields(self):
         for line in self:
-            line.validate_special_char('street', line.street)
-            line.validate_special_char('street1', line.street1)
+            line.validate_special_char('address line 1', line.street)
+            line.validate_special_char('address line 2', line.street1)
 
     @api.constrains('pin_code')
     def pin_code_validation(self):

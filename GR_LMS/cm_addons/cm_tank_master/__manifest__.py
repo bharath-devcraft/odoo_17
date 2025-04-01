@@ -8,7 +8,7 @@
     'description': """Scope of this module to fulfill the necessary features related to common tank master form.""",
 
     'author': "Praveenkumar M",
-    'website': "https://www.goodrich.co",
+    'website': "https://catalystsolutions.sg",
     'category': 'Custom Modules/custom_modules',
     'application' : True,
     'version': '0.1',
@@ -18,6 +18,9 @@
         'data/audit_rule_data.xml',
         'data/security_rule.xml',
         'views/cm_tank_master_view.xml',
+        'views/cm_soc_tank_view.xml',
+        'views/cm_gscs_tank_view.xml',
+        'views/cm_ot_op_tank_view.xml',
         'wizard/cm_tank_master_batch_inactive_view.xml',
     ],
     'demo': [

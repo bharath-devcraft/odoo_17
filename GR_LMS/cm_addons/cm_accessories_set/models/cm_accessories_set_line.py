@@ -12,6 +12,7 @@ class CmAccessoriesSetLine(models.Model):
 	accessories_id = fields.Many2one('product.template', string="Accessories Name", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True),('custom_type', '=', 'flexi_accessories')])
 	uom_id = fields.Many2one('uom.uom', string="UOM", ondelete='restrict', tracking=True)
 	qty = fields.Integer(string="Quantity", copy=False)
+	tax_ids = fields.Many2many('account.tax', string="Taxes", ondelete='restrict', check_company=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	unit_price = fields.Float(string="Unit Price", copy=False)
 	tot_amt = fields.Float(string="Total Value", copy=False)
 	note = fields.Html(string="Notes", copy=False, sanitize=False)
@@ -23,6 +24,16 @@ class CmAccessoriesSetLine(models.Model):
 			self.uom_id = self.accessories_id.uom_id
 			self.unit_price = self.accessories_id.standard_price
 			self.tot_amt = self.accessories_id.standard_price * self.qty
+			if self.accessories_id.hs_id:
+				if self.accessories_id.hs_id.cgst_id and self.accessories_id.hs_id.sgst_id:
+					tax_record_ids = [
+						self.accessories_id.hs_id.cgst_id.id,
+						self.accessories_id.hs_id.sgst_id.id
+					]
+
+					self.tax_ids = [(6, 0, tax_record_ids)]
+				else:
+					pass
 		else:
 			self.uom_id = False
 			self.unit_price = 0.00

@@ -26,14 +26,14 @@
                                 <div>
                                     <field name="country_id" options="{'no_create_edit': True}" required="1" readonly = "status not in ('draft','editable')"/>
                                 </div> 
-                                <field name="name" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="name" class ="name-value" widget="auto_fill" required="1" readonly = "status not in ('draft','editable')"/>
                             </group>
                             <group>
                                 <field name="short_name" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                         </group>
-                        
+                        <br></br>
                         <notebook>                            
                             <page string="Attachments" >
                                 <field name="line_ids" nolabel="1" readonly = "status not in ('draft','editable')">
@@ -58,7 +58,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -78,6 +78,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -142,13 +143,13 @@
             <field name="arch" type="xml">
                 <search string="Country Code">
                     <field name="name" string="code" filter_domain="[('name','ilike',self)]"/>
-                    <field name="country_id" string="Country" filter_domain="[('country_id','ilike',self)]"/>
+                    <field name="country_id" string="Country" filter_domain="[('country_id','ilike',self)]"/>                    
                     
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -158,8 +159,12 @@
                     <group expand="0" string="Group By">
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
                         <filter string="Country" name="country_id" domain="[]" context="{'group_by': 'country_id'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -175,7 +180,7 @@
             <field name="search_view_id" ref="cm_country_code_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 

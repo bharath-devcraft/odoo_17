@@ -2,6 +2,7 @@
 import time
 from odoo.addons.custom_properties.decorators import validation, is_special_char, valid_mobile_no, valid_phone_no, valid_email, valid_pin_code
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
@@ -11,6 +12,7 @@ CM_DEPORT_LOCATION='cm.depot.location'
 CM_CITY = 'cm.city'
 TIME_FORMAT='%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 CUSTOM_STATUS = [
         ('draft', 'Draft'),
@@ -24,13 +26,15 @@ ENTRY_MODE =  [('manual','Manual'),
 
 YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 
+DG_NON_DG = [('yes', 'DG'), ('no', 'Non DG')]
+
 CONTAINER_TYPE = [('tank_only', 'Tank Only'), ('dry', 'Dry'), ('all', 'All')]
 
 CONTAINER_SIZE = [('20_teu', '20 TEU'), ('40_teu', '40 TEU'), ('both', 'Both')]
 
-CARGO_CATEGORY = [('dg', 'DG'), ('non_dg', 'Non DG'), ('both', 'Both')]
+INTERNAL_INS = [('self', 'Self'), ('third_party', 'Third Party')]
 
-PAVER_BLOCKED = [('full', 'Full'), ('partially', 'Partially')]
+PAVER_BLOCKED = [('full', 'Full'), ('partially', 'Partial')]
 
 CONTRACT_TYPE = [('own', 'Own'), ('lease', 'Lease'), ('rent', 'Rent')]
 
@@ -42,6 +46,8 @@ CONTRACT_AGREE = [('no_contract', 'No Contract'), ('active', 'Active'), ('expire
 APPLICABLE_OPTION = [('applicable', 'Applicable'), ('not_applicable', 'Not Applicable')]
 
 VALIDITY_RANGE = [('perpetual', 'Perpetual'), ('limited', 'Limited')]
+
+WDP = [('internal', 'Internal'), ('external', 'External'), ('own', 'Both'), ('not_available', 'Not Available')]
 
 WEEK_DAYS = [('monday', 'Monday'),
             ('tuesday', 'Tuesday'),
@@ -63,11 +69,15 @@ class CmDepotLocation(models.Model):
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
     remarks = fields.Text(string="Remarks", copy=False)
     
+    depot_vendor_id = fields.Many2one('cm.depot.vendor.master', string="Deport Vendor Name", domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
     contact_person = fields.Char(string="Contact Person", size=50)
     mobile_no = fields.Char(string="Mobile No", size=15, copy=False)
     whatsapp_no = fields.Char(string="WhatsApp No",copy=False, size=15)
     phone_no = fields.Char(string="Landline No / Ext", size=12, copy=False)
+    mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     email = fields.Char(string="Email", copy=False, size=252)
     fax = fields.Char(string="Fax", copy=False, size=12)
     street = fields.Char(string="Address Line 1", size=252)
@@ -79,7 +89,8 @@ class CmDepotLocation(models.Model):
     state_id = fields.Many2one('res.country.state', string="State", ondelete='restrict',domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', country_id)]")
     designation = fields.Char(string="Designation", copy=False, size=50)
     skype = fields.Char(string="Skype ID", copy=False)
-
+    same_as_mobile = fields.Boolean(string="Same as Mobile Number", default=False, help="Click to apply same mobile number to whatsapp number")
+    
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
     sun = fields.Boolean(string="Sun", copy=False, default=False)
     mon = fields.Boolean(string="Mon", copy=False, default=False)
@@ -95,14 +106,15 @@ class CmDepotLocation(models.Model):
 
     container_type = fields.Selection(selection=CONTAINER_TYPE, string="Container Type", copy=False)
     container_size = fields.Selection(selection=CONTAINER_SIZE, string="Container Size", copy=False)
-    cargo_category = fields.Selection(selection=CARGO_CATEGORY, string="Cargo Category", copy=False) 
+    product_ids = fields.Many2many('cm.product',string="Restricted Product")
+    internal_ins = fields.Selection(selection=INTERNAL_INS, string="Internal Inspection", copy=False) 
     paver_blocked = fields.Selection(selection=PAVER_BLOCKED, string="Paver Blocked", copy=False)
     package_deal = fields.Selection(selection=APPLICABLE_OPTION, string="Package Deal")
     surveillance_systems = fields.Selection(selection=YES_OR_NO, string="Surveillance Systems", copy=False)
     pub_transport_avl = fields.Selection(selection=YES_OR_NO, string="Public Transport Availability", copy=False)
     inv_track_sys = fields.Selection(selection=YES_OR_NO, string="Inventory Tracking System", copy=False)
     eva_procedure = fields.Selection(selection=YES_OR_NO, string="Evacuation Procedures", copy=False)
-    waste_disp_procedure = fields.Selection(selection=YES_OR_NO, string="Waste Disposal Procedures", copy=False)
+    waste_disp_procedure = fields.Selection(selection=WDP, string="Waste Disposal Procedures", copy=False)
     steam_heat_fac = fields.Selection(selection=YES_OR_NO, string="Steam Heating Facility", copy=False)
     laden_storage_fac = fields.Selection(selection=YES_OR_NO, string="Laden Storage Facility", copy=False)
     degas_fac = fields.Selection(selection=YES_OR_NO, string="De-Gassing Facility", copy=False)
@@ -111,7 +123,7 @@ class CmDepotLocation(models.Model):
     emergency_plan = fields.Selection(selection=YES_OR_NO, string="Emergency Plan", copy=False)
     compt_cert = fields.Selection(selection=YES_OR_NO, string="Competence Certificate", copy=False)
     etp= fields.Selection(selection=YES_OR_NO, string="ETP( Effluent Treatment Plants )", copy=False)
-    other_facility = fields.Char(string="Other Facility", copy=False, size=252)
+    other_facility = fields.Text(string="Other Facility", copy=False, size=252)
 
     periodic_audit = fields.Selection(selection=APPLICABLE_OPTION, string="Periodic Audit", copy=False)
     interval = fields.Integer(string="Interval(Months)", copy=False)    
@@ -131,7 +143,7 @@ class CmDepotLocation(models.Model):
     rental_value = fields.Integer(string="Rental Value", copy=False)
     expiry_date = fields.Date(string="Expiry Date", copy=False)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -263,11 +275,18 @@ class CmDepotLocation(models.Model):
             if self.last_audit_date > self.next_audit_date:
                 raise UserError(_("Last audit date should be less than next audit date"))
     
+    @api.onchange('last_audit_date','next_audit_date','interval')
+    def onchange_audit_date(self):
+        if self.last_audit_date and self.interval:
+            self.next_audit_date =self.last_audit_date + relativedelta(months=self.interval) 
+
     @api.onchange('contract_agree')
     def onchange_contract_agree(self):
         if self.contract_agree != 'active':
             self.valid_from_date = False
             self.valid_to_date = False
+        if self.contract_agree != 'expired':
+            self.expiry_date = False
             
     @api.onchange('contract_type')
     def onchange_contract_type(self):
@@ -292,10 +311,18 @@ class CmDepotLocation(models.Model):
             self.country_code = self.country_id.code
             self.city_id = False
             self.state_id = False
+            record = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1)
+            c_code = record.id if record else False
+            self.mb_cc_id = c_code
+            self.wh_cc_id = c_code
+            self.ph_cc_id = c_code
         else:
             self.country_code = False
             self.city_id = False
             self.state_id = False
+            self.mb_cc_id = False
+            self.wh_cc_id = False
+            self.ph_cc_id = False
     
     @api.onchange('city_id')
     def onchange_city_id(self):
@@ -303,6 +330,13 @@ class CmDepotLocation(models.Model):
             self.state_id = self.city_id.state_id
         else:
             self.state_id = False
+            
+    @api.onchange('same_as_mobile','mobile_no')
+    def onchange_same_as_mobile(self):
+        if self.same_as_mobile:
+            self.whatsapp_no = self.mobile_no
+        else:
+            self.whatsapp_no = False
  
 
     def validations(self):
@@ -325,6 +359,8 @@ class CmDepotLocation(models.Model):
             self.write({'status': 'active',
                         'ap_rej_user_id': self.env.user.id,
                         'ap_rej_date': time.strftime(TIME_FORMAT)})
+            
+            self.depot_vendor_id.line_ids_c.create({'header_id':self.depot_vendor_id.id,'depot_id':self.id,'status':'active'})
         return True
 
     def entry_draft(self):
@@ -351,6 +387,10 @@ class CmDepotLocation(models.Model):
             'status': 'inactive',
             'inactive_user_id': self.env.user.id,
             'inactive_date': time.strftime(TIME_FORMAT)})
+        depot_data = self.env['cm.depot.vendor.master.depot.locations.line'].search([('depot_id', '=', self.id)])
+        if depot_data:
+            depot_data.write({'status': 'inactive'})
+
         return True
 
     def unlink(self):
@@ -373,20 +413,7 @@ class CmDepotLocation(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         
         cm_depot_location = self.env[CM_DEPORT_LOCATION]

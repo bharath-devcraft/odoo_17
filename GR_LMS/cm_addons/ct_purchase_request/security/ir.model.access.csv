@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_purchase_request,ct.purchase.request,model_ct_purchase_request,custom_properties.group_erp_admin,1,1,1,1
+access_ct_purchase_request_line,ct.purchase.request.line,model_ct_purchase_request_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_purchase_request_attachment_line,ct.purchase.request.attachment.line,model_ct_purchase_request_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_purchase_request_batch_cancel,ct.purchase.request.batch.cancel,model_ct_purchase_request_batch_cancel,custom_properties.group_erp_admin,1,1,1,1

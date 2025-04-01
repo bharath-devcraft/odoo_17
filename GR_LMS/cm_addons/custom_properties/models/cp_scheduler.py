@@ -10,16 +10,29 @@ class CpScheduler(models.Model):
     name = fields.Char(string="Name" , default='Scheduler Actions', index=True, c_rule=True)
     company_id = fields.Many2one('res.company', required=True, copy=False, readonly=True, default=lambda self: self.env.company, ondelete='restrict')
 
-    def auto_csm_template_action(self):
-        self.env['ct.transaction.scheduler'].custom_scheduler_mail()
+    def execution_completed_message(self,message=None):
+        if message:
+           exc_message= message
+        else:
+            exc_message = "Execution completed successfully!"
+
         return {
             'effect': {
             'fadeout': 'slow',
-            'message': 'Execution completed successfully!',
+            'message': exc_message,
 	        'img_url': '/custom_properties/static/img/smily.gif',
             'type': 'rainbow_man',
                       }
                 }
+        
+
+    def auto_csm_template_action(self):
+        self.env['ct.transaction.scheduler'].custom_scheduler_mail()
+        return self.execution_completed_message()
+    
+    def auto_csm_qs_bc_pending_mail_action(self):
+        self.env['ct.quotations.scheduler'].quotations_bc_pending_scheduler_mail()
+        return self.execution_completed_message()
 
 
     def auto_logger_mail(self):

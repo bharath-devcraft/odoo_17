@@ -45,7 +45,7 @@ class CtNocostTransaction(models.Model):
     currency_id = fields.Many2one('res.currency', string="Currency", copy=False, default=lambda self: self.env.company.currency_id.id, ondelete='restrict', readonly=True, tracking=True)
     delivery_date = fields.Date(string="Delivery Date", copy=False, tracking=True)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
@@ -83,8 +83,7 @@ class CtNocostTransaction(models.Model):
             if res_config_rule and self.confirm_user_id == self.env.user:
                 warning_msg.append("Confirmed user is not allow to approve the entry")
 
-    def validate_serial_lines(self, detail_line, warning_msg):
-        dub_serial = []
+    def validate_serial_lines(self, detail_line, warning_msg, dub_serial):
         serial_qty = 0
         for serial_line in detail_line.line_ids:
             serial_qty += serial_line.qty
@@ -103,10 +102,21 @@ class CtNocostTransaction(models.Model):
         if not self.line_ids:
             warning_msg.append("System not allow to confirm/approve with empty line details")
         else:
+            dub_product = set()
+            dub_serial = []
             for detail_line in self.line_ids:
                 if detail_line.qty <= 0:
                     warning_msg.append(f"Product({detail_line.description}) quantity should be greater than zero")
-                self.validate_serial_lines(detail_line, warning_msg)
+                combination = (
+                    detail_line.product_id.id, 
+                    detail_line.uom_id.id, 
+                    detail_line.brand_id.id if detail_line.brand_id else None
+                )
+                if combination in dub_product:
+                    warning_msg.append(f"Duplicate product are not allowed. Ref : {detail_line.description}")
+                else:
+                    dub_product.add(combination)
+                self.validate_serial_lines(detail_line, warning_msg, dub_serial)
 
 
     def validations(self, **kw):
@@ -162,7 +172,7 @@ class CtNocostTransaction(models.Model):
     @api.onchange('delivery_date')
     def onchange_delivery(self):
         if self.delivery_date and self.entry_date and self.delivery_date < self.entry_date:
-            raise UserError(_("Delivery date should be greater than or equal to order date"))
+            raise UserError(_("Delivery date should be greater than or equal to entry date"))
 
     @validation
     def entry_confirm(self):
@@ -238,7 +248,7 @@ class CtNocostTransaction(models.Model):
             if not self.ap_rej_remark or not self.ap_rej_remark.strip():
                 raise UserError(_("Reject remarks is must. Kindly enter the remarks in Approve / Reject Remarks field"))
             if self.ap_rej_remark and len(self.ap_rej_remark.strip()) < int(min_char):
-                raise UserError(_(f"Minimum {min_char} characters are must for Approve / Reject Remarks"))
+                raise UserError(_(f"Minimum {min_char} characters is required for Approve / Reject Remarks"))
             self.write({'status': 'rejected',
                         'ap_rej_user_id': self.env.user.id,
                         'ap_rej_date': time.strftime(TIME_FORMAT)
@@ -251,7 +261,7 @@ class CtNocostTransaction(models.Model):
             if not self.cancel_remark or not self.cancel_remark.strip():
                 raise UserError(_("Cancel remarks is must. Kindly enter the remarks in Cancel Remarks field"))
             if self.cancel_remark and len(self.cancel_remark.strip()) < int(min_char):
-                raise UserError(_(f"Minimum {min_char} characters are must for cancel remarks"))
+                raise UserError(_(f"Minimum {min_char} characters is required for cancel remarks"))
             self.write({'status': 'cancelled',
                         'cancel_user_id': self.env.user.id,
                         'cancel_date': time.strftime(TIME_FORMAT)

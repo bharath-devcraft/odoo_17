@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <form string="Batch Inactive">
                 <field name="master_ids" invisible="1"/>
-                <h5> Note: Only active entries can be eligible for inactivation</h5>
+                <h5> Note: Only active and Rejected entries can be eligible for inactivation</h5>
                 <group>
                     <field name="inactive_remark"/>
                 </group>
@@ -23,7 +23,7 @@
     </record>
 
     <record id="action_cm_product_batch_inactive" model="ir.actions.act_window">
-        <field name="name">Batch Inactive</field>
+        <field name="name"> ≣ Batch Inactive</field>
         <field name="res_model">cm.product.batch.inactive</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="cm_product_batch_inactive_form"/>

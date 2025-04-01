@@ -33,10 +33,10 @@ class CmFiscalYear(models.Model):
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
     from_date = fields.Date(string="From Date", c_rule=True)
     to_date = fields.Date(string="To Date", c_rule=True)
-    remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
-    company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
+    remarks = fields.Text(string="Remarks", copy=False)
+    company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -48,7 +48,10 @@ class CmFiscalYear(models.Model):
     inactive_user_id = fields.Many2one(RES_USERS, string="Inactivated By", copy=False, ondelete='restrict', readonly=True)
     update_date = fields.Datetime(string="Last Updated Date", copy=False, readonly=True)
     update_user_id = fields.Many2one(RES_USERS, string="Last Updated By", copy=False, ondelete='restrict', readonly=True)
-    
+
+    line_ids_a = fields.One2many('cm.fiscal.year.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
+
+
     @api.constrains('name')
     def name_validation(self):
         if self.name:
@@ -164,20 +167,7 @@ class CmFiscalYear(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
 
         cm_fy = self.env[CM_FISCAL_YEAR]
         result['all_draft'] = cm_fy.search_count([('status', '=', 'draft')])

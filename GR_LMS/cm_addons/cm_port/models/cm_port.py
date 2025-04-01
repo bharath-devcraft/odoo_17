@@ -9,19 +9,18 @@ CM_PORT = 'cm.port'
 RES_USERS = 'res.users'
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 CUSTOM_STATUS = [
         ('draft', 'Draft'),
         ('editable', 'Editable'),
         ('active', 'Active'),
-        ('blacklist', 'Blacklist'),
-        ('suspension', 'Suspension'),
         ('inactive', 'Inactive')]
 
 ENTRY_MODE =  [('manual','Manual'),
                ('auto', 'Auto')]
 
-PORT_CATEGORY = [('seaport', 'Seaport'), ('airport', 'Airport'), ('dry_port', 'Dry(ICD) Port')]
+PORT_CATEGORY = [('seaport', 'Sea'), ('dry_port', 'ICD')]
 
 YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 
@@ -34,20 +33,24 @@ class CmPort(models.Model):
     _description = 'Port'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'avatar.mixin']
     _order = 'name asc'
+    _rec_name = 'complete_name'
 
 
     name = fields.Char(string="Name", index=True, copy=False)
     short_name = fields.Char(string="Short Name", copy=False, help="Maximum 5 char is allowed and will accept upper case only", size=5, c_rule=True)
+    complete_name = fields.Char(string="Complete Name")
     bus_location = fields.Selection(selection=LOCATION, string="Location", copy=False)
     edi_code = fields.Char(string="EDI Code", index=True, copy=False, size=252)
-    port_category = fields.Selection(selection=PORT_CATEGORY, string="Port Category", copy=False)
+    port_category = fields.Selection(selection=PORT_CATEGORY, string="Sea / ICD", copy=False)
     icd_connected = fields.Selection(selection=YES_OR_NO, string="Is ICD Connected", copy=False)
-    icdport_id = fields.Many2one(CM_PORT, string="ICD Port Name", copy=False, ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('port_category', '=', 'dry_port')]")
+    icdport_ids = fields.Many2many(CM_PORT, 'cm_port_icdport_rel','icd_port_id','port_id', string="ICD Port Name", copy=False, ondelete='restrict', domain="[('status', '=', 'active'), ('active_trans', '=', True), ('port_category', '=', 'dry_port')]")
+    
     sea_connected = fields.Selection(selection=YES_OR_NO, string="Is Seaport Connected", copy=False)
-    seaport_id = fields.Many2one(CM_PORT, string="Seaport Name", copy=False, ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('port_category', '=', 'seaport')]")
+    seaport_ids = fields.Many2many(CM_PORT, 'cm_port_seaport_rel','sea_port_id','port_id', string="Seaport Name", copy=False, ondelete='restrict', domain="[('status', '=', 'active'), ('active_trans', '=', True), ('port_category', '=', 'seaport')]")
     free_zone = fields.Selection(selection=YES_OR_NO, string="Is Free Zone Port", copy=False)
-    sanctioned_port = fields.Selection(selection=YES_OR_NO, string="Sanctioned Port", copy=False, default='yes')
+    sanctioned_port = fields.Selection(selection=YES_OR_NO, string="Sanctioned Port", copy=False)
     agent_type = fields.Selection(selection=AGENT_TYPE, string="Agent Type", copy=False)
+    internal_email = fields.Char(string="Email", copy=False, size=252)
     currency_id = fields.Many2one('res.currency', string="Currency", copy=False, ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
     customs_note = fields.Text(string="Customs Notes", copy=False)
     sec_msure_note = fields.Text(string="Security Measure Notes", copy=False)
@@ -69,15 +72,17 @@ class CmPort(models.Model):
     country_code = fields.Char(string="Country Code", copy=False, size=252)
     city_id = fields.Many2one('cm.city', string="City", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', country_id)]")
     state_id = fields.Many2one('res.country.state', string="State", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', country_id)]")
-
+    mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     pin_code = fields.Char(string="Zip Code", copy=False, size=10)
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
     remarks = fields.Text(string="Remarks", copy=False)
     company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    same_as_mobile = fields.Boolean(string="Same as Mobile No", default=False, help="Click to apply same mobile number to whatsapp number")
 
-
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -204,10 +209,25 @@ class CmPort(models.Model):
             self.country_code = self.country_id.code
             self.city_id = False
             self.state_id = False
+            self.pin_code = False
+            record = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1)
+            c_code = record.id if record else False
+            self.mb_cc_id = c_code
+            self.wh_cc_id = c_code
+            self.ph_cc_id = c_code
+            self.currency_id = self.country_id.currency_id
+            self.sanctioned_port = self.country_id.san_country
+
         else:
             self.country_code = False
             self.city_id = False
             self.state_id = False
+            self.mb_cc_id = False
+            self.wh_cc_id = False
+            self.ph_cc_id = False
+            self.currency_id = False
+            self.sanctioned_port = False
+            self.pin_code = False
     
     @api.onchange('city_id')
     def onchange_city_id(self):
@@ -219,24 +239,24 @@ class CmPort(models.Model):
     @api.onchange('port_category')
     def onchange_port_category(self):
         self.icd_connected = False
-        self.icdport_id = False
+        self.icdport_ids = [(5, 0, 0)]
         self.sea_connected = False
-        self.seaport_id = False
+        self.seaport_ids = [(5, 0, 0)]
 
     @api.onchange('icd_connected')
     def onchange_icd_connected(self):
-        self.icdport_id = False
+        self.icdport_ids = [(5, 0, 0)]
 
     @api.onchange('sea_connected')
     def onchange_sea_connected(self):
-        self.seaport_id = False
-
-    @api.onchange('country_id')
-    def onchange_country_id(self):
-        if self.country_id:
-            self.currency_id = self.country_id.currency_id
+        self.seaport_ids = [(5, 0, 0)]
+        
+    @api.onchange('same_as_mobile','mobile_no')
+    def onchange_same_as_mobile(self):
+        if self.same_as_mobile:
+            self.whatsapp_no = self.mobile_no
         else:
-            self.currency_id = False
+            self.whatsapp_no = False
 
     def validations(self):
         warning_msg = []
@@ -250,6 +270,13 @@ class CmPort(models.Model):
             raise UserError(_(formatted_messages))
         
         return True
+
+    @api.onchange('name','short_name')
+    def onchange_rec_name(self):
+        if self.name and self.short_name:
+            self.complete_name = f"{self.name} - {self.short_name}"
+        else:
+            self.complete_name= False
 
     @validation
     def entry_approve(self):
@@ -307,20 +334,7 @@ class CmPort(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_port = self.env[CM_PORT]
         result['all_draft'] = cm_port.search_count([('status', '=', 'draft')])

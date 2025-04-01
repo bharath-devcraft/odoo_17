@@ -21,7 +21,7 @@
                                      Disable server-side validation alone to enhance system robustness; these disabled validations are handled on the client side itself.
                                 </div>
                             </div>
-                             
+
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box" id="variant_options">
                                 <div class="row mt16">
@@ -102,19 +102,50 @@
                                 </div>
                             </div>
                         </div>
-                 </div>
-            </app>
-           </xpath>
-       </field>
-   </record>
-   <record id="res_config_settings_action"
-       model="ir.actions.act_window">
-       <field name="name">Configuration</field>
-       <field name="type">ir.actions.act_window</field>
-       <field name="res_model">res.config.settings</field>
-       <field name="view_mode">form</field>
-       <field name="target">inline</field>
-       <field name="context">{'module' : ',custom_properties'}</field>
-  </record>
+                    </div>
+
+                    <setting id="pdf_report_watermark"
+                             string="PDF Report Watermark"
+                             help="Customize your PDF reports by adding watermarks for different record stages."
+                             documentation="/applications/sales/sales/send_quotations/pdf_quote_builder.html"
+                             company_dependent="1">
+
+                        <div class="mt16">
+                            <field name="draft_watermark_name" invisible="1"/>
+                            <label for="draft_watermark" class="me-2">Draft Watermark</label>
+                            <field name="draft_watermark" filename="draft_watermark_name"
+                                   />
+
+                        </div>
+
+                        <div class="mt16">
+                            <field name="reject_watermark_name" invisible="1"/>
+                            <label for="reject_watermark" class="me-2">Rejected Watermark</label>
+                            <field name="reject_watermark" filename="reject_watermark_name"
+                                   />
+                        </div>
+
+                        <div class="mt16">
+                            <field name="cancel_watermark_name" invisible="1"/>
+                            <label for="cancel_watermark" class="me-2">Cancelled Watermark</label>
+                            <field name="cancel_watermark" filename="cancel_watermark_name"
+                                   />
+                        </div>
+                    </setting>
+
+
+                </app>
+            </xpath>
+        </field>
+    </record>
+    <record id="res_config_settings_action"
+            model="ir.actions.act_window">
+        <field name="name">Configuration</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : ',custom_properties'}</field>
+    </record>
 
 </odoo>

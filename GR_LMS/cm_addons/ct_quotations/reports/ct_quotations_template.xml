@@ -1,73 +1,1866 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-<template id="report_ct_quotations_document">
- <t t-call="web.external_layout">
-   <t t-set="doc" t-value="doc.with_context(lang=doc.service_id.company_id.partner_id.lang)" />
-        <t t-set="consignor_address">
-            <t t-if="doc.bkg_party_id">
-                <div style="text-align: left">
-                    <b><t t-esc="doc.bkg_party_id.name" /></b>,<br/>
-                    <t t-esc="doc.bkg_party_id.street" />, 
-                    <t t-if="doc.bkg_party_id.street1">, <t t-esc="doc.bkg_party_id.street1" /></t>
-                    <t t-esc="doc.bkg_party_id.city_id.name" />-
-                    <t t-esc="doc.bkg_party_id.pin_code" />,
-                    <t t-esc="doc.bkg_party_id.state_id.name" />, 
-                    <t t-esc="doc.bkg_party_id.country_id.name" />, 
-                </div>
-            </t>
-            <t t-else="">
-                <div t-field="doc.new_bkg_party" style="text-align: left" />
-            </t>
+    <data>
+
+        <template id="report_ct_quotations_document">
+         <t t-if="o.status in ['rejected', 'cancelled']">
+             <head>
+                <title>
+                    <t t-if="o.price_owner == 'operator'">
+                        <t t-if="o.status == 'cancelled'">Offer-cancelled</t>
+                        <t t-elif="o.status == 'rejected'">Offer-rejected</t>
+                        <t t-else=""/>
+                    </t>
+                    <t t-else="">
+                        <t t-if="o.status == 'cancelled'">Quotation-cancelled</t>
+                        <t t-elif="o.status == 'rejected'">Quotation-rejected</t>
+                        <t t-else=""/>
+                    </t>
+                </title>
+            </head>
+
+             <div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center;">
+                 <div style="border: 2px solid #ff4d4d; padding: 20px; border-radius: 10px; background-color: #fff3f3; box-shadow: 0px 0px 10px rgba(255, 77, 77, 0.5);">
+                     <h2 style="color: #d9534f; font-size: 24px; margin-bottom: 10px;">Access Denied</h2>
+                     <p style="color: #444; font-size: 20px; text-align: center; font-weight: 500; margin-top: 50px;">
+                        This record cannot be printed because it is in the
+                        <span t-field="o.status" style="font-weight: bold; color: #d9534f; text-transform: capitalize;"/> stage.
+                    </p>
+                 </div>
+             </div>
         </t>
-        <t t-set="ship_to_address">
-            <t t-if="doc.bkg_party_id">
-                <div style="text-align: left">
-                    <t t-esc="doc.bkg_party_id.name" />, 
-                    <t t-esc="doc.bkg_party_id.street" />, 
-                    <t t-if="doc.bkg_party_id.street1">, <t t-esc="doc.bkg_party_id.street1" /></t>
-                    <t t-esc="doc.bkg_party_id.city_id.name" />, 
-                    <t t-esc="doc.bkg_party_id.state_id.name" />, 
-                    <t t-esc="doc.bkg_party_id.country_id.name" />, 
-                    <t t-esc="doc.bkg_party_id.pin_code" />
+        <t t-else="">
+            <head>
+                <title>
+                    <t t-if="o.price_owner == 'operator'">
+                        <t t-if="o.status == 'draft'">Offer-draft</t>
+                        <t t-elif="o.status == 'cancelled'">Offer-cancelled</t>
+                        <t t-elif="o.status == 'rejected'">Offer-rejected</t>
+                        <t t-else="">
+                            <t t-if="o.name">
+                                <t t-esc="o.name"/>
+                            </t>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <t t-if="o.status == 'draft'">Quotation-draft</t>
+                        <t t-elif="o.status == 'cancelled'">Quotation-cancelled</t>
+                        <t t-elif="o.status == 'rejected'">Quotation-rejected</t>
+                        <t t-else="">
+                            <t t-if="o.name">
+                                <t t-esc="o.name"/>
+                            </t>
+                        </t>
+                    </t>
+                </title>
+            </head>
+
+            <!-- header -->
+            <div class="header" style="height: 20px;">
+                <t t-set="settings" t-value="request.env['res.config.settings'].sudo().search([], limit=1)"/>
+                <t t-if="settings and settings.draft_watermark">
+                    <style>
+                        @page {
+                        background: none;
+                        }
+                        .watermark {
+                        position: fixed;
+                        margin-top: 150px;
+                        transform: translate(-80%, -80%) ;
+                        width: 100%;
+                        opacity: 0.3;
+                        z-index: -2000;
+                        }
+                    </style>
+
+
+                    <!-- Watermark in the background -->
+                    <div class="watermark">
+                        <t t-if="o.status == 'draft' or o.status == 'wfa'">
+                            <img t-att-src="image_data_uri(settings.draft_watermark)"
+                                 style="width: 100%; object-fit: contain; mix-blend-mode: multiply;"/>
+                        </t>
+                    </div>
+                </t>
+                <div class="row">
+                    <div class="o_clean_header">
+                        <div class="row row_custom o_header_layout_custom">
+                            <div class="col-9">
+                                <h t-if="o.company_id.name" style="font-size: 25px; font-weight: bold;"><t t-out="o.company_id.name"/></h><br/><br/>
+                                <h t-if="o.company_id.partner_id.street"><t t-out="o.company_id.partner_id.street"/></h>
+                                <h t-if="o.company_id.partner_id.street2">, <t t-out="o.company_id.partner_id.street2"/></h>
+                                <h t-if="o.company_id.partner_id.city">, <t t-out="o.company_id.partner_id.city"/></h>
+                                <h t-if="o.company_id.partner_id.state_id">, <t t-out="o.company_id.partner_id.state_id.name"/></h>
+                                <h t-if="o.company_id.partner_id.country_id">, <t t-out="o.company_id.partner_id.country_id.name"/></h>
+                            <br/>
+                            
+                            <p style="margin:8px;"/>
+
+
+                            <tr>
+                                <td><b>Phone </b></td>
+                                <td> :</td>
+                                <td><t t-out="o.company_id.partner_id.phone"/></td>
+                            </tr>
+                            <br/>
+                            <p style="margin:8px;"/>
+                            <tr>
+                                <td><b>Email </b></td>
+                                <td> :</td>
+                                <td><t t-out="o.company_id.partner_id.email"/></td>
+                                <td><b>Website</b></td>
+                                <td>:</td>
+                                <td><t t-out="o.company_id.partner_id.website"/></td>
+                            </tr>
+                            <br/>
+                            <br/>
+                            </div>
+<!--                            <div class="col-3 text-end">-->
+<!--                                    <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)"-->
+<!--                                         alt="Logo"-->
+<!--                                         style="width: 200px; object-fit: cover; margin-left: auto;"/>-->
+<!--                                </div>-->
+                        </div>
+                    </div>
                 </div>
-            </t>
-            <t t-else="">
-                <div t-field="doc.new_bkg_party" style="text-align: left" />
-            </t>
-        </t>
-        <t t-set="invoice_to_address">
-            <t t-if="doc.bkg_party_id">
-                <div style="text-align: left">
-                    <t t-esc="doc.bkg_party_id.name" />, 
-                    <t t-esc="doc.bkg_party_id.street" />, 
-                    <t t-if="doc.bkg_party_id.street1">, <t t-esc="doc.bkg_party_id.street1" /></t>
-                    <t t-esc="doc.bkg_party_id.city_id.name" />, 
-                    <t t-esc="doc.bkg_party_id.state_id.name" />, 
-                    <t t-esc="doc.bkg_party_id.country_id.name" />, 
-                    <t t-esc="doc.bkg_party_id.pin_code" />
-                </div>
-            </t>
-            <t t-else="">
-                <div t-field="doc.new_bkg_party" style="text-align: left" />
-            </t>
-        </t>
-        <t t-set="trans_data" t-value="doc"/>
-            <div class="p-2">
             </div>
-</t>
-</template>
+            <!-- header end -->
+            <div class="page">
+                <style>
+                    .space-colon{
+                    width:3%;
+                    }
+                    .agent-bg{
+                    background-color: #7c9fcf;
+                    color:rgb(13, 13, 14);
+                    }
+                    .operator-bg{
+                    background-color: #54d175;
+                    color:rgb(13, 13, 14);
+                    }
+                </style>
+                <div class="row" style="margin-top:-20px;">
+                    <div style="display:flex;justify-content: center;align-items: center;height:100vh;position: relative;">
+                        <t t-if="'TRAN' in o.combined_codes">
+                            <p style="font-size:20px;height:30px; text-align:center;">
+                                <b>Transport - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'DOTR' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>Domestic Trip Move Road - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'DOTL' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>Domestic Tank Lease - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'DOTT' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>Domestic Trip Move Rail - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'DOTC' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>Domestic Trip Move Coastal - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'DOTS' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>Domestic Tank Sale - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'FLBS' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>Flexi Bag Sale - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'FLAS' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>Flexi Accessories Sale - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'FLOS' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>Flexi Operational Service - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'ISTL' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>ISO Tank Lease - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'OSTE' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>Overseas Trip Move Export - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'OSNB' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>Overseas Nomination Business - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'OSNR' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>Overseas Net Rental - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'SOCE' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>SOC Trip Move Export - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'SOCI' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>SOC Trip Move Import - Quotation</b>
+                            </p>
+                        </t>
+                        <t t-if="'SOCR' in o.combined_codes">
+                            <p style="font-size:25px;height:30px; text-align:center;">
+                                <b>SOC Trip Move Import &amp; Export - Quotation</b>
+                            </p>
+                        </t>
+                    </div>
+                    <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1; margin-top: -20px;">
+                        <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                    Quotation No :
+                                    <span t-esc="o.name"/>
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                    Date:
+                                    <span t-field="o.entry_date"
+                                          t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Validity Date:
+                                    <span t-field="o.validity_date"
+                                          t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Prepared By :
+                                    <span t-esc="o.user_id.name"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px;">
+                    <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                        <table style="border-collapse: collapse;width:100%">
+                            <tr>
+                                <t t-if="o.price_owner == 'operator'">
+                                    <th class="operator-bg"
+                                        style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Customer Details:
+                                    </th>
+                                </t>
+                                <t t-else="">
+                                   <th class="agent-bg"
+                                        style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Customer Details:
+                                    </th>
+                                </t>
+                            </tr>
+                        </table>
+                        <table style="border-collapse: collapse;width:100%">
+                            <tr>
+                                <td style="width: 60%;font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Name :
+                                    <span t-esc="o.bkg_party_id.name"/>
+                                </td>
+                                <td style="width: 40%;font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Mobile No :
+                                    <span t-esc="o.bkg_party_id.mobile_no"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Address :
+                                    <span t-esc="o.bkg_party_id.street"/>
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-bottom:none;">
+                                    Email :
+                                    <span t-esc="o.bkg_party_id.email"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-bottom:none;">
+                                    Contact Person :
+                                    <span t-esc="o.bkg_party_id.contact_person"/>
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-bottom:none;"> </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <t t-if="'TRAN' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Weight (Kg) :
+                                        <span t-esc="o.tank_capacity"/>
+                                    </td>
+                                    <td style="width: 40%;font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Trailer Type :
+                                        <span t-field="o.trailer_type"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Free Hrs :
+                                        <span t-esc="o.free_hrs"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Tank Qty :
+                                        <span t-esc="o.tank_qty"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Empty / Laden :
+                                        <span t-field="o.container_category"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Loading Address :
+                                        <span t-esc="o.load_address"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left; border-top:none;">
+                                        Unloading Address :
+                                        <span t-esc="o.unload_address"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Empty off Loading Location :
+                                        <span t-esc="o.empty_offload_loc_id.name"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-esc="o.product_id.name"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Type :
+                                        <span t-field="o.dg_product"/>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 10px;padding: 5px;text-align:left;border:none;">
+                                            <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="'DOTR' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Weight (Kg) :
+                                        <span t-esc="o.tank_capacity"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Trailer Type :
+                                        <span t-field="o.trailer_type"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL Free Days :
+                                        <span t-esc="o.dotr_pol_free_days"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD Free Days :
+                                        <span t-esc="o.dotr_pod_free_days"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        No of Tanks :
+                                        <span t-esc="o.tank_qty"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Empty / Laden :
+                                        <span t-field="o.container_category"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Empty Pickup Location :
+                                        <span t-esc="o.trans_pickup_depot_id.name"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Loading Address :
+                                        <span t-esc="o.load_address"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Unloading Address :
+                                        <span t-esc="o.unload_address"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Empty off Loading Location :
+                                        <span t-esc="o.empty_offload_loc_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-esc="o.product_id.name"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Type :
+                                        <span t-field="o.dg_product"/>
+                                    </td>
+                                </tr>
+
+                            </table>
+                            <br/>
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                           <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+
+                <t t-if="'DOTL' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Lease Period :
+                                        <span t-esc="o.lease_period"/>
+                                        <span t-esc="o.period_choices"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        No of Tanks :
+                                        <span t-esc="o.tank_qty"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Tank Depot Pick Up Location :
+                                        <span t-esc="o.pickup_depot_id.name"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Tank Depot Drop Off Location :
+                                        <span t-esc="o.drop_depot_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Customer Factory Address :
+                                        <span t-esc="o.customer_factory_address"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-esc="o.product_id.name"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Product Type :
+                                        <span t-field="o.dg_product"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <br/>
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                           <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="'DOTT' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Weight (Kg) :
+                                        <span t-esc="o.tank_capacity"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Shipment Term :
+                                        <span t-esc="o.ship_term_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL :
+                                        <span t-esc="o.rail_pol_port_id.name"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL Free Days :
+                                        <span t-esc="o.rail_pod_free_days"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD :
+                                        <span t-esc="o.rail_pod_port_id.name"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD Free Days :
+                                        <span t-esc="o.rail_pod_free_days"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        No of Tanks :
+                                        <span t-esc="o.tank_qty"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Empty / Laden :
+                                        <span t-field="o.container_category"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-esc="o.product_id.name"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Product Type :
+                                        <span t-field="o.dg_product"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <br/>
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                            <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="'DOTC' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Weight (Kg) :
+                                        <span t-esc="o.tank_capacity"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Shipment Term :
+                                        <span t-esc="o.ship_term_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL :
+                                        <span t-esc="o.coastal_pol_port_id.name"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL Free Days :
+                                        <span t-esc="o.coastal_pol_free_days"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD :
+                                        <span t-esc="o.coastal_pod_port_id.name"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD Free Days :
+                                        <span t-esc="o.coastal_pod_free_days"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        No of Tanks :
+                                        <span t-esc="o.tank_qty"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Empty / Laden :
+                                        <span t-field="o.container_category"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-esc="o.product_id.name"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Product Type :
+                                        <span t-field="o.dg_product"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <br/>
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                            <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="'DOTS' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Tank Number :
+                                        <span t-esc="o.tank_no_id.name"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Year of Manufacturing :
+                                        <span t-esc="o.year_built"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Tank Depot empty Pickup Location:
+                                        <span t-esc="o.tank_sale_pickup_depot_id.name"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Customer Factory Address :
+                                        <span t-esc="o.factory_address"/>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Domestication Completed :
+                                        <span t-esc="o.domestication"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-esc="o.tank_sale_product_id.name"/>
+                                    </td>
+
+                                </tr>
+                            </table>
+                            <!-- <br/> -->
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                            <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <!-- <br/>  -->
+                            </t>
+                        </div>
+                    </div>
+                </t>
+
+                <t t-if="'FLBS' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Flexi Type :
+                                        <t t-if="o.flexi_type">
+                                            <span t-field="o.flexi_type"/>
+                                        </t>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Preferred Make :
+                                        <span t-field="o.vendor_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Layer Type:
+                                        <span t-field="o.flexi_layer_type_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Delivery Address :
+                                        <span t-field="o.del_address"/>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Capacity :
+                                        <span t-field="o.flexi_capacity_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        City:
+                                        <span t-field="o.city_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Bag Quantity(Nos) :
+                                        <t t-if="o.bag_qty">
+                                            <span t-esc="'{:,.2f}'.format(o.bag_qty)"/>
+                                        </t>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Exact Stuffing Address :
+                                        <span t-field="o.stuff_address"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Bag Required Date:
+                                        <span t-field="o.bag_req_date" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD Services:
+                                        <span t-field="o.pod_services"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-field="o.product_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Product Type :
+                                        <span t-field="o.dg_product"/>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- <br/> -->
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                            <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <!-- <br/>  -->
+                            </t>
+                        </div>
+                    </div>
+                </t>
+
+                <t t-if="'FLAS' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Flexi Type :
+                                        <t t-if="o.line_ids.flexi_type">
+                                            <span t-field="o.line_ids.flexi_type"/>
+                                        </t>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                          Delivery Address :
+                                        <span t-esc="o.del_address"/>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Layer Type:
+                                        <span t-esc="o.line_ids.flexi_layer_type_id.name"/>
+                                    </td>
+
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        City:
+                                        <span t-esc="o.city_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Capacity :
+                                        <span t-esc="o.line_ids.flexi_capacity_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- <br/> -->
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                            <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <!-- <br/>  -->
+                            </t>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="'FLOS' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Flexi Containers (Qty) :
+                                         <t t-if="o.flexi_stuff_qty">
+                                            <span t-esc="'{:,.2f}'.format(o.flexi_stuff_qty)"/>
+                                        </t>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Exact Stuffing Address :
+                                        <span t-esc="o.stuff_address"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Exact Stuffing Date :
+                                        <span t-field="o.stuff_date" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+
+                                    </td>
+
+                                </tr>
+                            </table>
+
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                           <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+
+                <t t-if="'ISTL' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Lease Period :
+                                        <t t-if="o.lease_period">
+                                            <span t-esc="o.lease_period"/> Days
+                                        </t>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        No Of Tanks :
+                                        <span t-esc="o.tank_qty"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Pickup Port Location :
+                                        <span t-esc="o.pickup_port_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Drop Off Port Location:
+                                        <span t-esc="o.drop_port_id.name"/>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Pickup Depot Location :
+                                        <span t-esc="o.pickup_depot_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Drop Off Depot Location:
+                                        <span t-esc="o.drop_depot_id.name"/>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-esc="o.product_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Product Type :
+                                        <span t-field="o.dg_product"/>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                            <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="'OSTE' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Shipment Term :
+                                        <span t-esc="o.ship_term_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL :
+                                        <span t-esc="o.pol_port_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL Free Days :
+                                        <span t-esc="o.pol_free_days"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD :
+                                        <span t-esc="o.pod_port_id.name"/>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD Free Days :
+                                        <span t-esc="o.pod_free_days"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Tank Pick Up Location :
+                                        <span t-esc="o.trip_pickup_depot_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-esc="o.product_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Type :
+                                        <span t-field="o.dg_product"/>
+                                    </td>
+                                </tr>
+
+                            </table>
+
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                            <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="'OSNB' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Shipment Term :
+                                        <span t-esc="o.ship_term_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL :
+                                        <span t-esc="o.pol_port_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL Free Days :
+                                        <span t-esc="o.pol_free_days"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD :
+                                        <span t-esc="o.pod_port_id.name"/>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD Free Days :
+                                        <span t-esc="o.pod_free_days"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Tank Pick Up Location :
+                                        <span t-esc="o.trip_pickup_depot_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-esc="o.product_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Type :
+                                        <span t-field="o.dg_product"/>
+                                    </td>
+                                </tr>
+
+                            </table>
+
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                            <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="'OSNR' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Shipment Term :
+                                        <span t-esc="o.ship_term_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL :
+                                        <span t-esc="o.pol_port_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL Free Days :
+                                        <span t-esc="o.pol_free_days"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD :
+                                        <span t-esc="o.pod_port_id.name"/>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD Free Days :
+                                        <span t-esc="o.pod_free_days"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Tank Pick Up Location :
+                                        <span t-esc="o.trip_pickup_depot_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-esc="o.product_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Type :
+                                        <span t-field="o.dg_product"/>
+                                    </td>
+                                </tr>
+
+                            </table>
+
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                            <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="'SOCE' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Shipment Term :
+                                        <span t-esc="o.ship_term_id.name"/>
+                                    </td>
+                                     <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL :
+                                        <span t-esc="o.pol_port_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL Free Days :
+                                        <span t-esc="o.pol_free_days"/>
+                                    </td>
+
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD :
+                                        <span t-esc="o.pod_port_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD Free Days :
+                                        <span t-esc="o.pod_free_days"/>
+                                    </td>
+                                      <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Pick Up Location :
+                                        <span t-esc="o.trip_pickup_depot_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-esc="o.product_id.name"/>
+                                    </td>
+                                       <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Type :
+                                        <span t-field="o.dg_product"/>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                            <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="'SOCI' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                    <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width:60%;  font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Shipment Term :
+                                        <span t-esc="o.ship_term_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                          POL :
+                                        <span t-esc="o.pol_port_id.name"/>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL Free Days :
+                                        <span t-esc="o.pol_free_days"/>
+                                    </td>
+
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD :
+                                        <span t-esc="o.pod_port_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD Free Days :
+                                        <span t-esc="o.pod_free_days"/>
+                                    </td>
+                                      <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Pick Up Location :
+                                        <span t-esc="o.trip_pickup_depot_id.name"/>
+                                    </td>
+
+                                </tr>
+                                <tr>
+
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-esc="o.product_id.name"/>
+                                    </td>
+                                      <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Type :
+                                        <span t-field="o.dg_product"/>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                            <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="'SOCR' in o.combined_codes">
+                    <div class="row">
+                        <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                                <tr>
+                                   <t t-if="o.price_owner == 'operator'">
+                                        <th class="operator-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                    <t t-else="">
+                                        <th class="agent-bg"
+                                            style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                            RFQ Details:
+                                        </th>
+                                    </t>
+                                </tr>
+                            </table>
+                            <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                                <tr>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Shipment Term :
+                                        <span t-esc="o.ship_term_id.name"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL :
+                                        <span t-esc="o.pol_port_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POL Free Days :
+                                        <span t-esc="o.pol_free_days"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD :
+                                        <span t-esc="o.pod_port_id.name"/>
+                                    </td>
 
 
-<template id="report_ct_quotations_raw">
-    <t t-call="web.html_container">
-        <t t-foreach="docs" t-as="doc">
-            <t t-call="ct_quotations.report_ct_quotations_document" t-lang="doc.service_id.company_id.partner_id.lang"/>
-        </t>
-    </t>
-</template>
+                                </tr>
+                                <tr>
 
-<template id="report_ct_quotations">
-    <t t-call="ct_quotations.report_ct_quotations_raw"/>
-</template>
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        POD Free Days :
+                                        <span t-esc="o.pod_free_days"/>
+                                    </td>
+                                    <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Pick Up Location :
+                                        <span t-esc="o.trip_pickup_depot_id.name"/>
+                                    </td>
 
+                                </tr>
+                                <tr>
+
+                                    <td style="width:60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Name :
+                                        <span t-esc="o.product_id.name"/>
+                                    </td>
+                                     <td style="width:40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        Product Type :
+                                        <span t-field="o.dg_product"/>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <t t-if="o.spl_req">
+                                <table style="border:none;width:100%;">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;">
+                                            <b>Special Requirements :</b>
+                                            <span t-esc="o.spl_req"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </t>
+                        </div>
+                    </div>
+                </t>
+
+                <div class="row">
+                    <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                        <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;margin-top: 10px;">
+                            <tr>
+
+                                <t t-if="o.price_owner == 'operator'">
+                                    <th class="operator-bg"
+                                        style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Item Details :
+                                    </th>
+                                </t>
+                                <t t-else="">
+                                    <th class="agent-bg"
+                                        style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Item Details :
+                                    </th>
+                                </t>
+                            </tr>
+                        </table>
+                        <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;border-top:none;">
+                            <tr>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;width: 2%;">
+                                    S.No
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;">
+                                    Description
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;">
+                                    UOM
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;">
+                                    Qty
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;">
+                                    Unit Price
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;width: 5%;">
+                                    Taxable Amount
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;">
+                                    Taxes
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;">
+                                    Tax Amount
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;width: 15%;">
+                                    Total Amount
+                                </td>
+                            </tr>
+
+                            <t t-set="s_no" t-value="1"/>
+                            <t t-foreach="o.line_ids_g" t-as="line">
+                                <tr>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;width: 2%;border-top:none;">
+                                        <span t-esc="s_no"/>
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;width: 30%;border-top:none;">
+                                        <span t-field="line.description"/>
+                                        <t t-if="'FLBS' in o.combined_codes">
+                                            <t t-foreach="o.line_ids_b" t-as="flexi_bag">
+                                                <t t-if="flexi_bag.acc_is_required">
+                                                <b>(</b>
+                                                <t t-foreach="flexi_bag.line_ids" t-as="flexi_line">
+
+                                                        <span t-esc="flexi_line.accessories_id.name"/>
+                                                        -
+                                                        <span t-esc="flexi_line.qty"/>
+                                                        <span t-esc="flexi_line.uom_id.name"/>
+                                                    </t>
+                                                <b>)</b>
+                                                </t>
+                                            </t>
+                                        </t>
+
+
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        <span t-out="line.uom_id.name"/>
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:right;border-top:none;">
+                                        <span t-out="'%.2f'%(line.qty)"/>
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:right;border-top:none;">
+                                        <t t-if="line.unit_price">
+                                            <span t-esc="'{:,.2f}'.format(line.unit_price)"/>
+                                        </t>
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:right;width: 5%;border-top:none;">
+                                        <t t-if="line.taxable_amt">
+                                        <span t-out="'{:,.2f}'.format(line.taxable_amt)"/>
+                                        </t>
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        <span t-out="', '.join(map(lambda x: (x.description or x.name), line.tax_ids))"> </span>
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:right;border-top:none;">
+                                        <t t-if="line.tax_amt">
+                                        <span t-out="'{:,.2f}'.format(line.tax_amt)"/>
+                                        </t>
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:right;width: 15%;border-top:none;">
+                                        <t t-if="line.tot_amt">
+                                            <span t-out="'{:,.2f}'.format(line.tot_amt)"/>
+                                        </t>
+                                        <span t-out="line.currency_id.name"/>
+                                    </td>
+                                </tr>
+                            </t>
+                            <t t-set="s_no" t-value="s_no + 1"/>
+                        </table>
+                        <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                            <tr>
+                                <td style="font-size: 14px; height: 30px;padding-left: 60px;text-align:right;">
+                                    Taxable
+                                    Amount
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding-left: 60px;text-align:right;">:
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 1px;text-align:right;">
+                                    <t t-if="o.taxable_amt">
+                                        <span t-esc="'{:,.2f}'.format(o.taxable_amt)"/>
+                                    </t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 14px; height: 30px;padding: 1px;text-align:right;">Tax
+                                    Amount
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 1px;text-align:right;">:</td>
+                                <td style="font-size: 14px; height: 30px;padding: 1px;text-align:right;">
+                                    <t t-if="o.tax_amt">
+                                        <span t-esc="'{:,.2f}'.format(o.tax_amt)"/>
+                                    </t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 14px; height: 30px; padding: 10px; text-align:right;">
+                                    <b>Total Amount</b>
+                                </td>
+                                <td style="font-size: 14px; height: 30px; padding: 1px; text-align:right;">:</td>
+                                <td style="font-size: 14px; height: 30px; padding: 1px; text-align:right;">
+                                    <b>
+                                        <t t-if="o.net_amt">
+                                            <span t-esc="'{:,.2f}'.format(o.net_amt)"/>
+                                        </t>
+                                        <span t-esc="o.quotation_currency_id.name"/>
+                                    </b>
+                                </td>
+                            </tr>
+
+                            <tr style="width:100%;">
+                                <td style="font-size: 14px; height: 30px; padding: 5px; text-align:left;">
+                                    Amount in Words :
+                                    <b>
+                                        <t t-if="o.net_amt">
+                                            <span t-out="o.quotation_currency_id.with_context(lang='es_AR').amount_to_text(o.net_amt)"/>
+                                        </t>
+                                    </b>
+                                </td>
+                                <td style="font-size: 14px; height: 30px; padding: 5px; text-align:left;"> </td>
+                                <td style="font-size: 14px; height: 30px; padding: 5px; text-align:left;"> </td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div style="margin: 0; padding: 0;font-family: Arial, sans-serif; font-size: 14px; line-height: 2; margin-top:10px;">
+                        <t t-if="o.mode_of_payment">
+                            <h style="font-size: 14px; height: 30px;padding: 5px;text-align:left;margin: 0; padding: 0">
+                                Payment Term :
+                                <span t-field="o.mode_of_payment"/>
+                            </h>
+                        </t>
+                        <t t-if="o.tank_detention_rate != 0">
+                            <br/>
+                            <h style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border-bottom:none;margin: 0; padding: 0">
+                                Detention Rate (Per Day) :
+                                <span t-esc="'%.2f'%(o.tank_detention_rate)"/>
+                                <t t-if="o.tank_detention_currency_id">
+                                    <span t-esc="o.tank_detention_currency_id.name"/>
+                                </t>
+                            </h>
+                        </t>
+                        <br/>
+                         <t t-if="'ISTL' in o.combined_codes">
+                            <h>Tax : Exclusive</h>
+                             <br/>
+                        </t>
+                        <t t-if="'OSTE' in o.combined_codes">
+                            <h>Tax : Exclusive</h>
+                            <br/>
+                        </t>
+                        <t t-if="'OSNB' in o.combined_codes">
+                            <h>Tax : Exclusive</h>
+                            <br/>
+                        </t>
+                        <t t-if="'OSNR' in o.combined_codes">
+                            <h>Tax : Exclusive</h>
+                            <br/>
+                        </t>
+
+                        <t t-if="'SOCI' in o.combined_codes">
+                            <h>Insurance :</h><span t-field="o.insurance"> </span>
+                             <br/>
+                        </t>
+                        <t t-if="'SOCE' in o.combined_codes">
+                            <h>Insurance :</h>  <span t-field="o.insurance"> </span>
+                             <br/>
+                        </t>
+                        <t t-if="'SOCR' in o.combined_codes">
+                            <h>Insurance :</h>  <span t-field="o.insurance"> </span>
+                             <br/>
+                        </t>
+                         <t t-if="'FLBS' in o.combined_codes">
+                            <h>Loading Parameters :</h>
+                              <br/>
+                        </t>
+                        <t t-if="o.remarks">
+                            <h style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;margin: 0; padding: 0">
+                                <b>Remarks :</b>
+                                <span t-esc="o.remarks"/>
+                            </h>
+                        </t>
+                    </div>
+                </div>
+                <div class="row" style="page-break-before: always;">
+                    <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                        <div style="display:flex;justify-content: center;align-items: center;height:100vh;">
+                            <p style="font-size:20px;height:30px; text-align:center;text-decoration: underline;">
+                                <b>Terms &amp; Conditions</b>
+                            </p>
+                        </div>
+                        <table style="border-collapse: collapse;width:100%">
+                            <t t-set="t_sno" t-value="1"/>
+                            <t t-foreach="o.line_ids_k" t-as="terms_line">
+                                <tr>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;vertical-align: top;text-align:left;">
+                                        <span t-esc="t_sno"/>.
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;">
+                                        <span t-esc="terms_line.description"/>
+                                    </td>
+                                </tr>
+                                <t t-set="t_sno" t-value="t_sno + 1"/>
+                            </t>
+                        </table>
+                    </div>
+                </div>
+            </div>
+             </t>
+
+            <!-- Footer -->
+            <div class="footer" style="height: 20px; position: absolute; bottom: -100px; width: 100%;">
+                <div class="text-center" style="border-top: 1px solid black;">
+                    <ul class="list-inline mb4">
+                        <div style="width: 65%;float: right;">
+                        </div>
+                        <div style="width: 35%;float: left;" t-if="report_type == 'pdf'">
+                            <span t-field="user.name"/>
+                            -
+                            <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M:%S')"/>
+                        </div>
+                    </ul>
+                    <div t-if="report_type == 'pdf'" style="width: 30%; float: left;">
+                        Page:
+                        <span class="page"/>
+                        of
+                        <span class="topage"/>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer Ends-->
+
+        </template>
+
+
+        <template id="report_ct_quotations">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="ct_quotations.report_ct_quotations_document"
+                       t-lang="o.service_id.company_id.partner_id.lang"/>
+                </t>
+            </t>
+        </template>
+    </data>
 </odoo>

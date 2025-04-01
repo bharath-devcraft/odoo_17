@@ -48,7 +48,7 @@ class CmPortTerminal(models.Model):
     company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -158,20 +158,7 @@ class CmPortTerminal(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_port_terminal = self.env[CM_PORT_TERMINAL]
         result['all_draft'] = cm_port_terminal.search_count([('status', '=', 'draft')])

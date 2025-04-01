@@ -9,7 +9,7 @@ RES_COMPANY = 'res.company'
 class CtNocostTransactionAttachmentLine(models.Model):
     _name = 'ct.nocost.transaction.attachment.line'
     _description = 'Attachments'
-    _order = 'id asc'
+    _order = 'attach_date desc'
 
     header_id = fields.Many2one('ct.nocost.transaction', string="Header Ref", index=True, required=True, ondelete='cascade', c_rule=True)
 

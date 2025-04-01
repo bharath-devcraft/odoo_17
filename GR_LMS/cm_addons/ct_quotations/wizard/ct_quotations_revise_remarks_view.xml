@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="ct_quotations_revise_remarks_form" model="ir.ui.view">
+        <field name="name">Quotations Mail Preview</field>
+        <field name="model">ct.quotations.revise.remarks</field>
+        <field name="arch" type="xml">
+            <form string="Preview">
+                <script type="text/javascript" src="/ct_quotations/static/src/js/revise_remarks_wizard.js"/>
+                <group>
+                    <field name="revise_remark" required = "1" force_save="1"/>
+                </group>
+                <footer>
+                <button string="Submit"
+                    icon="fa-pencil"
+                    class="btn btn-success"
+                    type="object"
+                    name="action_revise"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ct_quotations_revise_remarks" model="ir.actions.act_window">
+        <field name="name">Revise Remarks</field>
+        <field name="res_model">ct.quotations.revise.remarks</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="ct_quotations_revise_remarks_form"/>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_ct_quotations"/>
+        <field name="binding_view_types">list</field>
+    </record>
+</odoo>

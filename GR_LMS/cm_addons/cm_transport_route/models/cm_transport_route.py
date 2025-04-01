@@ -42,13 +42,14 @@ class CmTransportRoute(models.Model):
     toll_plaza = fields.Selection(selection=TOLL_PLAZA_OPTIONS, string="Toll Plaza", copy=False)
     border_entry_fee = fields.Selection(selection=BORDER_ENTRY_FEE, string="Border Entry Fee", copy=False)
     total_trip = fields.Integer(string="Total Trip(Km)", copy=False,  compute='_compute_line_total_distance', store=True )
+    ave_mileage = fields.Float(string="Average Mileage", copy=False)
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-    remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+    remarks = fields.Text(string="Remarks", copy=False)
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -115,7 +116,7 @@ class CmTransportRoute(models.Model):
     def validations(self):
         warning_msg = []
         if not self.line_ids:
-            warning_msg.append("System not allow to confirm/approve with empty line details")        
+            warning_msg.append("System not allow to confirm/approve with empty route details")        
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
         if not is_mgmt:
             res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
@@ -133,13 +134,6 @@ class CmTransportRoute(models.Model):
         if self.border_entry_fee == 'applicable':
             if len(self.line_ids_b) < 1:
                 raise UserError(_("Kindly add or verify border entry fee. Its required as per route configuration."))
-        
-        if self.from_location_id:
-            self.env.cr.execute(""" select from_location_id
-            from cm_transport_route where from_location_id = '%s' and to_location_id = '%s'
-            and id != %s and company_id = %s""" %(self.from_location_id.id,self.to_location_id.id, self.id, self.company_id.id))
-            if self.env.cr.fetchone():
-                raise UserError(_("From and To Location must be unique"))
                                 
         if warning_msg:
             formatted_messages = "\n".join(warning_msg)
@@ -203,20 +197,7 @@ class CmTransportRoute(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_transport_route = self.env[CM_TRANSPORT_ROUTE]
         result['all_draft'] = cm_transport_route.search_count([('status', '=', 'draft')])

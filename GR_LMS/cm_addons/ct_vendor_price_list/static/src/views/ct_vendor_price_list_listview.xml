@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="ct_vendor_price_list.CtVendorPriceListListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CtVendorPriceListDashBoard />
+        </xpath>
+    </t>
+</templates>

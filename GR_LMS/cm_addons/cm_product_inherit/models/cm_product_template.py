@@ -22,18 +22,17 @@ ENTRY_MODE =  [('manual','Manual'),
 
 YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 
+DG_NON_DG = [('yes', 'DG'), ('no', 'Non DG')]
+
 APPLICABLE_OPTION = [('applicable', 'Applicable'), ('not_applicable', 'Not Applicable')]
 
 FLEXI_TYPE = [('tltd', 'TLTD'), ('tlbd', 'TLBD'), ('blbd', 'BLBD')]
 
 
-LAYER_TYPE = [('3_layer', '3+1 Layer'), ('4_layer', '4+1 Layer'), ('5_layer', '5+1 Layer')]
-
 CUSTOM_TYPE = [('flexi_bag', 'Flexi Bag'), ('flexi_accessories', 'Flexi Accessories'), ('consumables', 'Consumables'), ('asset', 'Asset')]
+ 
 
-CAPACITY = [('16kl', '16KL'), ('18kl', '18KL'), ('20kl', '20KL'), ('22kl', '22KL'), ('24kl', '24KL')]
-
-VALVE_TYPE = [('3_butterfly', 'Butterfly'), ('3_ball_valve', 'Ball valve'), ('both', 'Both')]
+VALVE_TYPE = [('3_butterfly', 'Butterfly'), ('3_ball_valve', 'Ball Valve'), ('both', 'Both')]
 
 BAG_COSTING_METHOD = [('with_accessories', 'With Accessories'), ('without_accessories', 'Without Accessories')]
 
@@ -46,7 +45,7 @@ S_NO = [('required', 'Required'), ('not_required', 'Not Required')]
 class CmProductTemplate(models.Model):
     _name = 'product.template'
     _description = 'Record'
-    _inherit = ['mail.thread', 'mail.activity.mixin', 'avatar.mixin','product.template']
+    _inherit = ['mail.thread', 'mail.activity.mixin', 'avatar.mixin',PRODUCT_TEMPLATE]
     _order = 'name asc'
 
 
@@ -59,17 +58,18 @@ class CmProductTemplate(models.Model):
     vendor_id = fields.Many2one('cm.vendor.master', string="Vendor Name", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     custom_type = fields.Selection(selection=CUSTOM_TYPE, string="Type")
     flexi_type = fields.Selection(selection=FLEXI_TYPE, string="Flexi Type", copy=False, help='TLTD (Top Loading Top Discharge),TLBD (Top Loading Bottom Discharge),BLBD (Bottom Load Bottom Discharge)')
-    layer_type = fields.Selection(selection=LAYER_TYPE, string="Layer Type", copy=False, default='3_layer')
-    capacity = fields.Selection(selection=CAPACITY, string="Capacity(L)", copy=False)
+    layer_type_id = fields.Many2one('cm.flexi.layer.type', string="Layer Type", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    capacity_id = fields.Many2one('cm.flexi.capacity', string="Capacity", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     valve_size = fields.Char(string="Valve Size(Inch)", copy=False, size=50)
     valve_type = fields.Selection(selection=VALVE_TYPE, string="Valve Type", copy=False)
     halal_certification = fields.Selection(selection=APPLICABLE_OPTION, string="Halal Certification", copy=False)
     warranty = fields.Selection(selection=APPLICABLE_OPTION, string="Warranty", copy=False, tracking=True)
-    warranty_period = fields.Integer(string="Warranty Periods(Months)", copy=False, default = 18)
+    warranty_period = fields.Integer(string="Warranty Periods(Months)", copy=False)
     mfg_lead_time = fields.Integer(string="Manufacturing Lead Time(Days)", copy=False)
     bag_costing_method = fields.Selection(selection=BAG_COSTING_METHOD, string="Bag Costing Method", copy=False)
-    pad_type = fields.Selection(selection=PAD_TYPE, string="Pad Type", copy=False)
+    pad_type = fields.Selection(selection=PAD_TYPE, string="Heating Pad", copy=False)
     serial_no_req = fields.Selection(selection=S_NO, string="Serial No", copy=False)
+    currency_id = fields.Many2one('res.currency', string="Currency",default=lambda self: self.env.ref('base.INR').id, copy=False, ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
     
     moc_id = fields.Many2one('cm.moc', string="Material of Construction(MOC)", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     weight = fields.Float(string="Weight(Kg)", copy=False)
@@ -78,10 +78,11 @@ class CmProductTemplate(models.Model):
     hs_id = fields.Many2one('cm.hsn.code', string="HSN/SAC Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     bus_vert_id = fields.Many2one('cm.business.vertical', string="Business Vertical", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     bus_vert_sub_type_id = fields.Many2one('cm.business.vertical.sub.type', string="Business Vertical Sub Type", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    dg_product = fields.Selection(selection=YES_OR_NO, string="Dangerous Goods" ,copy=False, default="no")
+    dg_product = fields.Selection(selection=DG_NON_DG, string="Product Type" ,copy=False, default="no")
     dry_box_type = fields.Char(string="Dry Box Type", default="20 Feet Heavy Duty", copy=False, size=252)
+    Load_Params = fields.Char(string="Loading Parameters", copy=False, size=252)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -97,31 +98,13 @@ class CmProductTemplate(models.Model):
     line_ids = fields.One2many('cm.product.template.line', 'header_id', string="Accessories Details", copy=True, c_rule=True)
     line_ids_a = fields.One2many('cm.product.template.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
     
-    # @api.constrains('name')
-    # def name_validation(self):
-    #     if self.name:
-    #         if is_special_char(self.env, self.name):
-    #             raise UserError(_("Special character is not allowed in name field"))
 
-    #         name = self.name.upper().replace(" ", "")
-    #         self.env.cr.execute(""" select upper(name)
-    #         from product_template where upper(REPLACE(name, ' ', ''))  = '%s'
-    #         and id != %s and company_id = %s""" %(name, self.id, self.company_id.id))
-    #         if self.env.cr.fetchone():
-    #             raise UserError(_("Flexi bag name must be unique"))
-
-    # @api.constrains('short_name')
-    # def short_name_validation(self):
-    #     if self.short_name:
-    #         if is_special_char(self.env, self.short_name):
-    #             raise UserError(_("Special character is not allowed in short name field"))
-
-    #         short_name = self.short_name.upper().replace(" ", "")
-    #         self.env.cr.execute(""" select upper(short_name)
-    #         from product_template where upper(REPLACE(short_name, ' ', ''))  = '%s'
-    #         and id != %s and company_id = %s""" %(short_name, self.id, self.company_id.id))
-    #         if self.env.cr.fetchone():
-    #             raise UserError(_("Flexi bag short name must be unique"))
+    @api.onchange('warranty')
+    def onchange_warranty(self):
+        if self.warranty == 'applicable':
+            self.warranty_period = 18
+        if self.warranty != 'applicable':
+            self.warranty_period = False
 
     def validations(self):
         warning_msg = []
@@ -192,20 +175,7 @@ class CmProductTemplate(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         product_template = self.env[PRODUCT_TEMPLATE]
         result['all_draft'] = product_template.search_count([('status', '=', 'draft'), ('custom_type', '=', 'flexi_bag')])
@@ -226,20 +196,7 @@ class CmProductTemplate(models.Model):
     
     @api.model
     def retrieve_acc_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         product_template = self.env[PRODUCT_TEMPLATE]
         result['all_draft'] = product_template.search_count([('status', '=', 'draft'),('custom_type', '=', 'flexi_accessories')])
@@ -260,20 +217,7 @@ class CmProductTemplate(models.Model):
     
     @api.model
     def retrieve_gen_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         product_template = self.env[PRODUCT_TEMPLATE]
         result['all_draft'] = product_template.search_count([('status', '=', 'draft'),('custom_type', '=', 'consumables')])

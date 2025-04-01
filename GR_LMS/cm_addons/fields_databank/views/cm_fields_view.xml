@@ -35,6 +35,7 @@
                         <field name="branch_name" widget="proper_case"/>
                         <field name="tax_name"/>
                         <field name="mail_from"/>
+                        <field name="payment_email"/>
                         <field name="mail_cc"/>
                         <field name="mail_bcc"/>
                         <field name="subject"/>
@@ -61,6 +62,29 @@
                         <field name="tax_reg_no" widget="no_special_char"/>
                         <field name="branch_code" widget="no_special_char"/>
                         <field name="driver_lic_no" widget="no_special_char"/>
+                        <field name="customer_name" widget="no_special_char"/>
+                        <field name="service_name" widget="no_special_char"/>
+                        <field name="product_desc" widget="no_special_char"/>
+                        <field name="sys_ref" widget="no_special_char"/>
+                        <field name="che_name" widget="no_special_char"/>
+                        <field name="ship_name" widget="no_special_char"/>
+                        <field name="gra_den" widget="no_special_char"/>
+                         <field name="bl_ref_no"/>
+                        <field name="policy_no"/>
+                        <field name="new_bkg_party"/>
+                        <field name="new_shipper"/>
+                        <field name="load_address"/>
+                        <field name="unload_address"/>
+                        <field name="stuff_address"/>
+                        <field name="country_code"/>
+                        <field name="valve_size"/>
+                        <field name="group_name"/>
+                        <field name="halt_address"/>
+                        <field name="fre_pay_center"/>
+                        <field name="received_from"/>
+                        <field name="combined_codes" widget="numeric"/>
+                        <field name="load_zip_code" widget="numeric"/>
+                        <field name="unload_zip_code" widget="numeric"/>
                      </group>
                      <group>
                         <field name="vendor_inv_no"/>
@@ -69,6 +93,7 @@
                         <field name="ack_no"/>
                         <field name="cheque_favor"/>
                         <field name="tin_no" widget="numeric"/>
+                        <field name="payment_mobile_no" widget="numeric"/>
                         <field name="pan_no" widget="upper_case"/>
                         <field name="cst_no" widget="numeric"/>
                         <field name="vat_no"/>
@@ -88,6 +113,27 @@
                         <field name="watcher_mail_id"/>
                         <field name="seq_month"/>
                         <field name="fiscal_year_code"/>
+                        <field name="un_no"/>
+                        <field name="imo_class"/>
+                        <field name="sub_class1"/>
+                        <field name="sub_class2"/>
+                        <field name="psa_class"/>
+                        <field name="lpk_class"/>
+                        <field name="ems_class"/>
+                        <field name="payment_contact_person"/>
+                        <field name="payment_designation" widget="no_special_char"/>
+                        <field name="payment_street"/>
+                        <field name="payment_street1"/>
+                        <field name="owner_name"/>
+                        <field name="size_dim"/>
+                        <field name="pay_cap"/>
+                        <field name="tube_assembly"/>
+                        <field name="bot_dis_assembly"/>
+                        <field name="air_assembly"/>
+                        <field name="ext_clad"/>
+                        <field name="type_walkway"/>
+                        <field name="off_location"/>                       
+                        <field name="payment_pin_code" widget="numeric"/>
                         <!-- Catalysts-->
                         <field name="other_facility" widget="no_special_char"/>
                         <field name="continent" widget="no_special_char"/>
@@ -183,6 +229,30 @@
                         <field name="terminal_type"/>
                         <field name="safety_manual"/>
                         <field name="contract_agree"/>
+                        <field name="customer_type"/>
+                        <field name="lead_type"/>
+                        <field name="account_type"/>
+                        <field name="custom_type"/>
+                        <field name="acceptability"/>
+                        <field name="pack_grp"/>
+                        <field name="mar_poll"/>
+                        <field name="fosfa"/>
+                        <field name="kosher"/>
+                        <field name="ownership_type"/>
+                        <field name="sub_type"/>
+                        <field name="sub_type2"/>
+                        <field name="baffle"/>
+                        <field name="top_dis_assembly"/>
+                        <field name="srv_type"/>
+                        <field name="srv_fix_type"/>
+                        <field name="switch_bl_req"/>                        
+                        <field name="trailer_type"/>                        
+                        <field name="accessories_req"/>                        
+                        <field name="pod_services"/>                        
+                        <field name="charges_purpose"/>                        
+                        <field name="restriction_flag"/>                        
+                        <field name="rental_type"/>                        
+                        <field name="serial_no_req"/>                         
                      </group>
                      <group>
                         <field name="invoice_control"/>
@@ -255,6 +325,26 @@
                         <field name="is_registered"/>
                         <field name="agent_service"/>  
                         <field name="validity_range"/>                        
+                        <field name="rup_disc"/>                        
+                        <field name="bot_out_hous"/>                        
+                        <field name="spill_box_cover"/>                        
+                        <field name="shyp_tube"/>                        
+                        <field name="frame_type"/>                        
+                        <field name="hand_rail"/>                        
+                        <field name="vacuum_valve"/>                        
+                        <field name="mfg_warranty"/>                        
+                        <field name="periodic_ins"/>                        
+                        <field name="pneu_test"/>                        
+                        <field name="type_ins"/>                        
+                        <field name="ins_status"/>                        
+                        <field name="insurance"/>                        
+                        <field name="rebate"/>                        
+                        <field name="ship_trip_type"/>                      
+                        <field name="pad_type"/>                        
+                        <field name="interim_halt"/>                        
+                        <field name="eligible_location"/>                        
+                        <field name="carrier_type"/>                        
+                        <field name="routing"/>                       
                      </group>
                   </group>
                 </sheet>
@@ -405,6 +495,18 @@
                         <field name="green_tax_validity_days"/>
                         <field name="green_tax_escalation_mail_days"/>
                         <field name="speed_limit_per"/>                     
+                        <field name="re_use_days"/>                     
+                        <field name="avg_trans_days"/>                     
+                        <field name="max_cross_wgt"/>                     
+                        <field name="tare_wgt"/>                     
+                        <field name="gross_wgt"/>                     
+                        <field name="moc_shell"/>                     
+                        <field name="tank_mawp"/>                     
+                        <field name="test_test_pres"/>                     
+                        <field name="steam_mawp"/>                     
+                        <field name="steam_test_pres"/>                     
+                        <field name="heat_area"/>                     
+                        <field name="steam_runs"/>                     
                      </group>
                      <group>
                         <field name="cr_days"/>
@@ -441,6 +543,16 @@
                         <field name="maximum_days"/>
                         <field name="interval"/>
                         <field name="distance"/>
+                        <field name="tank_capacity"/>
+                        <field name="tank_qty"/>
+                        <field name="pol_free_days"/>
+                        <field name="pod_free_days"/>
+                        <field name="lease_period"/>
+                        <field name="prod_weight_kg"/>
+                        <field name="free_hrs"/>
+                        <field name="age"/>
+                        <field name="transit_time"/>
+                        <field name="revision_no"/>
 
                      </group>
                   </group>
@@ -509,6 +621,13 @@
                         <field name="next_fc_date"/>
                         <field name="next_inspection_date"/>
                         <field name="road_tax_paid_date"/>
+                        <field name="last_followup_date"/>
+                        <field name="next_followup_date"/>
+                        <field name="issue_date"/>
+                        <field name="mfg_date"/>
+                        <field name="on_hire_date"/>
+                        <field name="off_hire_date"/>
+                        <field name="last_inspection_date"/>
                      </group>
                      <group>
                         <field name="to_date" options="{'warn_future': true}"/>
@@ -540,6 +659,14 @@
                         <field name="mhc_date"/>
                         <field name="next_mhc_date"/>
                         <field name="lic_expire_date"/>
+                        <field name="hyd_test_date"/>
+                        <field name="trip_start_date"/>
+                        <field name="bag_req_date"/>
+                        <field name="ls_valid_from_date"/>
+                        <field name="ls_valid_to_date"/>
+                        <field name="valid_from_date"/>
+                        <field name="valid_to_date"/>
+                        <field name="received_date"/>
                      </group>
                   </group>
                 </sheet>

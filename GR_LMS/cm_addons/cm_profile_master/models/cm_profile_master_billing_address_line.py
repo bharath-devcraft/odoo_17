@@ -5,6 +5,7 @@ from odoo.exceptions import UserError
 
 RES_COMPANY = 'res.company'
 CM_CITY = 'cm.city'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 class CmProfileMasterBillingAddressLine(models.Model):
     _name = 'cm.profile.master.billing.address.line'
@@ -23,14 +24,15 @@ class CmProfileMasterBillingAddressLine(models.Model):
     city_id = fields.Many2one(CM_CITY, string="City", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', country_id)]")
     state_id = fields.Many2one('res.country.state', string="State", ondelete='restrict')
     phone_no = fields.Char(string="Landline No / Ext", size=12, copy=False)
+    ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     email = fields.Char(string="Email", copy=False, size=252)
     fax = fields.Char(string="Fax", copy=False, size=12)
     website = fields.Char(string="Website", copy=False, size=100)
     cin_no = fields.Char(string="CIN No", copy=False, size=21)
     gst_no = fields.Char(string="GST No", copy=False, size=15)
-    eff_from_date = fields.Date(string="Effect From Date")
-    company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
-    
+    eff_from_date = fields.Date(string="Effective From Date")
+    company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True) 
+
     def validate_special_char(self, field_name, field_value):
         if field_value and is_special_char(self.env, field_value):
             raise UserError(_(f"Special character is not allowed in {field_name} field in billing address tab, Ref: {field_value}"))
@@ -40,8 +42,8 @@ class CmProfileMasterBillingAddressLine(models.Model):
         for line in self:
             line.validate_special_char('name', line.name)
             line.validate_special_char('short name', line.short_name)
-            line.validate_special_char('street', line.street)
-            line.validate_special_char('street1', line.street1)
+            line.validate_special_char('Address Line 1', line.street)
+            line.validate_special_char('Address Line 2', line.street1)
 
     @api.constrains('phone_no')
     def phone_no_validation(self):
@@ -54,13 +56,6 @@ class CmProfileMasterBillingAddressLine(models.Model):
         for line in self:
             if line.email and  not valid_email(line.email):
                 raise UserError(_(f"Email is invalid. Please enter the correct email in billing address tab, Ref : {line.email}"))
-        
-    @api.constrains('gst_no')
-    def gst_no_validation(self):
-        for line in self:
-            if line.gst_no and not valid_gst_no(line.gst_no):
-                raise UserError(_(f"Invalid GST number. Please enter the correct GST number in billing address tab, Ref : {line.gst_no}") )
-
 
     @api.constrains('pin_code')
     def pin_code_validation(self):
@@ -75,18 +70,22 @@ class CmProfileMasterBillingAddressLine(models.Model):
 
     @api.constrains('eff_from_date')
     def eff_from_date_validation(self):
+        print(self)
         for line in self:
+
             if line.eff_from_date:
                 if line.eff_from_date <= fields.Date.today():
-                    raise UserError(_("Past / Current date should not allow as effective from date in billing addresses"))
+                    raise UserError(_("The effective from date cannot be in past or current date. Please select a future date in billing address tab"))
                 
                 latest_record = line.search([('header_id', '=', line.header_id.id)],order="eff_from_date desc", limit=1)
                 if line.eff_from_date < latest_record.eff_from_date:
-                    raise UserError(_("System should not allow as lesser effective from date than existing effective from date in billing addresses"))
+                    raise UserError(_("The effective from date cannot be earlier than the existing effective from date in billing address tab"))
 
                 duplicate_count = line.search_count([('eff_from_date', '=', line.eff_from_date), ('header_id', '=', line.header_id.id)])
                 if duplicate_count > 1:
-                    raise UserError(_("Multiple billing addresses with the same effective from date are not allowed"))
+                    raise UserError(_("Multiple billing addresses cannot have the same effective from date. Please choose a different effective from date in billing address tab"))
+            else:
+                raise UserError(_("The effective from date is mandatory for the address added in the billing address tab. Please add it to proceed further"))
 
     @api.constrains('cin_no')
     def cin_no_validation(self):
@@ -110,14 +109,29 @@ class CmProfileMasterBillingAddressLine(models.Model):
             self.country_code = self.country_id.code
             self.city_id = False
             self.state_id = False
+            self.pin_code = False
+            record = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1)
+            c_code = record.id if record else False
+            self.ph_cc_id = c_code
         else:
             self.country_code = False
             self.city_id = False
             self.state_id = False
+            self.ph_cc_id = False
+            self.pin_code = False
     
     @api.onchange('city_id')
     def onchange_city_id(self):
         if self.city_id:
             self.state_id = self.city_id.state_id
+            self.pin_code = False
         else:
             self.state_id = False
+            self.pin_code = False
+
+    @api.onchange('city_id','state_id','header_id.pan_no','header_id.gst_category')
+    def onchange_gst_category(self):
+        if self.state_id and self.header_id.pan_no and self.header_id.gst_category=='registered':
+            self.gst_no = str(self.state_id.short_name) + str(self.header_id.pan_no)
+        else:
+            self.gst_no = False

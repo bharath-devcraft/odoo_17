@@ -21,7 +21,7 @@ class CtNocostTransactionLine(models.Model):
     status = fields.Selection(related='header_id.status', store=True, c_rule=True)
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 
-    line_ids = fields.One2many('ct.nocost.transaction.serialno.line', 'header_id', string='S/N Details', copy=True, c_rule=True)
+    line_ids = fields.One2many('ct.nocost.transaction.serialno.line', 'header_id', string='Serial Number', copy=True, c_rule=True)
 
     @api.onchange('product_id')
     def onchange_product(self):

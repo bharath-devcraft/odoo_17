@@ -14,13 +14,13 @@ This module serves as a base for custom User Management modules within Odoo. It 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
-    'website': "https://www.goodrich.co",
+    'website': "https://catalystsolutions.sg",
     'category': 'Custom Modules/custom_modules',
     'application' : True,
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['account','base','mail'],
+    'depends': ['account','base','mail','cm_city'],
 
     # always loaded
     'data': [

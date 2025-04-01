@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Rejection Remark",
+    'name': "Rejection Reason",
 
-    'summary': "This is a custom rejection remark",
+    'summary': "This is a custom Rejection reason",
 
-    'description': """Scope of this module to fulfill the necessary features related to rejection remark form.""",
+    'description': """Scope of this module to fulfill the necessary features related to Rejection reason form.""",
 
     'author': "Bharath",
-    'website': "https://www.goodrich.co",
+    'website': "https://catalystsolutions.sg",
     'category': 'Custom Modules/custom_modules',
     'application' : True,
     'version': '0.1',

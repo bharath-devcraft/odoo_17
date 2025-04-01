@@ -17,7 +17,6 @@ class CmTax(models.Model):
 
 	
 	entry_mode = fields.Selection([('auto', 'Auto'), ('manual', 'Manual')],'Entry Mode',readonly=True,default='manual') 
-
 	status = fields.Selection([
 		('draft', 'Draft'),
 		('active', 'Active'),
@@ -56,6 +55,35 @@ class CmTax(models.Model):
 		'res.users', 'Last Updated By', readonly=True)
 		
 	line_ids = fields.One2many('cm.uom.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
+	
+	@api.depends('company_id')
+	def _compute_country_id(self):
+		for tax in self:
+			tax.country_id = False
+			
+	@api.depends('company_id', 'country_id')
+	def _compute_tax_group_id(self):
+		self.tax_group_id = False
+		
+			
+	@api.depends('type_tax_use', 'tax_scope')
+	@api.depends_context('append_type_to_tax_name')
+	def _compute_display_name(self):
+		type_tax_use = dict(self._fields['type_tax_use']._description_selection(self.env))
+		tax_scope = dict(self._fields['tax_scope']._description_selection(self.env))
+		for record in self:
+			name = record.name
+			if self._context.get('append_type_to_tax_name'):
+				name += ' (%s)' % type_tax_use.get(record.type_tax_use)
+			if record.tax_scope:
+				name += ' (%s)' % tax_scope.get(record.tax_scope)
+			if len(self.env.companies) > 1 and self.env.context.get('params', {}).get('model') == 'product.template':
+				name += ' (%s)' % record.company_id.display_name
+			if record.country_id:
+				if record.country_id != record.company_id._accessible_branches()[:1].account_fiscal_country_id:
+					name += ' (%s)' % record.country_code
+			
+			record.display_name = name
 	
 	@validation    
 	def entry_approve(self):
@@ -118,20 +146,7 @@ class CmTax(models.Model):
 			the transaction views.
 		"""
 
-		result = {
-			'all_draft': 0,
-			'all_active': 0,
-			'all_inactive': 0,
-			'all_editable': 0,
-			'my_draft': 0,
-			'my_active': 0,
-			'my_inactive': 0,
-			'my_editable': 0,
-			'all_today_count': 0,
-			'all_today_value': 0,
-			'my_today_count': 0,
-			'my_today_value': 0,
-		}
+		result = {}
 		
 		
 		#counts

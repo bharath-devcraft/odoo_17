@@ -113,7 +113,7 @@
                 <div style="color:blue;">
                     <marquee t-on-mouseover="stopMarquee" t-on-mouseout="startMarquee">
                         <img src="custom_properties/static/src/img/trans_marquee.png" width="60" height="40" alt="Ship" />
-                            Today's new entry count is <t t-out="transactionData['today_highest_tot']"/> and ref no is <t t-out="transactionData['ref_no']"/>
+                            Today highest entry value is <t t-out="transactionData['today_highest_tot']"/> and ref no is <t t-out="transactionData['ref_no']"/>
                     </marquee>
                 </div>
             </div>

@@ -11,6 +11,7 @@ CM_PROFILE_MASTER='cm.profile.master'
 CM_CITY = 'cm.city'
 TIME_FORMAT='%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 CUSTOM_STATUS = [
         ('draft', 'Draft'),
@@ -20,6 +21,7 @@ CUSTOM_STATUS = [
 
 ENTRY_MODE =  [('manual','Manual'),
                ('auto', 'Auto')]
+ENTRY_TYPE = [('new','New'),('name_change', 'Name Change')]
 
 YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 
@@ -37,9 +39,9 @@ class CmProfileMaster(models.Model):
     short_name = fields.Char(string="Short Name", copy=False, help="Maximum 4 char is allowed and will accept upper case only", size=4)
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-    remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+    remarks = fields.Text(string="Remarks", copy=False)
     
-
+    entry_type = fields.Selection(selection=ENTRY_TYPE, string="Entry Type", copy=False, default="new", tracking=True, help="* New means New master entry\n* Name change means has to use the same PAN, GST number, and name getting changed")
     contact_person = fields.Char(string="Contact Person", size=50)
     mobile_no = fields.Char(string="Mobile No", size=15, copy=False)
     whatsapp_no = fields.Char(string="WhatsApp No",copy=False, size=15)
@@ -55,8 +57,12 @@ class CmProfileMaster(models.Model):
     country_code = fields.Char(string="Country Code", copy=False, size=252)
     city_id = fields.Many2one(CM_CITY, string="City", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', country_id)]")
     state_id = fields.Many2one('res.country.state', string="State", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', country_id)]")
-    currency_id = fields.Many2one('res.currency', string="Currency", copy=False, default=lambda self: self.env.company.currency_id.id, ondelete='restrict', readonly=True, tracking=True)
-    
+    currency_id = fields.Many2one('res.currency', string="Currency", copy=False, ondelete='restrict', readonly=True, tracking=True)
+    mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+
+    parent_company_id = fields.Many2one(CM_PROFILE_MASTER, string="Parent Company", domain=[('status', '=', 'active'),('active_trans', '=', True)])
     tds = fields.Selection(selection=YES_OR_NO, string="TDS Applicable", copy=False)
     tan_no = fields.Char(string="TAN", size=20)
     cst_no = fields.Char(string="CST No", copy=False, size=20)
@@ -70,10 +76,12 @@ class CmProfileMaster(models.Model):
     cin_no = fields.Char(string="CIN No", copy=False, size=21)
     same_as_bill_address = fields.Boolean(string="Same as Billing Address", default=False)
     same_as_del_address = fields.Boolean(string="Same as Delivery Address", default=False)
+    same_as_mobile = fields.Boolean(string="Same as Mobile Number", default=False, help="Click to apply same mobile number to whatsapp number")
+    
 
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -179,14 +187,15 @@ class CmProfileMaster(models.Model):
             if rec_ids:
                 raise UserError(_("TIN number must be Unique"))
 
-    @api.constrains('pan_no')
+    @api.constrains('pan_no','entry_type')
     def pan_no_validation(self):
         if self.pan_no:
             if not valid_pan_no(self.pan_no):
                 raise UserError(_("Invalid PAN number. Please enter the correct PAN number"))
-            existing_record = self.env[CM_PROFILE_MASTER].search_count([('pan_no', '=', self.pan_no),('id', '!=', self.id), ('company_id', '=', self.company_id.id)])
-            if existing_record:
-                raise UserError(_("PAN number must be unique"))
+            if self.entry_type != 'name_change':
+                existing_record = self.env[CM_PROFILE_MASTER].search_count([('pan_no', '=', self.pan_no),('id', '!=', self.id), ('company_id', '=', self.company_id.id)])
+                if existing_record:
+                    raise UserError(_("PAN number must be unique"))
 
     @api.constrains('tan_no')
     def tan_no_validation(self):
@@ -214,13 +223,12 @@ class CmProfileMaster(models.Model):
             if self.env[CM_PROFILE_MASTER].search_count([('aadhaar_no', '=', self.aadhaar_no), ('id', '!=', self.id), ('company_id', '=', self.company_id.id)]):
                     raise UserError(_("Aadhaar number must be unique"))
 
-    @api.constrains('gst_no')
+    @api.constrains('gst_no','entry_type')
     def gst_no_validation(self):
         if self.gst_no:
             if not valid_gst_no(self.gst_no):
                 raise UserError(_("Invalid GST number. Please enter the correct GST number"))
-            
-            if self.gst_category == 'yes':
+            if self.gst_category == 'registered' and self.entry_type != 'name_change':
                 existing_gst = self.env[CM_PROFILE_MASTER].search_count([('gst_no', '=', self.gst_no), ('id', '!=', self.id), ('company_id', '=', self.company_id.id)])
                 if existing_gst > 0:
                     raise UserError(_("GST number must be unique"))
@@ -229,7 +237,7 @@ class CmProfileMaster(models.Model):
     def cin_no_validation(self):
         if self.cin_no:
             if is_special_char(self.env,  self.cin_no):
-                raise UserError(_(f"Special character is not allowed in CIN number field"))
+                raise UserError(_("Special character is not allowed in CIN number field"))
             if ' ' in self.cin_no:
                 raise UserError(_(f"Space is not allowed in CIN number field in delivery address tab, Ref: {self.cin_no}"))
 
@@ -250,23 +258,52 @@ class CmProfileMaster(models.Model):
             if len(emails) < (1 + len([item for item in self.line_ids if item.email])):
                 raise UserError(_("Duplicate emails are not allowed within the provided contact details"))
     
+    @api.depends('state_id','pan_no')
+    def _gst_no_generation(self):
+        for rec in self:
+            if rec.state_id and rec.pan_no:
+                rec.gst_no = str(rec.state_id.short_name) + str(rec.pan_no)
+
+
     @api.onchange('country_id')
     def onchange_country_id(self):
         if self.country_id:
             self.country_code = self.country_id.code
+            self.currency_id = self.country_id.currency_id.id
             self.city_id = False
             self.state_id = False
+            self.pin_code = False
+            record = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1)
+            c_code = record.id if record else False
+            self.mb_cc_id = c_code
+            self.wh_cc_id = c_code
+            self.ph_cc_id = c_code
         else:
             self.country_code = False
             self.city_id = False
             self.state_id = False
+            self.pin_code = False
+            self.currency_id = False
+            self.mb_cc_id = False
+            self.wh_cc_id = False
+            self.ph_cc_id = False
     
     @api.onchange('city_id')
     def onchange_city_id(self):
         if self.city_id:
             self.state_id = self.city_id.state_id
+            self.pin_code = False
         else:
             self.state_id = False
+            self.pin_code = False
+    
+    @api.onchange('city_id','state_id','pan_no','gst_category')
+    def onchange_gst_category(self):
+        if self.state_id and self.pan_no and self.gst_category=='registered':
+            self.gst_no = str(self.state_id.short_name) + str(self.pan_no)
+        else:
+            self.gst_no = False
+        
 
     @api.onchange('same_as_bill_address')
     def onchange_same_as_bill_address(self):
@@ -316,10 +353,15 @@ class CmProfileMaster(models.Model):
         else:
             self.line_ids_d = [(5, 0, 0)]
 
+    @api.onchange('same_as_mobile','mobile_no')
+    def onchange_same_as_mobile(self):
+        if self.same_as_mobile:
+            self.whatsapp_no = self.mobile_no
+        else:
+            self.whatsapp_no = False
+
     def validations(self):
         warning_msg = []
-        if not self.line_ids:
-            warning_msg.append("System not allow to approve with empty additional contact details")
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
         if not is_mgmt:
             res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
@@ -386,20 +428,7 @@ class CmProfileMaster(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         
         cm_profile_master = self.env[CM_PROFILE_MASTER]

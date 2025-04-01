@@ -58,7 +58,13 @@ class CmTaxGroup(models.Model):
 		'res.users', 'Last Updated By', readonly=True)
 		
 	line_ids = fields.One2many('cm.uom.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
-		
+
+
+	@api.depends('company_id')
+	def _compute_country_id(self):
+		for tax in self:
+			tax.country_id = False		
+	
 	@validation    
 	def entry_approve(self):
 		""" entry_approve """
@@ -120,20 +126,7 @@ class CmTaxGroup(models.Model):
 			the transaction views.
 		"""
 
-		result = {
-			'all_draft': 0,
-			'all_active': 0,
-			'all_inactive': 0,
-			'all_editable': 0,
-			'my_draft': 0,
-			'my_active': 0,
-			'my_inactive': 0,
-			'my_editable': 0,
-			'all_today_count': 0,
-			'all_today_value': 0,
-			'my_today_count': 0,
-			'my_today_value': 0,
-		}
+		result = {}
 		
 		
 		#counts

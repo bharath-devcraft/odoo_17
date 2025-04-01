@@ -31,46 +31,87 @@
 
             </header>
             <sheet>
+                <widget name="web_ribbon" title="Open" bg_color="bg-info" invisible = "status != 'open'"/>
                 <widget name="web_ribbon" title="Won" bg_color="bg-success" invisible = "status != 'won'"/>
                 <widget name="web_ribbon" title="Lost" bg_color="bg-danger" invisible = "status != 'lost'"/>
                 <group>
                     <group>
                         <field name="name" readonly = "1" force_save="1" class="animate-charcter" widget="CopyClipboardChar"/>
                         <field name="entry_date" string="Lead Date" required = "1" readonly = "status not in ('draft')"/>
+                        <field name="enq_source_id" required="1" readonly = "status not in ('draft')" options="{'no_create': True}"/>
+                        <field name="lead_type" required = "1" readonly = "status not in ('draft')"/>
                         <field name="customer_type" required = "1" readonly = "status not in ('draft')"/>
                         <field name="customer_id" force_save="1" required = "customer_type == 'existing'" invisible = "customer_type != 'existing'" readonly = "status not in ('draft')" options="{'no_create': True}"/>
-                        <field name="customer_name" force_save="1" required = "customer_type == 'new'" invisible = "customer_type != 'new'" readonly = "status not in ('draft')" />
-                        <field name="lead_type" required = "1" readonly = "status not in ('draft')"/>
-                        <field name="contact_person" required = "1" readonly = "status not in ('draft','open')"/>
-                        <field name="mobile_no" widget="numeric" required="1" readonly = "status not in ('draft','open')"/>
-                        <field name="email" required="1" readonly = "status not in ('draft','open')"/>
+                        <field name="customer_name" force_save="1" required = "customer_type == 'new'" invisible = "customer_type != 'new'" readonly = "status not in ('draft')" widget="no_special_char"/>
+                        <field name="customer_type_ids" required="1" widget="many2many_tags" readonly = "status not in ('draft')" options="{'no_create': True}"/>
+                        <field name="customer_division" readonly = "status not in ('draft')"/>
+                        <field name="bus_vert_id" required="1" readonly = "status not in ('draft')" options="{'no_create': True}"/>
+                        <field name="appointment_type" required = "1" readonly = "status not in ('draft')"/>
+                         <field name="contact_person" required = "1" readonly = "status not in ('draft')" force_save="1" widget="char_only" />
+                        <field name="designation" readonly = "status not in ('draft')" widget="proper_case" />
                     </group>
                     <group>
-                        <field name="address" force_save="1" required="1" readonly = "status not in ('draft','open')"/>
-                        <field name="enq_source_id" required="1" readonly = "status not in ('draft','open')" options="{'no_create': True}"/>
-                        <field name="service_name" required="1" readonly = "status not in ('draft','open')"/>
+
+                        <label for= "mobile_no" />
+                        <div>
+                            <div class="o_address_format" style="display: flex; align-items: flex-start;">
+                                <field name="mb_cc_id"  invisible="country_id == False or mb_cc_id == False" style="width: 15%%"  options="{'no_create': True,'no_open': True}" force_save="1" readonly = "1"/>
+                                <field name="mobile_no" style="width: 85%%" required="1" readonly = "status not in ('draft','editable')" force_save="1" widget="numeric"/>
+                            </div>
+                        </div>
+                        <field name="email" required="1" readonly = "status not in ('draft')" force_save="1"/>
+                        <field name="address" force_save="1" required="1" readonly = "status not in ('draft')"/>
+                        <field name="country_id" options="{'no_create': True}" force_save="1" required = "customer_type == 'new'" readonly = "customer_type != 'new' or status not in ('draft')"/>
                         <field name="product" string="Product List" readonly = "status not in ('draft','open')"/>
-                        <field name="last_followup_date" force_save="1" invisible="status == 'draft'" readonly = "1"/>
-                        <field name="feedback" string="Last Customer Feedback" force_save="1" invisible="status == 'draft'" readonly = "1"/>
+                        <field name="product_sds_ids" widget="single_file_binary" readonly = "status not in ('open')" invisible = "status == 'draft'" options="{'no_create_edit': True}"/>
+                        <field name="service_ids" widget="many2many_tags" options="{'no_create': True}" readonly = "status not in ('draft','open')"/>
+                        <field name="sales_exec_user_id" options="{'no_create': True}" required = "1" readonly = "status not in ('draft')" context="{'tree_view_ref': 'cm_user_mgmt.m_tree_view_users','search_view_ref': 'cm_user_mgmt.m_search_view_users'}" />
+                        <field name="sec_sales_exec_user_id" options="{'no_create': True}" readonly = "status not in ('draft','open')" context="{'tree_view_ref': 'cm_user_mgmt.m_tree_view_users','search_view_ref': 'cm_user_mgmt.m_search_view_users'}"/>
+                        <field name="last_followup_date" force_save="1" invisible="not last_followup_date" readonly = "1"/>
+                        <field name="feedback" string="Last Customer Feedback" force_save="1" invisible="not feedback" readonly = "1"/>
                         <field name="next_followup_date" force_save="1" required="status == 'draft'" readonly = "status != 'draft'"/>
-                        <field name="status" readonly = "1" force_save="1" invisible="1"/>
+                        <field name="tat" readonly = "1" invisible="1"/>
+                        <field name="status" string="Lead Status" readonly = "1" force_save="1" invisible="1"/>
+                        <field name="readonly_flag" readonly = "0" force_save="1" invisible="1"/>
                     </group>
                 </group>
                 
                 <notebook>
-                    <page string="Progress Log" >
-                        <field name="line_ids" string="Progress Log" colspan="4" nolabel="1" readonly = "status not in ('draft','open')">
-                            <tree string="Progress Log" editable="bottom">
-                                <field name="status" column_invisible="1"/>
+                    <page string="Service Details">
+                        <field name="line_ids_c" string="Service Details" colspan="4" nolabel="1" readonly = "status not in ('draft','open')">
+                            <tree string="Service Details" editable="bottom">
                                 <field name="header_id" column_invisible="1"/>
-                                <field name="next_followup_date" required="1" readonly="readonly_flag == True" width="200px"/>
-                                <field name="remarks" string="Notes" required="1" readonly="readonly_flag == True"/>
-                                <field name="user_id" string="Added By"/>
-                                <field name="crt_date" string="Added Date"/>
-                                <field name="readonly_flag" force_save="1" column_invisible="1"/>
+                                <field name="is_select"/>
+                                <field name="service_id" options="{'no_create': True}" required="entry_mode != 'auto'" readonly="entry_mode == 'auto'" force_save="1"/>
+                                <field name="tank_count" string="Tank Count" width="100px"/>
+                                <field name="business_value" width="120px" />
+                                <field name="currency_id" options="{'no_create': True}" width="100px" required="business_value" />
+                                <field name="product_name" width="120px"/>
+                                <field name="pol" width="120px"/>
+                                <field name="pod" width="120px"/>                                
+                                <field name="status" width="100px" readonly="1" force_save="1"/>
+                                <field name="rej_remark_id" options="{'no_create': True}" string="Lost Reason" readonly="1"/>
+                                <field name="lost_remark" string="Lost Remarks" readonly="1"/>
+                                <field name="entry_mode" force_save="1" column_invisible="1"/>
                             </tree>
                         </field>
                     </page>
+
+                    <page string="Progress Log" invisible="status == 'draft'" >
+                        <field name="line_ids" string="Progress Log" colspan="4" nolabel="1" readonly="readonly_flag">
+                            <tree string="Progress Log" editable="bottom">
+                                <field name="status" column_invisible="1"/>
+                                <field name="header_id" column_invisible="1"/>
+                                <field name="remarks" string="Notes" required="1"/>
+                                <field name="next_followup_date" required="1" width="200px"/>
+                                <field name="user_id" string="Added By" />
+                                <field name="crt_date" string="Added Date"/>
+                                <field name="readonly_flag" force_save="1" column_invisible="1"/>
+
+                            </tree>
+                        </field>
+                    </page>
+
                     <page string="Attachments" >
                         <field name="line_ids_a" string="Attachments" colspan="4" nolabel="1" readonly = "status not in ('draft','open')">
                             <tree string="Attachments" editable="bottom">
@@ -96,11 +137,13 @@
                                 <field name="company_id" force_save="1"/> 
                                 <field name="fy_control_date" readonly = "1" force_save="1"/>
                                 <field name="active_rpt"/>
+                                <field name="sales_lead_id" readonly = "1" force_save="1"/>
                             </group>
                             <group>
                                 <field name="active" widget="boolean_toggle"/>
                                 <field name="entry_mode" force_save="1"/>
                                 <field name="active_trans"/>
+                                <field name="progress_status" readonly = "1" force_save="1"/>
                             </group>
                         </group>
                         <group>
@@ -152,6 +195,9 @@
                     </page>
                 </notebook>
                 <group>
+                    <field name="visitor_summary"/>                    
+                    <field name="con_opp"/>
+                    <field name="company_physical"/>
                     <field name="remarks"/>
                 </group>
                 <div class="oe_chatter">
@@ -174,19 +220,20 @@
                 decoration-success = "status == 'won'"
                 decoration-muted = "status == 'lost'">
 
+                <field name="tat" width="10px"/>
                 <field name="name" decoration-bf="1"/>
                 <field name="entry_date" string="Lead Date"/>
-                <field name="customer_type"/>
+                <field name="customer_type" string="Type"/>
                 <field name="customer_name"/>
                 <field name="contact_person"/>
                 <field name="lead_type"/>
-                <field name="mobile_no"/>
                 <field name="confirm_user_id" string="Sales Executive"/>
-                <field name="status" widget="badge" 
+                <field name="status" string="Lead Status" widget="badge" 
                     decoration-info = "status == 'draft'"
                     decoration-bf = "status == 'open'"
                     decoration-success = "status == 'won'"
                     decoration-muted = "status == 'lost'"/>
+                <field name="progress_status" widget="badge"/>
             </tree>
         </field>
     </record>
@@ -203,19 +250,20 @@
                 decoration-success = "status == 'won'"
                 decoration-muted = "status == 'lost'">
 
+                <field name="tat" width="10px"/>
                 <field name="name" decoration-bf="1"/>
                 <field name="entry_date" string="Lead Date"/>
-                <field name="customer_type"/>
+                <field name="customer_type" string="Type"/>
                 <field name="customer_name"/>
                 <field name="contact_person"/>
                 <field name="lead_type"/>
-                <field name="mobile_no"/>
                 <field name="confirm_user_id" string="Sales Executive"/>
-                <field name="status" widget="badge" 
+                <field name="status" string="Lead Status" widget="badge" 
                     decoration-info = "status == 'draft'"
                     decoration-bf = "status == 'open'"
                     decoration-success = "status == 'won'"
                     decoration-muted = "status == 'lost'"/>
+                <field name="progress_status" widget="badge"/>
             </tree>
         </field>
     </record>
@@ -231,6 +279,7 @@
                 <field name="mobile_no"/>
                 <field name="product" string="Product List"/>
                 <field name="feedback" string="Last Customer Feedback"/>
+                <field name="sales_lead_id"/>
 
                 <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                 <filter name="Open" domain="[('status', '=', 'open')]"/>
@@ -245,14 +294,15 @@
                 
                 <group expand="0" string="Group By">
                     <filter string="Lead Date" name="entry_date" domain="[]" context="{'group_by': 'entry_date'}"/>
-                    <filter string="Customer Type" name="customer_type" domain="[]" context="{'group_by': 'customer_type'}"/>
+                    <filter string="Customer / Service Type" name="customer_type" domain="[]" context="{'group_by': 'customer_type'}"/>
                     <filter string="Customer Name" name="customer_name" domain="[]" context="{'group_by': 'customer_name'}"/>
                     <filter string="Lead Type" name="lead_type" domain="[]" context="{'group_by': 'lead_type'}"/>
                     <filter string="Lead Source" name="enq_source_id" domain="[]" context="{'group_by': 'enq_source_id'}"/>
                     <filter string="Sales Executive" name="confirm_user_id" domain="[]" context="{'group_by': 'confirm_user_id'}"/>
                     <filter string="Next Follow Up Date" name="next_followup_date" domain="[]" context="{'group_by': 'next_followup_date'}"/>
                     <filter string="Lost Reason" name="rej_remark_id" domain="[]" context="{'group_by': 'rej_remark_id'}"/>
-                    <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                    <filter string="Lead Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                    <filter string="Progress Status" name="progress_status" domain="[]" context="{'group_by': 'progress_status'}"/>
                     <filter string="Entry Mode" name="entry_mode" domain="[]" context="{'group_by': 'entry_mode'}"/>
                 </group>
             </search>
@@ -267,7 +317,7 @@
                 <field name="name"/>
                 <field name="entry_date"/>
                 <field name="customer_name"/>
-                <field name="service_name"/>
+                <field name="mobile_no"/>
                 <field name="confirm_user_id"/>
                 <field name="last_followup_date"/>
                 <field name="status"/>
@@ -289,8 +339,8 @@
                                     <div class="kanban-cell" t-att-title="'Customer Name'">
                                         <i class="fa fa-user" style="color: #E91E63;" title="Customer Icon"></i> <field name="customer_name"/>
                                     </div>
-                                    <div class="kanban-cell" t-att-title="'Required Services'">
-                                        <i class="fa fa-cogs" style="color: #4CAF50;" title="Service Icon"></i> <field name="service_name"/>
+                                    <div class="kanban-cell" t-att-title="'Mobile'">
+                                        <i class="fa fa-cogs" style="color: #4CAF50;" title="Service Icon"></i> <field name="mobile_no"/>
                                     </div>
                                 </div>
                                 <div class="kanban-row">
@@ -302,7 +352,7 @@
                                     </div>
                                 </div>
                                 <div class="kanban-row">
-                                    <div class="kanban-cell" t-att-title="'Status'">
+                                    <div class="kanban-cell" t-att-title="'Lead Status'">
                                         <field name="status" widget="label_selection" options="{'classes': {'draft': 'info', 'approved': 'default', 'won': 'success', 'lost': 'primary'}}"/>
                                     </div>
                                 </div>
@@ -335,7 +385,7 @@
         <field name="context">{}</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
-            No record found. Let's create one!
+            No record found. Let's create one !
           </p><p>
             This is for base transaction.
           </p>
@@ -369,6 +419,36 @@
         <field name="view_id" ref="ct_sales_lead.ct_sales_lead_graph"/>
         <field name="act_window_id" ref="ct_sales_lead_win_action"/>
     </record>
+
+    <record id="ct_sales_lead_service_details_wizard_form" model="ir.ui.view">
+        <field name="name">Wizard From View</field>
+        <field name="model">ct.sales.lead.service.details.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Service Details">
+                <sheet>
+                    <group>
+                        <div style="overflow-x: auto; white-space: nowrap; width:900px;">
+                            <field name="line_ids" string="Service Details" colspan="4" nolabel="1">
+                                <tree editable="bottom" create="0" delete="0">
+                                    <field name="header_id" column_invisible="1" force_save="1"/>
+                                    <field name="details_id" column_invisible="1" force_save="1"/>
+                                    <field name="is_select" column_invisible="1" force_save="1"/>
+                                    <field name="service_id" options="{'no_create': True}" readonly="1" force_save="1" width="150"/>
+                                    <field name="status" required="1" force_save="1" width="100px"/>
+                                    <field name="rej_remark_id" string="Lost Reason" required="status == 'lost'" readonly="status != 'lost'" options="{'no_create': True}" force_save="1" width="200"/>
+                                    <field name="lost_remark" string="Lost Remark" required="status == 'lost'" readonly="status != 'lost'" options="{'no_create': True}" force_save="1" width="250"/>
+                                </tree>
+                            </field>
+                        </div>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Submit" type="object" name="wizard_submit_button" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+   </record>
 
     <menuitem name="CRM" id="ct_crm_m_root" web_icon="ct_sales_lead,static/description/crm.png" sequence="6"/>
 

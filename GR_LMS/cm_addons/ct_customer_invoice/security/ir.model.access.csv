@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_customer_invoice,ct.customer.invoice,model_ct_customer_invoice,custom_properties.group_erp_admin,1,1,1,1
+access_ct_customer_invoice_attachment_line,ct.customer.invoice.attachment.line,model_ct_customer_invoice_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_customer_invoice_acc_line,ct.customer.invoice.acc.line,model_ct_customer_invoice_acc_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_customer_invoice_acc_details_line,ct.customer.invoice.acc.details.line,model_ct_customer_invoice_acc_details_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_customer_invoice_pri_details_line,ct.customer.invoice.pri.details.line,model_ct_customer_invoice_pri_details_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_customer_invoice_terms_conditions_line,ct.customer.invoice.terms.conditions.line,model_ct_customer_invoice_terms_conditions_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_customer_invoice_tax_line,ct.customer.invoice.tax.line,model_ct_customer_invoice_tax_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_customer_invoice_receipt_details_line,ct.customer.invoice.receipt.details.line,model_ct_customer_invoice_receipt_details_line,custom_properties.group_erp_admin,1,1,1,1
+

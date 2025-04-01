@@ -11,13 +11,12 @@ CM_CARRIER='cm.carrier'
 CM_CITY = 'cm.city'
 TIME_FORMAT='%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 CUSTOM_STATUS = [
         ('draft', 'Draft'),
         ('editable', 'Editable'),
         ('active', 'Active'),
-        ('temporarily_blocked', 'Temporarily Blocked'),
-        ('black_listed', 'Black Listed'),
         ('inactive', 'Inactive')]
 
 ENTRY_MODE =  [('manual','Manual'),
@@ -25,11 +24,15 @@ ENTRY_MODE =  [('manual','Manual'),
 
 YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 
+SURVEYOR_INSPECTION = [('required', 'Required'), ('not_required', 'Not Required')]
+
 ENTRY_MODE_OPTIONS = [('new', 'New'), ('name_change', 'Name Change')]
 
 CARRIER_TYPE_OPTIONS = [('mlo', 'MLO'), ('feeder', 'Feeder'), ('costal', 'Costal'), ('all', 'All')]
 
 FREQUENCY_OF_SAILING_OPTION = [('weekly', 'Weekly'), ('bi_weekly', 'Bi-Weekly'), ('monthly', 'Monthly')]
+
+VALIDITY_RANGE = [('perpetual', 'Perpetual/Life Time'), ('limited', 'Limited')]
 
 LEVEL_OF_SERVICE_PROVIDER_OPTION = [('1pl', '1PL'), ('2pl', '2PL'), ('3pl', '3PL'), ('4pl', '4PL'), ('5pl', '5PL')]
 
@@ -58,10 +61,10 @@ class CmCarrier(models.Model):
     service_prov_level = fields.Selection(selection=LEVEL_OF_SERVICE_PROVIDER_OPTION, string="Level Of Service Provider", copy=False)
     digital_service_name = fields.Selection(selection=DIGITAL_SERVICE_NAME_OPTION, string="Digital Service Name", copy=False)
     is_registered = fields.Selection(selection=YES_OR_NO, string="Is Registered Carrier", copy=False)
+    surveyor_inspection = fields.Selection(selection=SURVEYOR_INSPECTION, string="Surveyor Inspection", copy=False)
     cin_no = fields.Char(string="CIN No", copy=False, size=21)
     usci_no = fields.Char(string="USCI No", copy=False, size=252)
     trc_no = fields.Char(string="Tax Reg No(TRC)", copy=False, size=252)
-    gst_applicable =  fields.Selection(selection=YES_OR_NO, string="GST Applicable", copy=False)
     gst_no = fields.Char(string="GST No", copy=False, size=15)
     vat_no = fields.Char(string="VAT No", copy=False, size=20)
     fmc_no = fields.Char(string="FMC No", copy=False, size=252)
@@ -83,28 +86,21 @@ class CmCarrier(models.Model):
     pin_code = fields.Char(string="Zip Code", copy=False, size=10)
     pan_no = fields.Char(string="PAN No", copy=False, size=10)	    
     country_id = fields.Many2one('res.country', string="Country", ondelete='restrict')
+    mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    country_code = fields.Char(string="Country Code", copy=False, size=252)
+    same_as_mobile = fields.Boolean(string="Same as Mobile No", default=False, help="Click to apply same mobile number to whatsapp number")
     
     #Business Information
-    contract_agree = fields.Selection(selection=YES_OR_NO, string="Carrier Contract", copy=False)
-    con_start_date= fields.Date(string="Contract Start Date")
-    con_end_date = fields.Date(string="Contract End Date")
-    
-    #Payment Centre Details
-    payment_contact_person = fields.Char(string="Contact Person", size=50)
-    payment_designation = fields.Char(string="Designation", size=252)
-    payment_mobile_no = fields.Char(string="Mobile No", size=15, copy=False)
-    payment_whatsapp_no = fields.Char(string="WhatsApp No",copy=False, size=15)        
-    payment_email = fields.Char(string="Email", copy=False, size=252)
-    payment_street = fields.Char(string="Address Line 1", size=252)
-    payment_street1 = fields.Char(string="Address Line 2", size=252)
-    payment_city_id = fields.Many2one(CM_CITY, string="City", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    payment_state_id = fields.Many2one('res.country.state', string="State", ondelete='restrict')
-    payment_pin_code = fields.Char(string="Zip Code", copy=False, size=10)
-    payment_country_id = fields.Many2one('res.country', string="Country", ondelete='restrict')
+    contract_agree = fields.Selection(selection=YES_OR_NO, string="Contractual Agreements", copy=False)
+    validity_range = fields.Selection(selection=VALIDITY_RANGE, string="Validity Range", copy=False)
+    from_date= fields.Date(string="Contract Start Date")
+    to_date = fields.Date(string="Contract End Date")
     
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -122,6 +118,7 @@ class CmCarrier(models.Model):
     line_ids_a = fields.One2many('cm.carrier.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
     line_ids_b = fields.One2many('cm.carrier.bank.details.line', 'header_id', string="Bank Details", copy=True, c_rule=True)    
     line_ids_c = fields.One2many('cm.carrier.checklist.line', 'header_id', string="Checklist", copy=True, c_rule=True)
+    line_ids_d = fields.One2many('cm.carrier.payment.centre.details.line', 'header_id', string="Payment Centre Details", copy=True, c_rule=True)
     
     @api.constrains('name')
     def name_validation(self):
@@ -162,6 +159,15 @@ class CmCarrier(models.Model):
                     raise UserError(_("Mobile number(IN) is invalid. Please enter correct mobile number"))
             if not valid_mobile_no(self.mobile_no):
                 raise UserError(_("Mobile number is invalid. Please enter correct mobile number"))
+                
+    @api.constrains('whatsapp_no')
+    def whatsapp_no_validation(self):
+        if self.whatsapp_no and self.country_id:
+            if self.country_id.code == 'IN':
+                if not(len(str(self.whatsapp_no)) == 10 and self.whatsapp_no.isdigit() == True):
+                    raise UserError(_("Whatsapp number(IN) is invalid. Please enter correct whatsapp no number"))
+            if not valid_mobile_no(self.whatsapp_no):
+                raise UserError(_("Whatsapp number is invalid. Please enter correct whatsapp no number"))
 
     @api.constrains('email')
     def email_validation(self):
@@ -200,7 +206,7 @@ class CmCarrier(models.Model):
     def gst_no_validation(self):
         if self.gst_no:
             if not valid_gst_no(self.gst_no):
-                raise UserError(_("Invalid GST number. Please enter the correct GST number"))
+                raise UserError(_("Invalid gst number. Please enter the correct gst number"))
 
 
     @api.constrains('line_ids','email','mobile_no')
@@ -219,6 +225,34 @@ class CmCarrier(models.Model):
             if len(emails) < (1 + len([item for item in self.line_ids if item.email])):
                 raise UserError(_("Duplicate emails are not allowed within the provided contact details"))
     
+    @api.onchange('contract_agree')
+    def onchange_contract_agree(self):
+        if self.contract_agree != 'yes':
+            self.validity_range = False
+            self.from_date = False
+            self.to_date = False
+    
+    @api.onchange('validity_range')
+    def onchange_validity_range(self):
+        if self.validity_range:
+            self.from_date = False
+            self.to_date = False
+    
+    @api.onchange('country_id')
+    def onchange_country_id(self):
+        if self.country_id:
+            self.country_code = self.country_id.code
+            self.mb_cc_id = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1).id
+            self.wh_cc_id = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1).id
+            self.ph_cc_id = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1).id            
+        else:
+            self.country_code = False
+            self.city_id = False
+            self.state_id = False
+            self.mb_cc_id = False
+            self.wh_cc_id = False
+            self.ph_cc_id = False
+    
     @api.onchange('city_id')
     def onchange_city_id(self):
         if self.city_id:
@@ -227,20 +261,16 @@ class CmCarrier(models.Model):
         else:
             self.state_id = False
             self.country_id = False
-            
-    @api.onchange('payment_city_id')
-    def onchange_payment_city_id(self):
-        if self.payment_city_id:
-            self.payment_state_id = self.payment_city_id.state_id
-            self.payment_country_id = self.payment_city_id.country_id
+
+    @api.onchange('same_as_mobile','mobile_no')
+    def onchange_same_as_mobile(self):
+        if self.same_as_mobile:
+            self.whatsapp_no = self.mobile_no
         else:
-            self.payment_state_id = False
-            self.payment_country_id = False
+            self.whatsapp_no = False
 
     def validations(self):
-        warning_msg = []
-        if not self.line_ids:
-            warning_msg.append("System not allow to approve with empty additional contact details")
+        warning_msg = []        
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
         if not is_mgmt:
             res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
@@ -265,6 +295,8 @@ class CmCarrier(models.Model):
         if self.status == 'active':
             if not(self.env[RES_USERS].has_group('custom_properties.group_set_to_draft')):
                 raise UserError(_("You can't draft this entry. Draft Admin have the rights"))
+            if self.short_name == 'NPC':
+                raise UserError(_("You can't draft this entry. Its auto creation"))
             self.write({'status': 'editable'})
         return True
 
@@ -307,20 +339,7 @@ class CmCarrier(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         
         cm_carrier = self.env[CM_CARRIER]

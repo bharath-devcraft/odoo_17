@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_ct_grn_document">
+            <head>
+                <t t-if="o.name">
+                    <title t-esc="o.name"/>
+                </t>
+                <t t-else="">
+                    <title>GRN Draft</title>
+                </t>
+            </head>
+            <!-- header -->
+            <div class="header" style="height: 20px;">
+                <t t-set="settings" t-value="request.env['res.config.settings'].sudo().search([], limit=1)"/>
+                <t t-if="settings and settings.draft_watermark">
+                    <style>
+                        @page {
+                        background: none;
+                        }
+                        .watermark {
+                        position: fixed;
+                        margin-top: 150px;
+                        transform: translate(-80%, -80%) ;
+                        width: 100%;
+                        opacity: 0.3;
+                        z-index: -2000;
+                        }
+                    </style>
+
+
+                    <!-- Watermark in the background -->
+                    <div class="watermark">
+                        <t t-if="o.status == 'draft' or o.status == 'wfa'">
+                            <img t-att-src="image_data_uri(settings.draft_watermark)"
+                                 style="width: 100%; object-fit: contain; mix-blend-mode: multiply;"/>
+                        </t>
+                    </div>
+                </t>
+                <div class="row">
+                    <div class="o_clean_header">
+                        <div class="row row_custom o_header_layout_custom">
+                            <div class="col-9">
+                                <h t-if="o.company_id.name" style="font-size: 25px; font-weight: bold;"><t t-out="o.company_id.name"/></h><br/><br/>
+                                <h t-if="o.company_id.partner_id.street"><t t-out="o.company_id.partner_id.street"/></h>
+                                <h t-if="o.company_id.partner_id.street2">, <t t-out="o.company_id.partner_id.street2"/></h>
+                                <h t-if="o.company_id.partner_id.city">, <t t-out="o.company_id.partner_id.city"/></h>
+                                <h t-if="o.company_id.partner_id.state_id">, <t t-out="o.company_id.partner_id.state_id.name"/></h>
+                                <h t-if="o.company_id.partner_id.country_id">, <t t-out="o.company_id.partner_id.country_id.name"/></h>
+                            <br/>
+                            <p style="margin:8px;"/>
+
+
+                            <tr>
+                                <td><b>Phone </b></td>
+                                <td> :</td>
+                                <td><t t-out="o.company_id.partner_id.phone"/></td>
+                            </tr>
+                            <br/>
+                            <p style="margin:8px;"/>
+                            <tr>
+                                <td><b>Email </b></td>
+                                <td> :</td>
+                                <td><t t-out="o.company_id.partner_id.email"/></td>
+                                <td><b>Website</b></td>
+                                <td>:</td>
+                                <td><t t-out="o.company_id.partner_id.website"/></td>
+                            </tr>
+                            <br/>
+                            <br/>
+                            </div>
+<!--                            <div class="col-3 text-end">-->
+<!--                                    <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)"-->
+<!--                                         alt="Logo"-->
+<!--                                         style="width: 200px; object-fit: cover; margin-left: auto;"/>-->
+<!--                                </div>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- header end -->
+            <div class="page">
+                <style>
+                    .space-colon{
+                    width:3%;
+                    }
+                    .agent-bg{
+                    background-color: #7c9fcf;
+                    color:rgb(13, 13, 14);
+                    }
+                    .operator-bg{
+                    background-color: #54d175;
+                    color:rgb(13, 13, 14);
+                    }
+                </style>
+                <div class="row" style="margin-top:-20px;">
+                    <div style="display:flex;justify-content: center;align-items: center;height:100vh;position: relative;">
+                        <p style="font-size:20px;height:30px; text-align:center;">
+                            <b>Goods Receipts Note</b>
+                        </p>
+                    </div>
+                    <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1; margin-top: -20px;">
+                        <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                    GRN No :
+                                    <span t-esc="o.name"/>
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                    GRN Date:
+                                    <span t-field="o.entry_date"
+                                          t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                </td>
+                            </tr>
+
+                            <t t-if="o.grn_type=='dc_invoice'">
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Invoice No :
+                                        <span t-esc="o.partner_invoice_no"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Invoice Date:
+                                        <span t-field="o.partner_invoice_date"
+                                            t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                    </td>
+                                </tr>
+                            </t>
+                            <t t-if="o.grn_type=='only_grn'">
+                                <tr>
+                                    <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        DC No :
+                                        <span t-esc="o.dc_no"/>
+                                    </td>
+                                    <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        DC Date:
+                                        <span t-field="o.dc_date"
+                                            t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                    </td>
+                                </tr>
+                            </t>
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Created Date:
+                                    <span t-field="o.crt_date"
+                                          t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Prepared By :
+                                    <span t-esc="o.user_id.name"/>
+                                </td>
+                            </tr>
+                            <tr>                                
+                                <td colspan="2" style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    <b>Vendor Details :</b>
+                                    <span t-esc="o.vendor_id.name"/><span t-esc="o.address"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                        <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;margin-top: 10px;">
+                            <tr>
+                                <th class="agent-bg"
+                                    style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                    Item Details :
+                                </th>
+                            </tr>
+                        </table>
+                        <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;border-top:none;">
+                            <tr>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;width: 2%;">
+                                    S.No
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;">
+                                    Description
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;">
+                                    UOM
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;">
+                                    Qty
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;">
+                                    Unit Price
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;background-color:#d7d7d9;width: 15%;">
+                                    Total Amount
+                                </td>
+                            </tr>
+
+                            <t t-set="s_no" t-value="1"/>
+                            <t t-foreach="o.line_ids" t-as="line">
+                                <tr>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:center;width: 2%;border-top:none;">
+                                        <span t-esc="s_no"/>
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;width: 30%;border-top:none;">
+                                        <span t-field="line.description"/>
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                        <span t-out="line.uom_id.name"/>
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:right;border-top:none;">
+                                        <span t-out="'%.3f'%(line.qty)"/>
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:right;border-top:none;">
+                                        <t t-if="line.unit_price">
+                                            <span t-esc="'{:,.2f}'.format(line.unit_price)"/>
+                                        </t>
+                                    </td>
+
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:right;width: 15%;border-top:none;">
+                                        <t t-if="line.tot_amt">
+                                            <span t-out="'{:,.2f}'.format(line.tot_amt)"/>
+                                        </t>
+                                        <span t-out="o.currency_id.name"/>
+                                    </td>
+                                </tr>
+                            <t t-set="s_no" t-value="s_no + 1"/>
+                            </t>
+                        </table>
+                        <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                            <tr>
+                                <td style="font-size: 14px; height: 30px;padding-left: 60px;text-align:right;">
+                                    Taxable
+                                    Amount
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding-left: 60px;text-align:right;">:
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 1px;text-align:right;">
+                                    <t t-if="o.taxable_amt">
+                                        <span t-esc="'{:,.2f}'.format(o.taxable_amt)"/>
+                                    </t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 14px; height: 30px;padding: 1px;text-align:right;">Tax
+                                    Amount
+                                </td>
+                                <td style="font-size: 14px; height: 30px;padding: 1px;text-align:right;">:</td>
+                                <td style="font-size: 14px; height: 30px;padding: 1px;text-align:right;">
+                                    <t t-if="o.tax_amt">
+                                        <span t-esc="'{:,.2f}'.format(o.tax_amt)"/>
+                                    </t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 14px; height: 30px; padding: 10px; text-align:right;">
+                                    <b>Total Amount</b>
+                                </td>
+                                <td style="font-size: 14px; height: 30px; padding: 1px; text-align:right;">:</td>
+                                <td style="font-size: 14px; height: 30px; padding: 1px; text-align:right;">
+                                    <b>
+                                        <t t-if="o.net_amt">
+                                            <span t-esc="'{:,.2f}'.format(o.net_amt)"/>
+                                        </t>
+                                        <span t-esc="o.currency_id.name"/>
+                                    </b>
+                                </td>
+                            </tr>
+
+                            <tr style="width:100%;">
+                                <td style="font-size: 14px; height: 30px; padding: 5px; text-align:left;">
+                                    Amount in Words :
+                                    <b>
+                                        <t t-if="o.net_amt">
+                                            <span t-out="o.currency_id.with_context(lang='es_AR').amount_to_text(o.net_amt)"/>
+                                        </t>
+                                    </b>
+                                </td>
+                                <td style="font-size: 14px; height: 30px; padding: 5px; text-align:left;"> </td>
+                                <td style="font-size: 14px; height: 30px; padding: 5px; text-align:left;"> </td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </div>
+
+                
+                <div style="position: absolute; bottom: 40px; width: 100%; text-align: center;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                        <tr>
+                            <!-- Confirmed By Section -->
+                            <td style="width: 50%; padding-top: 20px;">
+                                <hr style="border: 1px solid black; width: 80%; margin-bottom: 10px;"/>
+                                <strong>Confirmed By</strong><br/>
+                                <span t-esc="o.confirm_user_id.name"/><br/>
+                                <span t-field="o.ap_rej_date"
+                                    t-options='{"widget": "datetime", "format": "dd/MM/yyyy HH:mm:ss"}'/>
+                                <!-- <img src="/web/static/src/img/signature_placeholder.png" style="max-height: 50px; margin-top: 5px;"/> -->
+                            </td>
+                            
+                            <!-- Approved By Section -->
+                            <td style="width: 50%; padding-top: 20px;">
+                                <hr style="border: 1px solid black; width: 80%; margin-bottom: 10px;"/>
+                                <strong>Approved By</strong><br/>
+                                <span t-esc="o.ap_rej_user_id.name"/><br/>
+                                <span t-field="o.ap_rej_date"
+                                    t-options='{"widget": "datetime", "format": "dd/MM/yyyy HH:mm:ss"}'/><br/>
+                                <!-- <img src="/web/static/src/img/signature_placeholder.png" style="max-height: 50px; margin-top: 5px;"/> -->
+                            </td>
+                        </tr>
+                    </table>
+                </div>        
+                
+                <!-- <div class="row" style="page-break-before: always;">
+                    <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                        <div style="display:flex;justify-content: center;align-items: center;height:100vh;">
+                            <p style="font-size:20px;height:30px; text-align:center;text-decoration: underline;">
+                                <b>Terms &amp; Conditions</b>
+                            </p>
+                        </div>
+                        <table style="border-collapse: collapse;width:100%">
+                            <t t-set="t_sno" t-value="1"/>
+                            <t t-foreach="o.line_ids_k" t-as="terms_line">
+                                <tr>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;vertical-align: top;text-align:left;">
+                                        <span t-esc="t_sno"/>.
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px;padding: 5px;text-align:left;">
+                                        <span t-esc="terms_line.description"/>
+                                    </td>
+                                </tr>
+                                <t t-set="t_sno" t-value="t_sno + 1"/>
+                            </t>
+                        </table>
+                    </div>
+                </div> -->
+            </div>
+
+            <!-- Footer -->
+            <div class="footer" style="height: 20px; position: absolute; bottom: -100px; width: 100%;">
+                <div class="text-center" style="border-top: 1px solid black;">
+                    <ul class="list-inline mb4">
+                        <div style="width: 65%;float: right;">
+                        </div>
+                        <div style="width: 35%;float: left;" t-if="report_type == 'pdf'">
+                            <span t-field="user.name"/>
+                            
+                            <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M:%S')"/>
+                        </div>
+                    </ul>
+                    <div t-if="report_type == 'pdf'" style="width: 30%; float: left;">
+                        Page:
+                        <span class="page"/>
+                        of
+                        <span class="topage"/>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer Ends-->
+
+        </template>
+
+
+        <template id="report_ct_grn">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="ct_grn.report_ct_grn_document"
+                       t-lang="o.company_id.partner_id.lang"/>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

@@ -14,12 +14,13 @@
     'application' : True,
     'version': '0.1',
 
-    'depends': ['base','mail','custom_properties','cm_fiscal_year'],
+    'depends': ['base','mail','custom_properties','cm_fiscal_year','cm_depot_location'],
 
     'data': [
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
         'data/audit_rule_data.xml',
+        'data/security_rule.xml',
         'views/ct_enquiry_view.xml',
     ],
     'demo': [],

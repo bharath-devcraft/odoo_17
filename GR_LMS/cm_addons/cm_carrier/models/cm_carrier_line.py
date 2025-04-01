@@ -5,6 +5,7 @@ from odoo.addons.custom_properties.decorators import valid_mobile_no,valid_email
 from odoo.exceptions import UserError
 
 RES_COMPANY = 'res.company'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 class CmCarrierLine(models.Model):
     _name = 'cm.carrier.line'
@@ -20,6 +21,10 @@ class CmCarrierLine(models.Model):
     whatsapp_no = fields.Char(string="Whats App No",copy=False, size=15)    
     landline_no = fields.Integer(string="Landline No / Ext", copy=False)
     email = fields.Char(string="Email", copy=False, size=252)
+    mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    same_as_mobile = fields.Boolean(string="Same as Mobile No", default=False, help="Click to apply same mobile number to whatsapp number")
     skype = fields.Char(string="Skype ID", size=252)
 
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
@@ -34,9 +39,28 @@ class CmCarrierLine(models.Model):
                 if not valid_mobile_no(line.mobile_no):
                     raise UserError(_(f"Mobile number is  invalid. Please enter correct mobile number in additional contact details tab, Ref : {line.mobile_no}"))
 
+    @api.constrains('whatsapp_no')
+    def whatsapp_no_validation(self):
+        for line in self:
+            if line.whatsapp_no and line.header_id.country_id:
+                if line.header_id.country_id.code == 'IN':
+                    if not(len(str(line.whatsapp_no)) == 10 and line.whatsapp_no.isdigit() == True):
+                        raise UserError(_(f"Whatsapp number(IN) is  invalid. Please enter correct whatsapp number in additional contact details tab, Ref : {line.mobile_no}"))
+                if not valid_mobile_no(line.whatsapp_no):
+                    raise UserError(_(f"Whatsapp number is  invalid. Please enter correct whatsapp number in additional contact details tab, Ref : {line.mobile_no}"))
+
     @api.constrains('email')
     def email_validation(self):
         for line in self:
             if line.email and not valid_email(line.email):
                 raise UserError(_(f"Email is invalid. Please enter the correct email in  additional contact details tab, Ref : {line.email}"))
 
+    @api.onchange('same_as_mobile','mobile_no','mb_cc_id')
+    def onchange_same_as_mobile(self):
+        for rec in self:
+            if rec.same_as_mobile:
+                rec.whatsapp_no = rec.mobile_no
+                rec.wh_cc_id = rec.mb_cc_id
+            else:
+                rec.whatsapp_no = False
+                rec.wh_cc_id = False

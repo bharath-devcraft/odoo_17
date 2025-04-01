@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="seq_ct_rfq" model="ir.sequence">
+        <field name="name">CT RFQ</field>
+        <field name="code">ct.rfq</field>
+        <field name="prefix">RFQ/%(year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+    
+    <record id="seq_ct_rfq_draft" model="ir.sequence">
+        <field name="name">CT RFQ Draft</field>
+        <field name="code">ct.rfq.draft</field>
+        <field name="prefix">RFQD/%(year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+</odoo>

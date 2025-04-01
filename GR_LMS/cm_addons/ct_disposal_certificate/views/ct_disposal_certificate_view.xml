@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <record model="ir.ui.view" id="ct_disposal_certificate_form">
+      <field name="name">Form View</field>
+      <field name="model">ct.disposal.certificate</field>
+      <field name="arch" type="xml">
+        <form string="Disposal Certificate" create="0">
+            <header>
+
+                <button string="Confirm"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_confirm" invisible = "status != 'draft'"
+                    confirm="Are you sure to proceed ?"/>
+                <button string="Approve"
+                    icon="fa-thumbs-up"
+                    class="btn btn-success"
+                    type="object"
+                    name="entry_approve" invisible = "status != 'wfa'"
+                    confirm="Are you sure to proceed ?"/>
+                <button string="Reject"
+                    icon="fa-thumbs-down"
+                    class="btn btn-danger"
+                    type="object"
+                    name="entry_reject" invisible = "status != 'wfa'"
+                    confirm="Are you sure to proceed ?"/>
+                <button string="Cancel"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_cancel" invisible = "status != 'approved'"
+                    confirm="Are you sure to proceed ?"/>
+
+                <field name="status" widget="statusbar" style="width:700px;"/>                
+
+            </header>
+            <sheet>
+                <widget name="web_ribbon" title="Approved" bg_color="bg-success" invisible = "status != 'approved'"/>
+                <group>
+                    <group>
+                        <field name="name" readonly="1" force_save="1" invisible="1"/>
+                        <field name="jc_id" readonly = "1" force_save="1" options="{'no_create': True}"  class="animate-charcter"/>
+                        <field name="customer_id" readonly = "1" force_save="1" options="{'no_create': True}"/>
+                        <field name="address" readonly = "1" force_save="1"/>
+                    </group>
+                    <group>
+                        <field name="contact_person" readonly = "1" force_save="1"/>
+                        <field name="mobile_no" readonly = "1" force_save="1"/>
+                        <field name="email" readonly = "1" force_save="1"/>
+                    </group>
+                </group>
+                <group string="Bag Details">
+                    <group>
+                        <field name="flexi_bag_id" readonly = "1" force_save="1" options="{'no_create': True}"/>
+                        <field name="uom_id" readonly = "1" force_save="1" options="{'no_create': True}"/>
+                    </group>
+                    <group>
+                        <field name="qty" readonly = "1" force_save="1"/>
+                    </group>
+                </group>
+                <group string="Vendor Details">
+                    <group>
+                        <field name="vendor_id" readonly = "1" force_save="1" options="{'no_create': True}"/>
+                        <field name="v_address" readonly = "1" force_save="1"/>
+                        <field name="v_contact_person" readonly = "1" force_save="1"/>
+                    </group>
+                    <group>
+                        <field name="v_mobile_no" readonly = "1" force_save="1"/>
+                        <field name="v_email" readonly = "1" force_save="1"/>
+                    </group>
+                </group>
+                <group string="Disposal Details">
+                    <group>
+
+                        <field name="disposal_category" required = "1" readonly = "status not in ('draft','wfa')"/>
+                        <field name="disposal_date" required="1" readonly = "status not in ('draft','wfa')"/>
+                        <field name="disposal_loc" required = "1" readonly = "status not in ('draft','wfa')"/>
+                        <field name="bc_id" readonly = "1" force_save="1" invisible="disposal_category not in ('export_disposal','import_disposal')" options="{'no_create': True}"/>
+                        <field name="dc_id" required="disposal_category == 'expired_disposal'" readonly = "status not in ('draft','wfa')" invisible="disposal_category != 'expired_disposal'" options="{'no_create': True}"/>
+                    </group>
+                    <group>
+                        <field name="lot_ids" required = "1" widget="many2many_tags" readonly = "status not in ('draft','wfa')" options="{'no_create': True}"/>
+                        <field name="certificate_no" required = "1" readonly = "status not in ('draft','wfa')"/>
+                        <field name="certificate_date" required = "1" readonly = "status not in ('draft','wfa')"/>
+                        <field name="certificate_ids" required = "1" readonly = "status not in ('draft','wfa')" widget="single_file_binary" options="{'no_create_edit': True}"/>
+                    </group>
+                </group>
+                <group>
+                    <group>
+                    </group>
+                    <group>
+                        <field name="status" readonly = "1" force_save="1" invisible="1"/>
+                    </group>
+                </group>
+
+                
+                <notebook>
+                    <page string="Attachments" >
+                        <field name="line_ids_a" string="Attachments" colspan="4" nolabel="1" readonly = "status not in ('draft','wfa')">
+                            <tree string="Attachments" editable="bottom">
+
+                                <field name="status" column_invisible="1"/>
+                                <field name="header_id" column_invisible="1"/>
+                                <field name="company_id" column_invisible="1"/>
+                                <field name="attach_desc" required="1"/>
+                                <field name="attachment_ids" required="1" widget="single_file_binary" options="{'no_create_edit': True}"/>
+                                <field name="attach_user_id" readonly = "1" force_save="1"/>
+                                <field name="attach_date" readonly = "1" force_save="1"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Approve / Reject Remarks">
+                        <group>
+                            <field name="ap_rej_remark" nolabel="1" style="width:1000px;" readonly = "status in ('approved','cancelled','rejected')"/>
+                        </group>
+                    </page>
+                    <page string="Cancel Remarks">
+                        <group>
+                            <field name="cancel_remark" nolabel="1" style="width:1000px;" readonly = "status in ('cancelled','rejected')"/>
+                        </group>
+                    </page>
+                    <page string="Entry Info">
+                        <group>
+                            <group>
+                                <field name="company_id" force_save="1"/> 
+                                <field name="fy_control_date" readonly = "1" force_save="1"/>
+                                <field name="active_rpt"/>
+                            </group>
+                            <group>
+                                <field name="active" widget="boolean_toggle"/>
+                                <field name="entry_mode" force_save="1"/>
+                                <field name="active_trans"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="user_id" widget="many2one_avatar_user" />
+                                <field name="confirm_user_id" invisible="status == 'draft'" widget="many2one_avatar_user" />
+                                <field name="ap_rej_user_id" invisible="status in ('draft','wfa')" widget="many2one_avatar_user" />
+                                <field name="cancel_user_id" invisible="status != 'cancelled'" widget="many2one_avatar_user" />
+                                <field name="update_user_id" widget="many2one_avatar_user" />
+                            </group>
+                            <group>
+                                <field name="crt_date" />
+                                <field name="confirm_date" invisible="status == 'draft'" />
+                                <field name="ap_rej_date" invisible="status in ('draft','wfa')" />
+                                <field name="cancel_date" invisible="status != 'cancelled'" />
+                                <field name="update_date" />
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+                <group>
+                    <field name="remarks"/>
+                </group>
+                <div class="oe_chatter">
+                    <field name="message_ids"/>
+                </div>  
+            </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="ct_disposal_certificate_tree_js" model="ir.ui.view">
+        <field name="name">List Dashboard View</field>
+        <field name="model">ct.disposal.certificate</field>
+        <field name="priority" eval="10"/>
+        <field name="arch" type="xml">
+            <tree string="Disposal Certificate" js_class="ct_disposal_certificate_list"
+                sample="1"
+                decoration-info = "status == 'draft'"
+                decoration-success = "status == 'wfa'"
+                decoration-bf = "status in ('approved','draft')"
+                decoration-warning = "status == 'rejected'"
+                decoration-primary = "status == 'cancelled'" create="0">
+
+                <field name="jc_id" decoration-bf="1"/>
+                <field name="customer_id"/>
+                <field name="vendor_id"/>
+                <field name="bc_id"/>
+                <field name="dc_id"/>
+                <field name="disposal_category"/>
+                <field name="status" widget="badge" 
+                    decoration-info = "status == 'draft'"
+                    decoration-success = "status == 'wfa'"
+                    decoration-bf = "status == 'approved'"
+                    decoration-warning = "status == 'rejected'"
+                    decoration-primary = "status == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ct_disposal_certificate_tree" model="ir.ui.view">
+        <field name="name">List View</field>
+        <field name="model">ct.disposal.certificate</field>
+        <field name="priority" eval="1"/>
+        <field name="arch" type="xml">
+            <tree string="Disposal Certificate"
+                sample="1"
+                decoration-info = "status == 'draft'"
+                decoration-success = "status == 'wfa'"
+                decoration-bf = "status in ('approved','draft')"
+                decoration-warning = "status == 'rejected'"
+                decoration-primary = "status == 'cancelled'" create="0">
+
+                <field name="jc_id" decoration-bf="1"/>
+                <field name="customer_id"/>
+                <field name="vendor_id"/>
+                <field name="bc_id"/>
+                <field name="dc_id"/>
+                <field name="disposal_category"/>
+                <field name="status" widget="badge" 
+                    decoration-info = "status == 'draft'"
+                    decoration-success = "status == 'wfa'"
+                    decoration-bf = "status == 'approved'"
+                    decoration-warning = "status == 'rejected'"
+                    decoration-primary = "status == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ct_disposal_certificate_search" model="ir.ui.view">
+        <field name="name">Search View</field>
+        <field name="model">ct.disposal.certificate</field>
+        <field name="arch" type="xml">
+            <search string="Disposal Certificate">
+                <field name="jc_id"/>
+                <field name="bc_id"/>
+                <field name="dc_id"/>
+                <field name="certificate_no"/>
+
+                <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+                <filter name="WFA" domain="[('status', '=', 'wfa')]"/>
+                <filter name="Approved" domain="[('status', '=', 'approved')]"/>
+                <filter name="Cancelled" domain="[('status', '=', 'cancelled')]"/>
+                <filter name="Rejected" domain="[('status', '=', 'rejected')]"/>
+                <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/>
+                <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
+                <filter name="My WFA" string="My WFA" domain="[('user_id', '=', uid),('status', '=', 'wfa')]"/>
+                <filter name="My Approved" string="My Approved" domain="[('user_id', '=', uid),('status', '=', 'approved')]"/>
+                <filter name="My Cancelled" string="My Cancelled" domain="[('user_id', '=', uid),('status', '=', 'cancelled')]"/>
+                <filter name="My Rejected" string="My Rejected" domain="[('user_id', '=', uid),('status', '=', 'rejected')]"/>
+                <filter name="Hidden" domain="[('active', '=', False)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Customer Name" name="customer_id" domain="[]" context="{'group_by': 'customer_id'}"/>
+                    <filter string="Vendor Name" name="vendor_id" domain="[]" context="{'group_by': 'vendor_id'}"/>
+                    <filter string="Disposal Category" name="disposal_category" domain="[]" context="{'group_by': 'disposal_category'}"/>
+                    <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter string="Confirmed By" name="confirm_user_id" domain="[]" context="{'group_by': 'confirm_user_id'}"/>
+                    <filter string="Approved / Rejected By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                    <filter string="Cancelled By" name="cancel_user_id" domain="[]" context="{'group_by': 'cancel_user_id'}"/>
+                    <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                    <filter string="Entry Mode" name="entry_mode" domain="[]" context="{'group_by': 'entry_mode'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="ct_disposal_certificate_kanban" model="ir.ui.view">
+        <field name="name">Kanban View</field>
+        <field name="model">ct.disposal.certificate</field>
+        <field name="arch" type="xml">
+            <kanban string="Disposal Certificate" class="o_kanban_mobile" sample="1" quick_create="false">
+                <field name="jc_id"/>
+                <field name="ap_rej_user_id"/>
+                <field name="status"/>
+                <progressbar field="status"
+                    colors='{"draft": "info", "wfa": "success", "approved": "bf","cancelled": "primary","rejected": "warning"}'/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="kanban-card"> 
+                            <div class="kanban-table">
+                                <div class="kanban-row">
+                                    <div class="kanban-cell" t-att-title="'JC No'">
+                                        <field style="color: #4d4d4d; font-weight: bold; font-size: 18px;" name="jc_id"/>
+                                    </div>
+                                </div>
+                                <div class="kanban-row">
+                                    <div class="kanban-cell" t-att-title="'Status'">
+                                        <field name="status" widget="label_selection" options="{'classes': {'draft': 'info', 'wfa': 'success', 'approved': 'default', 'cancelled': 'primary', 'rejected': 'warning'}}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="ct_disposal_certificate_graph" model="ir.ui.view">
+       <field name="name">Graph View</field>
+       <field name="model">ct.disposal.certificate</field>
+       <field name="arch" type="xml">
+            <graph string="Disposal Certificate" sample="1" disable_linking="True" stacked="0" type="pie">
+                <field name="status"/>
+                <field name="id" string="Count" type="measure" operator="count"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="ct_disposal_certificate_win_action" model="ir.actions.act_window" >
+      <field name="name">Disposal Certificate</field>
+      <field name="res_model">ct.disposal.certificate</field>
+      <field name="view_mode">tree,form,kanban,graph</field>
+        <field name="domain">[]</field>
+        <field name="view_id" ref="ct_disposal_certificate_tree_js"/>
+        <field name="search_view_id" ref="ct_disposal_certificate_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No record found. Let's create one !
+          </p><p>
+            This is for base transaction.
+          </p>
+        </field>
+    </record>
+
+    <record id="ct_view_disposal_certificate_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="ct_disposal_certificate.ct_disposal_certificate_tree_js"/>
+        <field name="act_window_id" ref="ct_disposal_certificate_win_action"/>
+    </record>
+
+    <record id="ct_view_disposal_certificate_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="ct_disposal_certificate.ct_disposal_certificate_form"/>
+        <field name="act_window_id" ref="ct_disposal_certificate_win_action"/>
+    </record>
+
+    <record id="ct_view_disposal_certificate_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3"/>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="ct_disposal_certificate.ct_disposal_certificate_kanban"/>
+        <field name="act_window_id" ref="ct_disposal_certificate_win_action"/>
+    </record>
+
+    <record id="ct_view_disposal_certificate_graph" model="ir.actions.act_window.view">
+        <field name="sequence" eval="4"/>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="ct_disposal_certificate.ct_disposal_certificate_graph"/>
+        <field name="act_window_id" ref="ct_disposal_certificate_win_action"/>
+    </record>
+
+    <menuitem name="Disposal Certificate" id="ct_disposal_certificate_act_menu" parent="ct_business_confirmation.ct_flexi_m_parent"
+              action="ct_disposal_certificate_win_action" sequence="17"/>
+  </data>
+</odoo>

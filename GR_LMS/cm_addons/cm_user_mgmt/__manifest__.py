@@ -10,7 +10,7 @@ This module serves as a base for custom User Management modules within Odoo. It 
     """,
 
     'author': "Karthikeyan S",
-    'website': "https://www.goodrich.co",
+    'website': "https://catalystsolutions.sg",
     'category': 'Custom Modules/custom_modules',
     'application' : True,
     'version': '0.1',

@@ -14,7 +14,7 @@ ENTRY_MODE =  [('manual', 'Manual'),
 class CmTankOperatorAttachmentLine(models.Model):
     _name = 'cm.tank.operator.attachment.line'
     _description = 'Attachments'
-    _order = 'id asc'
+    _order = 'attach_date desc'
 
     header_id = fields.Many2one('cm.tank.operator', string="Header Ref", index=True, required=True, ondelete='cascade', c_rule=True)
     attach_desc = fields.Char(string="Description", size=252)
@@ -28,6 +28,13 @@ class CmTankOperatorAttachmentLine(models.Model):
     expiry_date = fields.Date(string="Expiry Date", copy=False)
     company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", readonly=True, tracking=True)
+
+    @api.constrains('attach_desc')
+    def attach_desc_validation(self):
+        for line in self:
+            desc = line.attach_desc.strip() if line.attach_desc else None
+            if len(desc) < 3:
+                raise UserError(_(f"Description field must contain at least 3 characters in the Attachments tab. Ref: {line.attach_desc}"))
 
     @api.onchange('attachment_ids')
     def onchange_attachment_ids(self):

@@ -65,7 +65,7 @@ class CmCompany(models.Model):
 	ph_cc_id = fields.Many2one('cm.country.code', string="Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	same_as_bill_address = fields.Boolean(string="Same as Billing Address", default=False)
 	same_as_del_address = fields.Boolean(string="Same as Delivery Address", default=False)		
-			
+	same_as_mobile = fields.Boolean(string="Same as Mobile No", default=False, help="Click to apply same mobile number to whatsapp number")	
 	
 	#Entry info
 	active = fields.Boolean('Visible', default=True)
@@ -171,6 +171,13 @@ class CmCompany(models.Model):
 		else:
 			self.state_id = False
 	
+	@api.onchange('same_as_mobile','mobile')
+	def onchange_same_as_mobile(self):
+		if self.same_as_mobile:
+			self.whatsapp_no = self.mobile
+		else:
+			self.whatsapp_no = False
+	
 	@validation    
 	def entry_approve(self):
 		""" entry_approve """
@@ -232,20 +239,7 @@ class CmCompany(models.Model):
 			the transaction views.
 		"""
 
-		result = {
-			'all_draft': 0,
-			'all_active': 0,
-			'all_inactive': 0,
-			'all_editable': 0,
-			'my_draft': 0,
-			'my_active': 0,
-			'my_inactive': 0,
-			'my_editable': 0,
-			'all_today_count': 0,
-			'all_today_value': 0,
-			'my_today_count': 0,
-			'my_today_value': 0,
-		}
+		result = {}
 		
 		
 		#counts

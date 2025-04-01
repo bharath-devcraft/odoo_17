@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+
+FLEXI_TYPE = [('tltd','TLTD'),
+              ('tlbd', 'TLBD'),
+              ('blbd', 'BLBD')]
 
 class CtEnquiryFlexiAccessoriesLine(models.Model):
     _name = 'ct.enquiry.flexi.acc.line'
@@ -9,9 +14,12 @@ class CtEnquiryFlexiAccessoriesLine(models.Model):
 
     header_id = fields.Many2one('ct.enquiry', string="Header Ref", index=True, required=True, ondelete='cascade', c_rule=True)
 
-    accessory_set_id = fields.Many2one('cm.accessories.set', string="Flexi Bag Type", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    flexi_type = fields.Selection(selection=FLEXI_TYPE, string="Flexi Type", copy=False)
+    flexi_layer_type_id = fields.Many2one('cm.flexi.layer.type', string="Layer Type", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    flexi_capacity_id = fields.Many2one('cm.flexi.capacity', string="Capacity", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    vendor_id = fields.Many2one('cm.vendor.master', string="Preferred Vendor", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     accessory_set_qty = fields.Float(string="Set Qty", digits=(2, 3), default=1)
-    line_count = fields.Integer(string="Line Count", copy=False, default=0, readonly=True, store=True, compute='_compute_all_line')
+    line_count = fields.Integer(string="No of Items", copy=False, default=0, readonly=True, store=True, compute='_compute_all_line')
     status = fields.Selection(related='header_id.status', store=True, c_rule=True)
     company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
@@ -22,14 +30,31 @@ class CtEnquiryFlexiAccessoriesLine(models.Model):
         for data in self:
             data.line_count = len(data.line_ids)
 
-    @api.onchange('accessory_set_id')
+    @api.onchange('flexi_type', 'flexi_layer_type_id', 'vendor_id')
     def onchange_accessory_set_id(self):
         self.line_ids = [(5, 0, 0)]
-        if self.accessory_set_id:
-            self.line_ids = [
-                (0, 0, {
-                    'accessories_id': line.accessories_id.id,
-                    'uom_id': line.uom_id.id,
-                    'qty': line.qty
-                }) for line in self.accessory_set_id.line_ids
-            ]
+        if self.flexi_type and self.flexi_layer_type_id and self.vendor_id:
+            acc_rec = self.env['cm.accessories.set'].search([
+                ('flexi_type', '=', self.flexi_type),
+                ('flexi_layer_type_id', '=', self.flexi_layer_type_id.id),
+                ('vendor_id', '=', self.vendor_id.id),
+                ('status', '=', 'active'),
+                ('active_trans', '=', True)
+            ], limit=1)
+            if acc_rec:
+                self.line_ids = [
+                    (0, 0, {
+                        'accessories_id': line.accessories_id.id,
+                        'uom_id': line.uom_id.id,
+                        'qty': (line.qty * self.accessory_set_qty) if self.accessory_set_qty > 0 else line.qty,
+                        'set_qty': line.qty
+                    }) for line in acc_rec.line_ids
+                ]
+
+    @api.onchange('accessory_set_qty')
+    def onchange_qty(self):
+        if self.accessory_set_qty < 1:
+            raise UserError(_("Set qty should be greater than zero."))
+        if self.accessory_set_qty > 0:
+            for line in self.line_ids.filtered(lambda l: l.qty):
+                line.qty = self.accessory_set_qty * line.set_qty

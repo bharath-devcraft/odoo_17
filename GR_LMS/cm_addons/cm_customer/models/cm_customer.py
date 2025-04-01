@@ -10,13 +10,12 @@ CM_CUSTOMER='cm.customer'
 TIME_FORMAT='%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
 IR_SEQUENCE = 'ir.sequence'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 CUSTOM_STATUS = [
 		('draft', 'Draft'),		
 		('editable', 'Editable'),		
 		('active', 'Active'),
-		('blacklist', 'Blacklist'),
-		('suspension', 'Suspension'),
 		('inactive', 'Inactive')]
 
 ENTRY_MODE =  [('manual','Manual'),
@@ -28,7 +27,7 @@ ENTRY_TYPE =  [('new','New'),
 COMPANY_TYPE =  [('proprietary','Proprietary'),
 			   ('partnership', 'Partnership'),
 			   ('private', 'Private'),
-			   ('public', 'Public Limited')]
+			   ('public_limited', 'Public Limited')]
 			   
 YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 
@@ -50,6 +49,10 @@ BUSINESS_SEGMENTS =  [('increased','Increased'),
 			   
 PAYMENT_TYPE = [('cash', 'Cash'), ('credit', 'Credit')]
 
+CPCB_REGISTERED = [('registered', 'Registered'), ('not_registered', 'Not Registered')]
+
+VALIDITY_RANGE = [('perpetual', 'Perpetual/Life Time'), ('limited', 'Limited')]
+
 COUNTRY_OF_CONCERN = [('economic', 'Economic Sanction'), 
 					('undesignated', 'Undesignated Terrorist'),
 					('checimal_weapon', 'Checimal Weapon'),
@@ -65,11 +68,11 @@ class CmCustomer(models.Model):
 	short_name = fields.Char(string="Short Name", copy=False, help="Maximum 15 char is allowed and will accept upper case only", size=15, c_rule=True)
 	status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
 	inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-	remarks = fields.Html(string="Remarks", copy=False, sanitize=False)	
+	remarks = fields.Text(string="Remarks", copy=False)	
 
 	contact_person = fields.Char(string="Contact Person", size=50)
 	mobile_no = fields.Char(string="Mobile No", size=15, copy=False)
-	phone_no = fields.Char(string="Phone No", size=12, copy=False)
+	phone_no = fields.Char(string="Landline No / Ext", size=12, copy=False)
 	email = fields.Char(string="Email", copy=False, size=252)
 	fax = fields.Char(string="Fax", copy=False, size=12)    
 	street = fields.Char(string="Street", size=252)
@@ -78,25 +81,27 @@ class CmCustomer(models.Model):
 	city_id = fields.Many2one('cm.city', string="City", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', country_id)]")
 	state_id = fields.Many2one('res.country.state', string="State", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	country_id = fields.Many2one('res.country', string="Country", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-	mb_cc_id = fields.Many2one('cm.country.code', string="Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-	wh_cc_id = fields.Many2one('cm.country.code', string="Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-	ph_cc_id = fields.Many2one('cm.country.code', string="Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	country_code = fields.Char(string="Country Code", copy=False, size=252)
 	currency_id = fields.Many2one('res.currency', string="Currency", copy=False, default=lambda self: self.env.company.currency_id.id, ondelete='restrict', readonly=True, tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	
 	pan_no = fields.Char(string="PAN No", copy=False, size=10)
 	aadhaar_no = fields.Char(string="Aadhaar No", copy=False, size=12, tracking=True)    
+	uin_no = fields.Char(string="UIN No", copy=False, size=21, tracking=True)    
 	gst_no = fields.Char(string="GST No", copy=False, size=15)
 	same_as_bill_address = fields.Boolean(string="Same as Billing Address", default=False)
 	same_as_del_address = fields.Boolean(string="Same as Delivery Address", default=False)
+	same_as_mobile = fields.Boolean(string="Same as Mobile No", default=False, help="Click to apply same mobile number to whatsapp number")
 	
 	### New Fields Added
-	entry_type = fields.Selection(selection=ENTRY_TYPE, string="Entry Type", copy=False, default="new", tracking=True)
+	entry_type = fields.Selection(selection=ENTRY_TYPE, string="Entry Type", copy=False, default="new", tracking=True, help="* New means New master entry\n* Name change means has to use the same PAN, GST number, and name getting changed")
 	company_type = fields.Selection(selection=COMPANY_TYPE, string="Company Type", copy=False, tracking=True)
 	year_id = fields.Many2one('cm.calendar.year', string="Year", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])	
 	parent_company_id = fields.Many2one(CM_CUSTOMER, string="Parent Company", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-	bus_vert_id = fields.Many2one('cm.business.vertical', string="Business Vertical", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-	bus_vert_sub_type_id = fields.Many2one('cm.business.vertical.sub.type', string="Business Vertical Sub Type", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('bus_vert_id', '=', bus_vert_id)]")
+	bus_vert_ids = fields.Many2many('cm.business.vertical', string="Business Vertical", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	bus_vert_sub_type_ids = fields.Many2many('cm.business.vertical.sub.type', string="Business Vertical Sub Type", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('bus_vert_id', '=', bus_vert_ids)]")
 	customer_type_ids = fields.Many2many('cm.customer.type', string="Customer Type", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	customer_bus_act_id = fields.Many2many('cm.customer.business.activity', string="Customer's Business Activity", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	sez_zone = fields.Selection(selection=YES_OR_NO, string="Comes Under SEZ", copy=False)
@@ -117,17 +122,19 @@ class CmCustomer(models.Model):
 	business_category = fields.Selection(selection=BUSINESS_CATEGORY, string="Business Category", copy=False)
 	business_grade = fields.Selection(selection=BUSINESS_GRADE, string="Business Grade", copy=False)
 	business_segments = fields.Selection(selection=BUSINESS_SEGMENTS, string="Business Segments", copy=False)
-	contract_customer = fields.Selection(selection=YES_OR_NO, string="Contract Customer", copy=False)
-	con_start_date = fields.Date(string="Contract Start Date", copy=False)
-	con_end_date = fields.Date(string="Contract End Date", copy=False)	
+	contract_customer = fields.Selection(selection=YES_OR_NO, string="Contractual Agreements", copy=False)
+	validity_range = fields.Selection(selection=VALIDITY_RANGE, string="Validity Range", copy=False)
+	from_date = fields.Date(string="From Date", copy=False)
+	to_date = fields.Date(string="To Date", copy=False)	
 	payment_type = fields.Selection(selection=PAYMENT_TYPE, string="Payment Type", copy=False)
 	sales_rm_id = fields.Many2one('cm.employee', string="Sales RM", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-	global_Key = fields.Selection(selection=YES_OR_NO, string="Global Key Account", copy=False)
+	global_Key = fields.Selection(selection=YES_OR_NO, string="Global Key Customer", copy=False)
 	country_of_concern = fields.Selection(selection=COUNTRY_OF_CONCERN, string="Country of Concern", copy=False)
 	past_legal_action = fields.Selection(selection=YES_OR_NO, string="Past Legal Actions", copy=False)
+	cpcb_registered = fields.Selection(selection=CPCB_REGISTERED, string="CPCB Registered", copy=False, help="Central Pollution Control Board")
 
 	company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
-	active = fields.Boolean(string="Visible", default=True)
+	active = fields.Boolean(string="Visible in View", default=True)
 	active_rpt = fields.Boolean(string="Visible In Reports", default=True)
 	active_trans = fields.Boolean(string="Visible In Transactions", default=True)
 	entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -139,7 +146,6 @@ class CmCustomer(models.Model):
 	inactive_user_id = fields.Many2one(RES_USERS, string="Inactivated By", copy=False, ondelete='restrict', readonly=True)
 	update_date = fields.Datetime(string="Last Updated Date", copy=False, readonly=True)
 	update_user_id = fields.Many2one(RES_USERS, string="Last Updated By", copy=False, ondelete='restrict', readonly=True)
-
 
 	line_ids = fields.One2many('cm.customer.line', 'header_id', string="Additional Contacts", copy=True, c_rule=True)
 	line_ids_a = fields.One2many('cm.customer.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
@@ -188,11 +194,19 @@ class CmCustomer(models.Model):
 			if not valid_mobile_no(self.mobile_no):
 				raise UserError(_("Mobile number is invalid. Please enter correct mobile number"))
 
+	@api.constrains('whatsapp_no')
+	def whatsapp_no_validation(self):
+		if self.whatsapp_no and self.country_id:
+			if self.country_id.code == 'IN':
+				if not(len(str(self.whatsapp_no)) == 10 and self.whatsapp_no.isdigit() == True):
+					raise UserError(_("Whatsapp number(IN) is invalid. Please enter correct whatsapp no number"))
+			if not valid_mobile_no(self.whatsapp_no):
+				raise UserError(_("Whatsapp number is invalid. Please enter correct whatsapp no number"))
+
 	@api.constrains('email')
 	def email_validation(self):
 		if self.email  and not valid_email(self.email):
 			raise UserError(_("Email is invalid. Please enter the correct email"))
-	
 
 	@api.constrains('street')
 	def street_validation(self):
@@ -216,8 +230,6 @@ class CmCustomer(models.Model):
 				if is_special_char(self.env,self.pin_code):
 					raise UserError(_("Special character is not allowed in pin code field"))
 
-
-
 	@api.constrains('pan_no')
 	def pan_no_validation(self):
 		if self.pan_no:
@@ -226,7 +238,6 @@ class CmCustomer(models.Model):
 			existing_record = self.env[CM_CUSTOMER].search_count([('pan_no', '=', self.pan_no),('id', '!=', self.id), ('company_id', '=', self.company_id.id)])
 			if existing_record:
 				raise UserError(_("PAN number must be unique"))
-
 
 	@api.constrains('aadhaar_no')
 	def aadhaar_no_validation(self):
@@ -244,7 +255,6 @@ class CmCustomer(models.Model):
 			existing_gst = self.env[CM_CUSTOMER].search_count([('gst_no', '=', self.gst_no), ('id', '!=', self.id), ('company_id', '=', self.company_id.id)])
 			if existing_gst > 0:
 				raise UserError(_("GST number must be unique"))
-
 
 	@api.constrains('line_ids','email','mobile_no')
 	def contact_details_validations(self):
@@ -264,18 +274,22 @@ class CmCustomer(models.Model):
 	
 	@api.onchange('contract_customer')
 	def onchange_contract_customer(self):
-		self.con_start_date = False
-		self.con_end_date = False
+		self.from_date = False
+		self.to_date = False
 	
 	@api.onchange('country_id')
 	def onchange_country_id(self):
 		if self.country_id:
-			self.country_code = self.country_id.code
-			self.mb_cc_id = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1).id
-			self.wh_cc_id = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1).id
-			self.ph_cc_id = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1).id
+			self.country_code = self.country_id.code    
 			self.city_id = False
 			self.state_id = False
+			self.pin_code = False
+			record = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1)
+			c_code = record.id if record else False
+			self.mb_cc_id = c_code
+			self.wh_cc_id = c_code
+			self.ph_cc_id = c_code
+			
 		else:
 			self.country_code = False
 			self.city_id = False
@@ -283,6 +297,7 @@ class CmCustomer(models.Model):
 			self.mb_cc_id = False
 			self.wh_cc_id = False
 			self.ph_cc_id = False
+			self.pin_code = False
 	
 	@api.onchange('city_id')
 	def onchange_city_id(self):
@@ -325,12 +340,19 @@ class CmCustomer(models.Model):
 			self.line_ids_d = delivery_lines
 		else:
 			self.line_ids_d = [(5, 0, 0)]
+			
+	@api.onchange('same_as_mobile','mobile_no')
+	def onchange_same_as_mobile(self):
+		if self.same_as_mobile:
+			self.whatsapp_no = self.mobile_no
+		else:
+			self.whatsapp_no = False
 
 	def validations(self):
 		warning_msg = []
 		is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
 		
-		if self.con_start_date and self.con_end_date and self.con_start_date >= self.con_end_date:
+		if self.from_date and self.to_date and self.from_date >= self.to_date:
 			raise UserError("The From Date must be less than or equal to the To Date")
 		
 		if not is_mgmt:
@@ -342,8 +364,7 @@ class CmCustomer(models.Model):
 			raise UserError(_(formatted_messages))
 
 		return True
-		
-		
+
 	def sequence_no_validations(self, **kw):
 		warning_msg = []
 		action_code_map = {
@@ -410,6 +431,8 @@ class CmCustomer(models.Model):
 		if self.status == 'active':
 			if not(self.env[RES_USERS].has_group('custom_properties.group_set_to_draft')):
 				raise UserError(_("You can't draft this entry. Draft Admin have the rights"))
+			if self.short_name == 'NPC':
+				raise UserError(_("You can't draft this entry. Its auto creation"))
 			self.write({'status': 'editable'})
 		return True
 
@@ -452,22 +475,8 @@ class CmCustomer(models.Model):
 	 
 	@api.model
 	def retrieve_dashboard(self):
-		result = {
-			'all_draft': 0,
-			'all_active': 0,
-			'all_inactive': 0,
-			'all_editable': 0,
-			'my_draft': 0,
-			'my_active': 0,
-			'my_inactive': 0,
-			'my_editable': 0,
-			'all_today_count': 0,
-			'all_today_value': 0,
-			'my_today_count': 0,
-			'my_today_value': 0,
-		}
-		
-		
+		result = {}
+
 		cm_customer = self.env[CM_CUSTOMER]
 		result['all_draft'] = cm_customer.search_count([('status', '=', 'draft')])
 		result['all_active'] = cm_customer.search_count([('status', '=', 'active')])

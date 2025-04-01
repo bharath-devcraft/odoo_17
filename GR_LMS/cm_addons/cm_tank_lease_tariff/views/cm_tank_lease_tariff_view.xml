@@ -29,33 +29,39 @@
                     </header>
                     
                     <sheet>                    
+                        <widget name="web_ribbon" title="Draft" bg_color="bg-info" invisible = "status != 'draft'"/>
+                        <widget name="web_ribbon" title="Editable" bg_color="bg-warning" invisible = "status != 'editable'"/>
                         <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+                        <widget name="web_ribbon" title="Inactive" bg_color="bg-danger" invisible = "status != 'inactive'"/>
                         <group>
                             <group >
                                 <label for="eff_from_date" class="name-lable"/>
                                 <div>
 									<field name="eff_from_date" required="1" readonly = "status not in ('draft','editable')"/>                                    
                                 </div>
-                                <field name="business_location" required="1" readonly = "status not in ('draft','editable')"/> 
+                                <field name="business_location" required="1" readonly = "1" force_save="1"/>
+                                <field name="state_id" options="{'no_create': True}" invisible = "business_location not in ('pan_india')" required = "business_location in ('pan_india')" readonly = "status not in ('draft','editable')"/>  
                                 <field name="operating_cost" required="1" readonly = "status not in ('draft','editable')"/> 
+                                <field name="markup_val" invisible = "business_location not in ('pan_india')" required = "business_location in ('pan_india')" readonly = "status not in ('draft','editable')"/> 
                             </group>
                             <group>
-                                <field name="currency_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="avg_trans_days" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="re_use_days" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="currency_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
+                                <field name="avg_trans_days" style = "width:95%%" invisible = "business_location not in ('exim')" required = "business_location in ('exim')" readonly = "status not in ('draft','editable')"/>
+                                <field name="re_use_days" style = "width:95%%" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="status" readonly = "1" invisible="1"/>
+                                <field name="name" invisible="1"/>
                             </group>
                         </group>
                         
                         <notebook>
-                            <page string="Charges Details" invisible="1" >
+                            <page string="Charges Details" >
                                 <field name="line_ids" nolabel="1" readonly = "status not in ('draft','editable')">
                                     <tree string="Details" editable="bottom">
                                         <field name="header_id" column_invisible="1"/>
                                         <field name="charges_id" required="1" options="{'no_create': True}"/>
                                         <field name="mandatory" required="1" />
                                         <field name="currency_id" required="1" options="{'no_create': True}"/>
-                                        <field name="tax_ids" widget="many2many_tags" options="{'no_create': True}" readonly="1" force_save="1"/>
+                                        <field name="costing_type" required="1" />
                                         <field name="unit_value" required="1" />
                                         <field name="company_id" column_invisible="1"/>                           
                                     </tree>
@@ -84,7 +90,8 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+										<field name="tot_amt" readonly = "1" invisible="1"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -104,6 +111,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -125,15 +133,39 @@
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">                    
-                    <field name="business_location" width="200px"/>
+                    <field name="eff_from_date"/>
+                    <field name="business_location"/>
+                    <field name="state_id"/>
+                    <field name="operating_cost"/>
                     <field name="currency_id"/>
-                    <field name="re_use_days" width="300px"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
                         decoration-primary = "status == 'inactive'"/>
-                    <field name="ap_rej_user_id" string="Approved By"/>
-                    <field name="crt_date" width="200px"/>
+                    <field name="ap_rej_user_id" string="Approved By" width="200px"/>
+                </tree>
+            </field>
+        </record>
+        <record id="cm_op_tank_lease_tariff_tree_js" model="ir.ui.view">
+            <field name="name">Dashboard View</field>
+            <field name="model">cm.tank.lease.tariff</field>
+            <field name="priority" eval="10"/>
+            <field name="arch" type="xml">
+                <tree string="Tank Lease Tariff" js_class="cm_op_tank_lease_tariff_list"
+                        decoration-info="status == 'draft'" 
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status in ('active','draft')"
+                        decoration-primary = "status == 'inactive'">                    
+                    <field name="eff_from_date"/>
+                    <field name="business_location"/>
+                    <field name="state_id"/>
+                    <field name="operating_cost"/>
+                    <field name="currency_id"/>
+                    <field name="status" widget="badge" decoration-info = "status == 'draft'"
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status == 'active'"
+                        decoration-primary = "status == 'inactive'"/>
+                    <field name="ap_rej_user_id" string="Approved By" width="200px"/>
                 </tree>
             </field>
         </record>
@@ -167,13 +199,13 @@
             <field name="model">cm.tank.lease.tariff</field>
             <field name="arch" type="xml">
                 <search string="Tank Lease Tariff">
-                    <field name="currency_id" string="Currency" filter_domain="[('currency_id','ilike',self)]"/>
-                    
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
+                    <field name="currency_id" string="Currency" filter_domain="[('currency_id','ilike',self)]"/>                    
+                     
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/>
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -185,8 +217,12 @@
                         <filter string="Business Location" name="business_location" domain="[]" context="{'group_by': 'business_location'}"/>
                         <filter string="Currency" name="currency_id" domain="[]" context="{'group_by': 'currency_id'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -197,16 +233,39 @@
             <field name="name">Tank Lease Tariff</field>
             <field name="res_model">cm.tank.lease.tariff</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[]</field>
+            <field name="domain">[('business_location','=','pan_india')]</field>
             <field name="view_id" ref="cm_tank_lease_tariff_tree_js"/>
             <field name="search_view_id" ref="cm_tank_lease_tariff_search"/>
-            <field name="context">{}</field>
+            <field name="context">{'default_business_location':'pan_india'}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                                  (0, 0, {'view_mode': 'tree', 'view_id': ref('cm_tank_lease_tariff_tree_js')}),
+                                  (0, 0, {'view_mode': 'form', 'view_id': ref('cm_tank_lease_tariff_form')})
+                                 ]"/>
+        </record>
+        
+        <record id="cm_op_tank_lease_tariff_win_action" model="ir.actions.act_window">
+            <field name="name">Tank Lease Tariff</field>
+            <field name="res_model">cm.tank.lease.tariff</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('business_location','=','exim')]</field>
+            <field name="view_id" ref="cm_op_tank_lease_tariff_tree_js"/>
+            <field name="search_view_id" ref="cm_tank_lease_tariff_search"/>
+            <field name="context">{'default_business_location':'exim'}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
+            </field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                                  (0, 0, {'view_mode': 'tree', 'view_id': ref('cm_op_tank_lease_tariff_tree_js')}),
+                                  (0, 0, {'view_mode': 'form', 'view_id': ref('cm_tank_lease_tariff_form')})
+                                 ]"/>
         </record>
 
         <menuitem name="Tank Lease Tariff" id="cm_tank_lease_tariff_act_menu" parent="cm_master.cm_tariff_master_m_parent" action="cm_tank_lease_tariff_win_action" sequence="26"/>
+        
+        <menuitem name="Tank Lease Tariff" id="cm_op_tank_lease_tariff_act_menu" parent="cm_master.cm_op_tariff_master_m_parent" action="cm_op_tank_lease_tariff_win_action" sequence="26"/>
 
     </data>
         

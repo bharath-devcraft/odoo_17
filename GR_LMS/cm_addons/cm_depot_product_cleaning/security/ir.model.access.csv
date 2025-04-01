@@ -1,0 +1,7 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_cm_depot_product_cleaning_admin","cm.depot.product.cleaning.admin","model_cm_depot_product_cleaning","custom_properties.group_master_admin",1,1,1,1
+"access_cm_depot_product_cleaning_attachment_line_admin","cm.depot.product.cleaning.attachment.line.admin","model_cm_depot_product_cleaning_attachment_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_depot_product_batch_inactive_admin","cm.depot.product.cleaning.batch.inactive.admin","model_cm_depot_product_batch_inactive","custom_properties.group_master_admin",1,1,1,1
+"access_cm_depot_product_cleaning_user","cm.depot.product.cleaning.user","model_cm_depot_product_cleaning","custom_properties.group_master_user",1,0,0,0
+"access_cm_depot_product_cleaning_attachment_line_user","cm.depot.product.cleaning.attachment.line.user","model_cm_depot_product_cleaning_attachment_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_depot_product_batch_inactive_user","cm.depot.product.cleaning.batch.inactive.user","model_cm_depot_product_batch_inactive","custom_properties.group_master_user",1,0,0,0

@@ -104,7 +104,9 @@
                 
                 </div>
                 <div style="color:blue;">
-                    <marquee t-on-mouseover="stopMarquee" t-on-mouseout="startMarquee">Today's new entry count is <t t-out="masterData['all_today_count']"/></marquee>
+                    <marquee t-on-mouseover="stopMarquee" t-on-mouseout="startMarquee">
+                    <img src="custom_properties/static/src/img/truck.png" width="60" height="40" alt="Truck" />
+                    Today's new entry count is <t t-out="masterData['all_today_count']"/></marquee>
                 </div>
             </div>
         </div>

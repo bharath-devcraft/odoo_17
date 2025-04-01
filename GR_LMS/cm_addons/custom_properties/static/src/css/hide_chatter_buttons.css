@@ -1,0 +1,9 @@
+/* All the form Send message , Notes and Attach  */
+.o-mail-Chatter-logNote, 
+.o-mail-Chatter-activity, 
+.o-mail-Followers, 
+.o-mail-Chatter-sendMessage, 
+.flex-grow-1.d-flex.d-none, 
+.o-mail-Chatter-topbar {
+    display: none !important;
+}

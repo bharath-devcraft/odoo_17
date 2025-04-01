@@ -11,6 +11,7 @@ CM_VENDOR_MASTER='cm.vendor.master'
 CM_CITY = 'cm.city'
 TIME_FORMAT='%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 CUSTOM_STATUS = [
         ('draft', 'Draft'),
@@ -25,7 +26,6 @@ YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 
 COMPANY_TYPE_OPTIONS = [('person', 'Individual'), ('company', 'Company')]
 
-GST_OPTIONS = [('registered', 'Registered'), ('un_registered', 'Un Registered')]
 
 APPLICABLE_OPTION = [('applicable', 'Applicable'), ('not_applicable', 'Not Applicable')]
 
@@ -38,16 +38,19 @@ class CmVendorMaster(models.Model):
     _order = 'name asc'
 
     name = fields.Char(string="Name", index=True, copy=False)
-    short_name = fields.Char(string="Short Name", copy=False)
+    short_name = fields.Char(string="Short Name", copy=False, size=4)
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-    remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+    remarks = fields.Text(string="Remarks", copy=False)
     
 
     contact_person = fields.Char(string="Contact Person", size=50)
     mobile_no = fields.Char(string="Mobile No", size=15, copy=False)
     whatsapp_no = fields.Char(string="WhatsApp No",copy=False, size=15)
     phone_no = fields.Char(string="Landline No / Ext", size=12, copy=False)
+    mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     email = fields.Char(string="Email", copy=False, size=252)
     fax = fields.Char(string="Fax", copy=False, size=12)
     street = fields.Char(string="Address Line 1", size=252)
@@ -62,7 +65,7 @@ class CmVendorMaster(models.Model):
     currency_id = fields.Many2one('res.currency', string="Currency", copy=False, ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
     entry_type = fields.Selection(selection=ENTRY_TYPE,default="new", string="Entry Type", copy=False, tracking=True)
     is_registered = fields.Selection(selection=YES_OR_NO, string="Is Registered Vendor", copy=False)##
-    parent_company_id = fields.Many2one('cm.vendor.master', string="Parent Company", domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    parent_company_id = fields.Many2one(CM_VENDOR_MASTER, string="Parent Company", domain=[('status', '=', 'active'),('active_trans', '=', True)])
     vendor_type_id = fields.Many2one('cm.vendor.type', string="Vendor Type", domain=[('status', '=', 'active'),('active_trans', '=', True)])
     cin_no = fields.Char(string="CIN No", copy=False, size=21)
     tax_reg_no = fields.Char(string="Tax Reg No(TRC)", copy=False, size=20)
@@ -74,12 +77,11 @@ class CmVendorMaster(models.Model):
 
     pan_no = fields.Char(string="PAN No", copy=False, size=10)
     aadhaar_no = fields.Char(string="Aadhaar No", copy=False, size=12, tracking=True)
-    gst_category = fields.Selection(selection=GST_OPTIONS, string="GST Category", copy=False)
     gst_no = fields.Char(string="GST No", copy=False, size=15)
-
+    same_as_mobile = fields.Boolean(string="Same as Mobile No", default=False, help="Click to apply same mobile number to whatsapp number")
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -98,7 +100,8 @@ class CmVendorMaster(models.Model):
     line_ids_b = fields.One2many('cm.vendor.master.billing.address.line', 'header_id', string="Billing Address", copy=True, c_rule=True)
     line_ids_c = fields.One2many('cm.vendor.master.bank.details.line', 'header_id', string="Bank Details", copy=True, c_rule=True)
     line_ids_d = fields.One2many('cm.vendor.master.delivery.address.line', 'header_id', string="Delivery Address", copy=True, c_rule=True)
-    
+
+
     @api.constrains('name')
     def name_validation(self):
         if self.name:
@@ -191,7 +194,7 @@ class CmVendorMaster(models.Model):
             if not valid_gst_no(self.gst_no):
                 raise UserError(_("Invalid GST number. Please enter the correct GST number"))
             
-            if self.gst_category == 'registered' and self.entry_type != 'name_change' :
+            if self.entry_type != 'name_change' :
                 existing_gst = self.env[CM_VENDOR_MASTER].search_count([('gst_no', '=', self.gst_no), ('id', '!=', self.id), ('company_id', '=', self.company_id.id)])
                 if existing_gst > 0:
                     raise UserError(_("GST number must be unique"))
@@ -219,10 +222,18 @@ class CmVendorMaster(models.Model):
             self.country_code = self.country_id.code
             self.city_id = False
             self.state_id = False
+            record = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1)
+            c_code = record.id if record else False
+            self.mb_cc_id = c_code
+            self.wh_cc_id = c_code
+            self.ph_cc_id = c_code
         else:
             self.country_code = False
             self.city_id = False
             self.state_id = False
+            self.mb_cc_id = False
+            self.wh_cc_id = False
+            self.ph_cc_id = False
     
     @api.onchange('city_id')
     def onchange_city_id(self):
@@ -235,13 +246,14 @@ class CmVendorMaster(models.Model):
     def onchange_profit_share(self):
         if self.profit_share != 'applicable':
             self.profit_val = False
+            
+    @api.onchange('same_as_mobile','mobile_no')
+    def onchange_same_as_mobile(self):
+        if self.same_as_mobile:
+            self.whatsapp_no = self.mobile_no
+        else:
+            self.whatsapp_no = False
     
-    @api.onchange('entry_type')
-    def onchange_entry_type(self):
-        if self.entry_type == 'new':
-            self.parent_company_id = False
-
-
     def validations(self):
         warning_msg = []
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
@@ -259,8 +271,8 @@ class CmVendorMaster(models.Model):
     def entry_approve(self):
         if self.status in ('draft', 'editable'):
             self.validations()
-            if not self.short_name and self.name and self.country_id:
-                self.short_name = self.name[:4].upper() + " - " + self.country_id.name.upper()	
+            # if not self.short_name and self.name and self.country_id:
+            #     self.short_name = self.name[:4].upper() + " - " + self.country_id.name.upper()	
             self.write({'status': 'active',
                         'ap_rej_user_id': self.env.user.id,
                         'ap_rej_date': time.strftime(TIME_FORMAT)})
@@ -312,20 +324,7 @@ class CmVendorMaster(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         
         cm_vendor_master = self.env[CM_VENDOR_MASTER]

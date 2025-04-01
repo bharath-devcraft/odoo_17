@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_po_advance,ct.po.advance,model_ct_po_advance,custom_properties.group_erp_admin,1,1,1,1
+access_ct_po_advance_line,ct.po.advance.line,model_ct_po_advance_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_po_advance_attachment_line,ct.po.advance.attachment.line,model_ct_po_advance_attachment_line,custom_properties.group_erp_admin,1,1,1,1

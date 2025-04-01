@@ -34,9 +34,9 @@
                             <group >
                                 <label for="name" class="name-lable"/>
                                 <div>
-                                    <field name="name" class="name-value" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+                                    <field name="name" class="name-value" widget="auto_fill" required="1" readonly = "status not in ('draft','editable')"/>
                                 </div> 
-                                <field name="street" readonly = "status not in ('draft','editable')"/>
+                                <field name="street" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="city_id" required="1" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
                                 <field name="state_id" required="1" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>                                
                             </group>
@@ -72,7 +72,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -92,6 +92,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -166,11 +167,12 @@
                     <field name="state_id" filter_domain="[('state_id','ilike',self)]"/>
                     <field name="country_id" filter_domain="[('country_id','ilike',self)]"/>
                     <field name="pin_code" string="Zip Code" filter_domain="[('pin_code','ilike',self)]"/>
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
+                    
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -182,8 +184,12 @@
                         <filter string="State" name="state_id" domain="[]" context="{'group_by': 'state_id'}"/>
                         <filter string="Country" name="country_id" domain="[]" context="{'group_by': 'country_id'}"/>
                         <filter string="Zip Code" name="pin_code" domain="[]" context="{'group_by': 'pin_code'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -199,11 +205,11 @@
             <field name="search_view_id" ref="cm_transport_location_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 
-        <menuitem name="Transport Location" id="cm_transport_location_act_menu" parent="cm_master.cm_crm_master_m_parent" action="cm_transport_location_win_action" sequence="47"/>
+        <menuitem name="Transport Location" id="cm_transport_location_act_menu" parent="cm_master.cm_transport_master_m_parent" action="cm_transport_location_win_action" sequence="47"/>
 
     </data>
         

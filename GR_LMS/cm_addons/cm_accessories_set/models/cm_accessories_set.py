@@ -20,6 +20,8 @@ CUSTOM_STATUS = [
 ENTRY_MODE =  [('manual','Manual'),
 			   ('auto', 'Auto')]
 
+FLEXI_TYPE = [('tltd', 'TLTD'), ('tlbd', 'TLBD'), ('blbd', 'BLBD')]
+
 class CmAccessoriesSet(models.Model):
 	_name = 'cm.accessories.set'
 	_description = 'Accessories Set'
@@ -27,11 +29,10 @@ class CmAccessoriesSet(models.Model):
 	_order = 'name asc'
 
 
-	name = fields.Char(string="Flexi Bag Type", index=True, copy=False)
-	flexi_bag_id = fields.Many2one('product.template', string="Flexi Bag Type", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True),('custom_type', '=', 'flexi_bag')])
+	name = fields.Char(string="Bag Name", index=True, copy=False)
 	status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
 	inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-	remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+	remarks = fields.Text(string="Remarks", copy=False)
 	company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 	
 	qty = fields.Integer(string="Quantity(Set)", copy=False, default=1, readonly=True)
@@ -39,8 +40,13 @@ class CmAccessoriesSet(models.Model):
 	tot_amt = fields.Float(string="Total Cost Price", copy=False, store=True, compute='_compute_all_line')
 	markup = fields.Float(string="Markup(%)", copy=False)
 	tot_sale_amt = fields.Float(string="Sales Price", copy=False, store=True, compute='_compute_all_line')
+	tot_currency_id = fields.Many2one('res.currency', string="Currency", copy=False, ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	currency_id = fields.Many2one('res.currency', string="Currency", copy=False, ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	vendor_id = fields.Many2one('cm.vendor.master', string="Vendor Name", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	flexi_type = fields.Selection(selection=FLEXI_TYPE, string="Flexi Type", copy=False, help='TLTD (Top Loading Top Discharge),TLBD (Top Loading Bottom Discharge),BLBD (Bottom Load Bottom Discharge)')
+	flexi_layer_type_id = fields.Many2one('cm.flexi.layer.type', string="Layer Type", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
-	active = fields.Boolean(string="Visible", default=True)
+	active = fields.Boolean(string="Visible in View", default=True)
 	active_rpt = fields.Boolean(string="Visible In Reports", default=True)
 	active_trans = fields.Boolean(string="Visible In Transactions", default=True)
 	entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -67,7 +73,7 @@ class CmAccessoriesSet(models.Model):
 			from cm_accessories_set where upper(REPLACE(name, ' ', ''))  = '%s'
 			and id != %s and company_id = %s""" %(name, self.id, self.company_id.id))
 			if self.env.cr.fetchone():
-				raise UserError(_("Flexi Bag Type name must be unique"))
+				raise UserError(_("Bag name must be unique"))
 
 	def validations(self):
 		warning_msg = []
@@ -102,10 +108,10 @@ class CmAccessoriesSet(models.Model):
 			else:
 				data.tot_sale_amt = sum(line.tot_amt for line in data.line_ids)
 	
-	@api.onchange('flexi_bag_id')
-	def onchange_flexi_bag_id(self):
-		if self.flexi_bag_id:
-			self.name = self.flexi_bag_id.name
+	@api.onchange('flexi_type')
+	def onchange_flexi_type(self):
+		if self.flexi_type:
+			self.name = self.flexi_type.upper()
 		else:
 			self.name = False
 	
@@ -165,20 +171,7 @@ class CmAccessoriesSet(models.Model):
 	 
 	@api.model
 	def retrieve_dashboard(self):
-		result = {
-			'all_draft': 0,
-			'all_active': 0,
-			'all_inactive': 0,
-			'all_editable': 0,
-			'my_draft': 0,
-			'my_active': 0,
-			'my_inactive': 0,
-			'my_editable': 0,
-			'all_today_count': 0,
-			'all_today_value': 0,
-			'my_today_count': 0,
-			'my_today_value': 0,
-		}
+		result = {}
 		
 		cm_accessories_set = self.env[CM_ACCESSORIES_SET]
 		result['all_draft'] = cm_accessories_set.search_count([('status', '=', 'draft')])

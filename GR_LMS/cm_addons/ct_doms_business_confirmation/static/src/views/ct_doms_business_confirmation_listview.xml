@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="ct_doms_business_confirmation.CtDomsBusinessConfirmationListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CtDomsBusinessConfirmationDashBoard />
+        </xpath>
+    </t>
+</templates>

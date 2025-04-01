@@ -51,7 +51,7 @@ class CtTransaction(models.Model):
     currency_id = fields.Many2one('res.currency', string="Currency", copy=False, default=lambda self: self.env.company.currency_id.id, ondelete='restrict', readonly=True, tracking=True)
     delivery_date = fields.Date(string="Delivery Date", copy=False, tracking=True)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
@@ -108,6 +108,7 @@ class CtTransaction(models.Model):
 
     def validate_expense_lines(self, warning_msg):
         if self.line_ids_b:
+            dub_expense = set()
             for exp_line in self.line_ids_b:
                 if exp_line.amt <= 0:
                     warning_msg.append(f"Expense({exp_line.expense_id.name}) amount should be greater than zero")
@@ -115,10 +116,18 @@ class CtTransaction(models.Model):
                     warning_msg.append(f"Expense({exp_line.expense_id.name}) discount should be greater than or equal to zero")
                 if exp_line.disc_per > 100:
                     warning_msg.append(f"Expense({exp_line.expense_id.name}) discount should not be greater than hundred percent")
+                if exp_line.expense_id.id in dub_expense:
+                    warning_msg.append(f"Duplicate expense are not allowed. Ref : {exp_line.expense_id.name}")
+                if exp_line.tax_ids:
+                    tax_groups = {tax.tax_group_id.name for tax in exp_line.tax_ids}
+                    if 'IGST' in tax_groups and tax_groups & {'CGST', 'SGST'}:
+                        warning_msg.append(
+                            f"Expense ({exp_line.expense_id.name}) - the combination of IGST with CGST or SGST is not allowed."
+                        )
+                dub_expense.add(exp_line.expense_id.id)
 
 
-    def validate_serial_lines(self, detail_line, warning_msg):
-        dub_serial = []
+    def validate_serial_lines(self, detail_line, warning_msg, dub_serial):
         serial_qty = 0
         for serial_line in detail_line.line_ids:
             serial_qty += serial_line.qty
@@ -133,7 +142,7 @@ class CtTransaction(models.Model):
             warning_msg.append(f"Product({detail_line.description}) sum of serial no quantity should be equal to product quantity")
 
 
-    def validate_detail_lines(self, detail_line, warning_msg):
+    def validate_detail_lines(self, detail_line, warning_msg, dub_serial):
         if detail_line.qty <= 0:
             warning_msg.append(f"Product({detail_line.description}) quantity should be greater than zero")
         if detail_line.unit_price <= 0:
@@ -142,16 +151,34 @@ class CtTransaction(models.Model):
             warning_msg.append(f"Product({detail_line.description}) discount should be greater than or equal to zero")
         if detail_line.disc_per > 100:
             warning_msg.append(f"Product({detail_line.description}) discount should not be greater than hundred percent")
-        
-        self.validate_serial_lines(detail_line, warning_msg)
+        if detail_line.tax_ids:
+            tax_groups = {tax.tax_group_id.name for tax in detail_line.tax_ids}
+            if 'IGST' in tax_groups and tax_groups & {'CGST', 'SGST'}:
+                warning_msg.append(
+                    f"Product ({detail_line.description}) - the combination of IGST with CGST or SGST is not allowed."
+                )
+        self.validate_serial_lines(detail_line, warning_msg, dub_serial)
 
 
     def validate_line_items(self, warning_msg):
         if not self.line_ids:
             warning_msg.append("System not allow to confirm/approve with empty line details")
         else:
+            dub_product = set()
+            dub_serial = []
             for detail_line in self.line_ids:
-                self.validate_detail_lines(detail_line, warning_msg)
+                if detail_line.qty <= 0:
+                    warning_msg.append(f"Product({detail_line.description}) quantity should be greater than zero")
+                combination = (
+                    detail_line.product_id.id, 
+                    detail_line.uom_id.id, 
+                    detail_line.brand_id.id if detail_line.brand_id else None
+                )
+                if combination in dub_product:
+                    warning_msg.append(f"Duplicate product are not allowed. Ref : {detail_line.description}")
+                else:
+                    dub_product.add(combination)
+                self.validate_detail_lines(detail_line, warning_msg, dub_serial)
 
 
     def validations(self, **kw):
@@ -238,8 +265,9 @@ class CtTransaction(models.Model):
             data.tot_amt = sum(data.line_ids.mapped('tot_amt'))
             data.other_amt = sum(data.line_ids_b.mapped('amt'))
             data.disc_amt = sum(data.line_ids.mapped('disc_amt')) + sum(data.line_ids_b.mapped('disc_amt'))
-            
+
             old_grand_total = data.taxable_amt + data.tax_amt
+            old_grand_total_round_off = data.grand_tot_amt
 
             data.taxable_amt = (data.tot_amt + data.other_amt) - data.disc_amt
             data.tax_amt = sum(data.line_ids.mapped('tax_amt')) + sum(data.line_ids_b.mapped('tax_amt'))
@@ -248,17 +276,21 @@ class CtTransaction(models.Model):
                 data.manual_round_off = False
                 data.round_off_amt = 0.00
                 data.fixed_disc_amt = 0.00
-            
+
             if not data.manual_round_off:
                 data.round_off_amt = round(data.taxable_amt + data.tax_amt) - (data.taxable_amt + data.tax_amt)
                 data.round_off_amt = round(data.round_off_amt, 2)
 
             data.grand_tot_amt = data.taxable_amt + data.tax_amt + data.round_off_amt
-            
-            data.fixed_disc_amt = 0.00 if data.grand_tot_amt <= 0 else data.fixed_disc_amt
-            
+
+            data.fixed_disc_amt = (
+                0.00 
+                if data.grand_tot_amt <= 0 or old_grand_total_round_off != data.grand_tot_amt 
+                else data.fixed_disc_amt
+            )
+   
             data.net_amt = data.grand_tot_amt - data.fixed_disc_amt
-    
+
     
     @api.depends('line_ids', 'line_ids_b', 'round_off_amt', 'fixed_disc_amt', 'manual_round_off')
     def _compute_all_line(self):
@@ -283,7 +315,7 @@ class CtTransaction(models.Model):
     @api.onchange('delivery_date')
     def onchange_delivery(self):
         if self.delivery_date and self.entry_date and self.delivery_date < self.entry_date:
-            raise UserError(_("Delivery date should be greater than or equal to order date"))
+            raise UserError(_("Delivery date should be greater than or equal to entry date"))
     
     @api.onchange('round_off_amt')
     def onchange_round_off_amt(self):
@@ -421,7 +453,7 @@ class CtTransaction(models.Model):
             if not self.ap_rej_remark or not self.ap_rej_remark.strip():
                 raise UserError(_("Reject remarks is must. Kindly enter the remarks in Approve / Reject Remarks field"))
             if self.ap_rej_remark and len(self.ap_rej_remark.strip()) < int(min_char):
-                raise UserError(_(f"Minimum {min_char} characters are must for Approve / Reject Remarks"))
+                raise UserError(_(f"Minimum {min_char} characters is required for Approve / Reject Remarks"))
             self.write({'status': 'rejected',
                         'ap_rej_user_id': self.env.user.id,
                         'ap_rej_date': time.strftime(TIME_FORMAT)
@@ -434,7 +466,7 @@ class CtTransaction(models.Model):
             if not self.cancel_remark or not self.cancel_remark.strip():
                 raise UserError(_("Cancel remarks is must. Kindly enter the remarks in Cancel Remarks field"))
             if self.cancel_remark and len(self.cancel_remark.strip()) < int(min_char):
-                raise UserError(_(f"Minimum {min_char} characters are must for cancel remarks"))
+                raise UserError(_(f"Minimum {min_char} characters is required for cancel remarks"))
             self.write({'status': 'cancelled',
                         'cancel_user_id': self.env.user.id,
                         'cancel_date': time.strftime(TIME_FORMAT)

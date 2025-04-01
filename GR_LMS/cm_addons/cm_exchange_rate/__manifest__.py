@@ -8,7 +8,7 @@
     'description': """Scope of this module to fulfill the necessary features related to common exchange rate form.""",
 
     'author': "Karthikeyan S",
-    'website': "https://www.goodrich.co",
+    'website': "https://catalystsolutions.sg",
     'category': 'Custom Modules/custom_modules',
     'application' : True,
     'version': '0.1',

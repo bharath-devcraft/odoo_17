@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import time
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
 class CmCurrencyAttachmentLine(models.Model):
     _name = 'cm.currency.attachment.line'
     _description = 'Attachments'
-    _order = 'id asc'
+    _order = 'attach_date desc'
 
     header_id = fields.Many2one('res.currency', string="Header Ref",index=True, required=True, ondelete='cascade', c_rule=True)
     attach_desc = fields.Char(string="Description", size=252)
@@ -14,6 +15,13 @@ class CmCurrencyAttachmentLine(models.Model):
     attach_user_id = fields.Many2one('res.users', string="Attached By", copy=False, ondelete='restrict', readonly=True)
     company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
     
+    
+    @api.constrains('attach_desc')
+    def attach_desc_validation(self):
+        for line in self:
+            desc = line.attach_desc.strip() if line.attach_desc else None
+            if len(desc) < 3:
+                raise UserError(_(f"Description field must contain at least 3 characters in the attachments tab. Ref: {line.attach_desc}"))
 
     @api.onchange('attachment_ids')
     def onchange_attachment_ids(self):

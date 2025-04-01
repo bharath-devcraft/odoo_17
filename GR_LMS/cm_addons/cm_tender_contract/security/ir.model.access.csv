@@ -1,0 +1,7 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_cm_tender_contract_admin","cm.tender.contract.admin","model_cm_tender_contract","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tender_contract_attachment_line_admin","cm.tender.contract.attachment.line.admin","model_cm_tender_contract_attachment_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tender_contract_batch_inactive_admin","cm.tender.contract.batch.inactive.admin","model_cm_tender_contract_batch_inactive","custom_properties.group_master_admin",1,1,1,1
+"access_cm_tender_contract_user","cm.tender.contract.user","model_cm_tender_contract","custom_properties.group_master_user",1,0,0,0
+"access_cm_tender_contract_attachment_line_user","cm.tender.contract.attachment.line.user","model_cm_tender_contract_attachment_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_tender_contract_batch_inactive_user","cm.tender.contract.batch.inactive.user","model_cm_tender_contract_batch_inactive","custom_properties.group_master_user",1,0,0,0

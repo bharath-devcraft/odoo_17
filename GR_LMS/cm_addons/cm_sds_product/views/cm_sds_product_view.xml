@@ -37,13 +37,14 @@
                                     <field name="product_id" class="name-value" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/> 
                                     <field name="name" widget="no_special_char" invisible="1" readonly = "status not in ('draft','editable')"/>
                                 </div> 
-                                <field name="vendor_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="mfg_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                 
                             </group>
                             <group>
                                 <field name="issue_date" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="validity_period" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="valid_to_date" string = "Validy End Date" required="1" force_save = "1" readonly = "1"/>
+                                <field name="valid_to_date" string = "Validity End Date" required="1" force_save = "1" readonly = "1"/>
+                                <field name="attachment_ids" widget="single_file_binary" options="{'no_create_edit': True}" readonly = "status not in ('draft','editable')"/>
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                         </group>
@@ -90,7 +91,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -110,6 +111,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -132,11 +134,11 @@
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
                     <field name="product_id"/>
-                    <field name="vendor_id" string = "Mfg Name"/>
+                    <field name="mfg_id" string = "Mfg Name"/>
                     <field name="issue_date"/>
-                    <field name="dg_product" string = "DG Goods"/>
+                    <field name="dg_product"/>
                     <field name="validity_period"/>
-                    <field name="valid_to_date"/>
+                    <field name="valid_to_date" string = "Validity End Date"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -158,11 +160,11 @@
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
                     <field name="product_id"/>
-                    <field name="vendor_id" string = "Mfg Name"/>
+                    <field name="mfg_id" string = "Mfg Name"/>
                     <field name="issue_date"/>
-                    <field name="dg_product" string = "DG Goods"/>
+                    <field name="dg_product"/>
                     <field name="validity_period"/>
-                    <field name="valid_to_date"/>
+                    <field name="valid_to_date" string = "Validity End Date"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -180,14 +182,14 @@
             <field name="arch" type="xml">
                 <search string="SDS Product">
                     <field name="product_id" string="Product Name" filter_domain="[('name','ilike',self)]"/>
-                    <field name="vendor_id" string="Manufacturer Name" filter_domain="[('short_name','ilike',self)]"/>
+                    <field name="mfg_id" string="Manufacturer Name" filter_domain="[('mfg_id','ilike',self)]"/>
                     <field name="che_name" string="Chemical Name" filter_domain="[('che_name','ilike',self)]"/>
                     
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -196,12 +198,16 @@
                     
                     <group expand="0" string="Group By">
                         <filter string="Product Name" name="product_id" domain="[]" context="{'group_by': 'product_id'}"/>
-                        <filter string="Manufacturer Name" name="vendor_id" domain="[]" context="{'group_by': 'vendor_id'}"/>
+                        <filter string="Manufacturer Name" name="mfg_id" domain="[]" context="{'group_by': 'mfg_id'}"/>
                         <filter string="SDS Issue Date" name="issue_date" domain="[]" context="{'group_by': 'issue_date'}"/>
-                        <filter string="Validy End Date" name="valid_to_date" domain="[]" context="{'group_by': 'valid_to_date'}"/>
+                        <filter string = "Validity End Date" name="valid_to_date" domain="[]" context="{'group_by': 'valid_to_date'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -209,7 +215,7 @@
 
 
         <record id="cm_sds_product_win_action" model="ir.actions.act_window">
-            <field name="name">SDS Product</field>
+            <field name="name">Product SDS</field>
             <field name="res_model">cm.sds.product</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[]</field>
@@ -217,11 +223,11 @@
             <field name="search_view_id" ref="cm_sds_product_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 
-        <menuitem name="SDS Product" id="cm_sds_product_act_menu" parent="cm_master.cm_crm_master_m_parent" action="cm_sds_product_win_action" sequence="119"/>
+        <menuitem name="Product SDS" id="cm_sds_product_act_menu" parent="cm_master.cm_crm_master_m_parent" action="cm_sds_product_win_action" sequence="119"/>
 
     </data>
         

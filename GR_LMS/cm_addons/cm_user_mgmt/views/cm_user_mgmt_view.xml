@@ -29,8 +29,10 @@
 					<field name="department_id" required = "1" options="{'no_create':1,'no_create_edit':1}" readonly = "status in ('active','inactive')"/>
 					<field name="designation_id" required = "1" options="{'no_create':1,'no_create_edit':1}" readonly = "status in ('active','inactive')"/>
 					<field name="mobile_no" required = "1" readonly = "status in ('active','inactive')"/>
+					<field name="same_as_mobile" readonly = "status not in ('draft','editable')"/>
+					<field name="whatsapp_no" widget="numeric" required="1" readonly = "status not in ('draft','editable')"/>
 					<field name="ext_no" string="Landline No / Ext" readonly = "status in ('active','inactive')"/>
-					<field name="email" string="Email" readonly = "status in ('active','inactive')"/>                                
+					<field name="email" widget="valid_email" string="Email" readonly = "status in ('active','inactive')"/>                                
 			    </group>
 					<group string="Access Rights Properties">
 					<field name="status" readonly = "1" invisible="1"/>
@@ -38,6 +40,7 @@
 					<field name="access_company_ids" widget="many2many_tags" required="1" readonly = "status in ('active','inactive')"/>
 					<field name="division_ids" widget="many2many_tags" required="1" readonly = "status in ('active','inactive')"/>
 					<field name="department_ids" widget="many2many_tags" required="1" readonly = "status in ('active','inactive')"/>
+					<field name="service_ids" widget="many2many_tags" readonly = "status in ('active','inactive')"/>
 					<field name="sign_img" widget='image' class="oe_avatar_style oe_avatar"/>
 			    </group>						
 					    
@@ -78,7 +81,7 @@
 				<field name="active_rpt"/>
 			    </group>
 			    <group>
-				<field name="active" widget="boolean_toggle"/>
+				<field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
 				<field name="entry_mode"/>
 			    </group>
 			</group>
@@ -117,26 +120,50 @@
         <!-- Tree view starts -->
         
         <record id="m_tree_view_users" model="ir.ui.view">
-            <field name="name">Users Tree View</field>
-            <field name="model">res.users</field>
-            <field name="arch" type="xml">
-		<tree string="Users" js_class="cm_user_list"
-			decoration-info="status == 'draft'" 
-			decoration-success = "status == 'editable'"
-			decoration-bf = "status in ('active','draft')"
-			decoration-primary = "status == 'inactive'">
-                    <field name="name" string="Display Name"/>
-                    <field name="login" string="Login Name"/>
-                    <field name="user_category"/>
-                    <field name="company_id"/>
-                    <field name="department_id"/>
-                    <field name="mobile_no"/>
-                    <field name="status" widget="badge" decoration-info = "status == 'draft'"
-			decoration-success = "status == 'editable'"
-			decoration-bf = "status == 'active'"
-			decoration-primary = "status == 'inactive'"/>
-		</tree>
-            </field>
+			<field name="name">Users Tree View</field>
+			<field name="model">res.users</field>
+			<field name="arch" type="xml">
+			<tree string="Users" 
+				decoration-info="status == 'draft'" 
+				decoration-success = "status == 'editable'"
+				decoration-bf = "status in ('active','draft')"
+				decoration-primary = "status == 'inactive'">
+						<field name="name" string="Display Name"/>
+						<field name="login" string="Login Name"/>
+						<field name="user_category"/>
+						<field name="company_id"/>
+						<field name="department_id"/>
+						<field name="mobile_no"/>
+						<field name="status" widget="badge" decoration-info = "status == 'draft'"
+				decoration-success = "status == 'editable'"
+				decoration-bf = "status == 'active'"
+				decoration-primary = "status == 'inactive'"/>
+			</tree>
+			</field>
+        </record>
+
+
+		<record id="m_tree_view_users_js" model="ir.ui.view">
+			<field name="name">Users Tree View</field>
+			<field name="model">res.users</field>
+			<field name="arch" type="xml">
+			<tree string="Users" js_class="cm_user_list"
+				decoration-info="status == 'draft'" 
+				decoration-success = "status == 'editable'"
+				decoration-bf = "status in ('active','draft')"
+				decoration-primary = "status == 'inactive'">
+						<field name="name" string="Display Name"/>
+						<field name="login" string="Login Name"/>
+						<field name="user_category"/>
+						<field name="company_id"/>
+						<field name="department_id"/>
+						<field name="mobile_no"/>
+						<field name="status" widget="badge" decoration-info = "status == 'draft'"
+				decoration-success = "status == 'editable'"
+				decoration-bf = "status == 'active'"
+				decoration-primary = "status == 'inactive'"/>
+			</tree>
+			</field>
         </record>
 
         
@@ -169,6 +196,10 @@
 					<field name="fiscal_year_id" required="1" options="{'no_create':1,'no_create_edit':1}"/>
 				</group>
             </group>
+            
+            <div>
+				<button name="preference_change_password" type="object" string="Change password" class="btn btn-secondary"/>
+			</div>
         </xpath>
     </field>
 	</record>
@@ -190,11 +221,12 @@
 		    <field name="department_id" string="Department" filter_domain="[('department_id','ilike',self)]"/>		    
 		    <field name="designation_id" string="Designation" filter_domain="[('designation_id','ilike',self)]"/>
 		     
-		    <filter name="my_master" string="My Master" domain="[('user_id', '=', uid)]"/> 
+		    
 		    <filter name="Draft" domain="[('status', '=', 'draft')]"/>
 		    <filter name="Editable" domain="[('status', '=', 'editable')]"/>
 		    <filter name="Active" domain="[('status', '=', 'active')]"/>
 		    <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+		    <filter name="my_master" string="My Master" domain="[('user_id', '=', uid)]"/> 
 		    <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
 		    <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
 		    <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -202,13 +234,17 @@
 		    <filter name="Inactive List" domain="[('active', '=', False)]"/>
 		    
 		    <group expand="0" string="Group By">
-			<filter string="User Category" name="user_category" domain="[]" context="{'group_by': 'user_category'}"/>
-			<filter string="Department" name="department_id" domain="[]" context="{'group_by': 'department_id'}"/>
-			<filter string="Division" name="division_id" domain="[]" context="{'group_by': 'division_id'}"/>
-			<filter string="Designation" name="designation_id" domain="[]" context="{'group_by': 'designation_id'}"/>
-			<filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
-			<filter string="Approved By" name="status" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
-			<filter string="Approved Date" name="status" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+				<filter string="User Category" name="user_category" domain="[]" context="{'group_by': 'user_category'}"/>
+				<filter string="Department" name="department_id" domain="[]" context="{'group_by': 'department_id'}"/>
+				<filter string="Division" name="division_id" domain="[]" context="{'group_by': 'division_id'}"/>
+				<filter string="Designation" name="designation_id" domain="[]" context="{'group_by': 'designation_id'}"/>
+				<filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+				<filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+				<filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
+				<filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+				<filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+				<filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+				<filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
 		    </group>
             </search>
             </field>
@@ -234,7 +270,7 @@
        <record id="res_user_new_tree" model="ir.actions.act_window.view">
             <field eval="1" name="sequence"/>
             <field name="view_mode">tree</field>
-            <field name="view_id" ref="m_tree_view_users"/>
+            <field name="view_id" ref="m_tree_view_users_js"/>
             <field name="act_window_id" ref="mma_res_users_new"/>
         </record>
         

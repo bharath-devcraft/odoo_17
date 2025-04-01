@@ -12,7 +12,7 @@
                     icon="fa-thumbs-up"
                     class="btn btn-success"
                     type="object"
-                    name="entry_confirm" invisible = "status != 'draft'"
+                    name="confirm_warning_rule" invisible = "status != 'draft'"
                     confirm="Are you sure to proceed ?"/>
                 <button string="Cancel"
                     icon="fa-thumbs-down"
@@ -25,27 +25,44 @@
 
             </header>
             <sheet>
+                <widget name="web_ribbon" title="RFQ Sent" bg_color="bg-success" invisible = "status != 'rfq_sent'"/>
+                <widget name="web_ribbon" title="Quotation Sent" bg_color="bg-success" invisible = "status != 'quotation_sent'"/>
                 <widget name="web_ribbon" title="Won" bg_color="bg-success" invisible = "status != 'won'"/>
                 <widget name="web_ribbon" title="Lost" bg_color="bg-danger" invisible = "status != 'lost'"/>
                 <group>
                     <group>
                         <field name="name" readonly = "1" force_save="1" class="animate-charcter" widget="CopyClipboardChar"/>
-                        <field name="entry_date" string="Enquiry Date" required = "1" readonly = "status not in ('draft')"/>
+                        <field name="entry_date" required = "1" readonly = "status not in ('draft')"/>
                         <field name="service_id" options="{'no_create': True}" required = "1" readonly = "status not in ('draft')"/>
                         <field name="generated_user_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft')"/>
                         <field name="enq_source_id" options="{'no_create': True}" required = "1" readonly = "status not in ('draft')"/>
-                        <field name="ref_no" string="Reference Details / Date" readonly = "status not in ('draft')"/>
-                        <field name="bkg_party_id" options="{'no_create': True}" readonly = "status not in ('draft')"/>
-                        <field name="new_bkg_party" readonly = "status not in ('draft')"/>
-                        <field name="bus_vert_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
-                        <field name="contact_person" required = "1" readonly = "status not in ('draft')" force_save="1"/>
+                        <field name="ref_no" readonly = "status not in ('draft')"/>
+                        <field name="bkg_party_id" options="{'no_create': True}" readonly = "status not in ('draft')" force_save="1"/>
+                        <field name="new_bkg_party" widget="char_only" force_save="1" invisible="bkg_party_id != False" readonly = "status not in ('draft')"/>
+                        <field name="contact_person" widget="char_only" required = "1" readonly = "status not in ('draft')" force_save="1"/>
+                        <field name="mobile_no" widget="numeric" required = "1" readonly = "status not in ('draft')" force_save="1"/>
                     </group>
                     <group>
-                        <field name="mobile_no" required = "1" readonly = "status not in ('draft')" force_save="1"/>
                         <field name="email" required = "1" readonly = "status not in ('draft')" force_save="1"/>
+                        <field name="bus_vert_id" options="{'no_create': True}" readonly = "status not in ('draft')" force_save="1"/>
                         <field name="shipper_cus_id" options="{'no_create': True}" readonly = "status not in ('draft')"/>
-                        <field name="new_shipper" readonly = "status not in ('draft')"/>
-                        <field name="agent_id" options="{'no_create': True}" required = "1" readonly = "status not in ('draft')"/>
+                        <field name="new_shipper" widget="char_only" readonly = "status not in ('draft')"/>
+                        <field name="tank_operator_id" widget="many2many_tags" options="{'no_create': True}" 
+                            required = "'DOTR' in combined_codes or 'DOTC' in combined_codes
+                                        or 'DOTT' in combined_codes or 'DOTL' in combined_codes
+                                        or 'OSTE' in combined_codes or 'OSTI' in combined_codes
+                                        or 'ISTL' in combined_codes or 'TRAN' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                        or 'SOCE' in combined_codes or 'SOCI' in combined_codes
+                                        or 'SOCR' in combined_codes"
+                            invisible = "'DOTR' not in combined_codes and 'DOTC' not in combined_codes
+                                        and 'DOTT' not in combined_codes and 'DOTL' not in combined_codes
+                                        and 'OSTE' not in combined_codes and 'OSTI' not in combined_codes
+                                        and 'ISTL' not in combined_codes and 'TRAN' not in combined_codes
+                                        and 'OSNR' not in combined_codes and 'OSNB' not in combined_codes
+                                        and 'SOCE' not in combined_codes and 'SOCI' not in combined_codes
+                                        and 'SOCR' not in combined_codes"
+                            readonly = "status not in ('draft')"/>
                         <field name="rebate" required = "1" readonly = "status not in ('draft')"/>
                         <label for="cust_rate"/>
                         <div>
@@ -54,79 +71,261 @@
                                 <field name="currency_id" style="width: 22%%" options="{'no_create': True}" required = "cust_rate > 0" readonly = "status not in ('draft')"/>
                             </div>
                         </div>
-                        <field name="expiry_date" string="Last Date to Submit Quote" options="{'min_date': today}" required = "1" readonly = "status not in ('draft')"/>
+                        <field name="expiry_date" options="{'min_date': today}" required = "1" readonly = "status not in ('draft')"/>
+                        <field name="project_name" widget="char_only" readonly = "status not in ('draft')"/>
+                        <field name="lead_remark" invisible="entry_mode != 'auto'" readonly = "1" force_save="1"/>
                         <field name="status" readonly = "1" force_save="1" invisible="1"/>
                     </group>
                 </group>
-                <group string="Product Details">
+                <group string="Product Details" 
+                    invisible = "'DOTR' not in combined_codes and 'DOTC' not in combined_codes
+                        and 'DOTT' not in combined_codes and 'DOTL' not in combined_codes
+                        and 'OSTE' not in combined_codes and 'OSTI' not in combined_codes
+                        and 'ISTL' not in combined_codes and 'TRAN' not in combined_codes
+                        and 'SOCE' not in combined_codes and 'FLBS' not in combined_codes
+                        and 'OSNR' not in combined_codes and 'OSNB' not in combined_codes
+                        and 'SOCI' not in combined_codes and 'SOCR' not in combined_codes"
+                    >
                     <group>
-                        <field name="product_id" options="{'no_create': True}" readonly = "status not in ('draft')"/>
-                        <field name="product" readonly = "status not in ('draft')"/>
-                        <field name="dg_product" required = "product_id == False" readonly = "product_id != False or status not in ('draft')" force_save="1"/>
-                        <field name="un_no" invisible = "dg_product == 'no' or product_id == False" readonly = "1" force_save="1"/>
-                        <field name="sub_class1" invisible = "dg_product == 'no' or product_id == False" readonly = "1" force_save="1"/>
-                        <field name="sub_class2" invisible = "dg_product == 'no' or product_id == False" readonly = "1" force_save="1"/>
-                    </group>
-                    <group>
-                        <field name="tank_t_code" string="Tank Type(T Code)" force_save="1" readonly = "status not in ('draft')"/>
-                        <field name="tank_capacity"
-                            required = "'DOTR' in combined_codes or 'DOTC' in combined_codes
-                                         or 'DOTT' in combined_codes or 'DOTL' in combined_codes"
-                            invisible = "'DOTR' not in combined_codes and 'DOTC' not in combined_codes
-                                        and 'DOTT' not in combined_codes and 'DOTL' not in combined_codes"
-                            readonly = "status not in ('draft')"/>
-                        <field name="tank_qty"
-                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes  or 'ISTL' in combined_codes
-                                        or 'SOCT' in combined_codes or 'TRAN' in combined_codes or 'DOTR' in combined_codes
-                                        or 'DOTC' in combined_codes or 'DOTT' in combined_codes or 'DOTL' in combined_codes"
-                            invisible = "'OSTE' not in combined_codes and 'OSTI' not in combined_codes  and 'ISTL' not in combined_codes
-                                        and 'SOCT' not in combined_codes and 'TRAN' not in combined_codes and 'DOTR' not in combined_codes
-                                        and 'DOTC' not in combined_codes and 'DOTT' not in combined_codes and 'DOTL' not in combined_codes"
-                            readonly = "status not in ('draft')"/>
                         <field name="container_category" 
                             required = "'OSTE' in combined_codes or 'OSTI' in combined_codes  or 'ISTL' in combined_codes
-                                        or 'SOCT' in combined_codes or 'TRAN' in combined_codes or 'DOTR' in combined_codes
-                                        or 'DOTC' in combined_codes or 'DOTT' in combined_codes or 'DOTL' in combined_codes"
+                                        or 'SOCE' in combined_codes or 'TRAN' in combined_codes or 'DOTR' in combined_codes
+                                        or 'DOTC' in combined_codes or 'DOTT' in combined_codes or 'DOTL' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes or 'SOCI' in combined_codes
+                                        or 'SOCR' in combined_codes"
                             invisible = "'OSTE' not in combined_codes and 'OSTI' not in combined_codes  and 'ISTL' not in combined_codes
-                                        and 'SOCT' not in combined_codes and 'TRAN' not in combined_codes and 'DOTR' not in combined_codes
-                                        and 'DOTC' not in combined_codes and 'DOTT' not in combined_codes and 'DOTL' not in combined_codes"
+                                        and 'SOCE' not in combined_codes and 'TRAN' not in combined_codes and 'DOTR' not in combined_codes
+                                        and 'DOTC' not in combined_codes and 'DOTT' not in combined_codes and 'DOTL' not in combined_codes
+                                        and 'OSNR' not in combined_codes and 'OSNB' not in combined_codes and 'SOCI' not in combined_codes
+                                        and 'SOCR' not in combined_codes"
                             readonly = "status not in ('draft')" force_save="1"/>
+                        <field name="cleaning_status" 
+                            required = "container_category == 'empty' and
+                                ('DOTR' in combined_codes or 'DOTC' in combined_codes
+                                or 'DOTT' in combined_codes or 'DOTL' in combined_codes
+                                or 'OSTE' in combined_codes or 'OSTI' in combined_codes
+                                or 'ISTL' in combined_codes or 'TRAN' in combined_codes
+                                or 'SOCE' in combined_codes or 'FLBS' in combined_codes
+                                or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                or 'SOCI' in combined_codes or 'SOCR' in combined_codes)"
+                            invisible = "container_category != 'empty'"
+                            readonly = "status not in ('draft')" force_save="1"/>
+                        <field name="product_id" invisible="container_category == 'empty' and cleaning_status == 'cleaned'" options="{'no_create': True}" readonly = "status not in ('draft')"/>
+                        <field name="product_status" invisible="product_id == False" readonly = "1" force_save="1"/>
+                        <field name="ap_rej_note" invisible="product_id == False" readonly = "1" force_save="1"/>
+                        <field name="product" widget="char_only" force_save="1" invisible="product_id != False or container_category == 'empty' and cleaning_status == 'cleaned'" readonly = "status not in ('draft')"/>
+                        <field name="dg_product" 
+                            required = "product_id == False and 
+                                (container_category != 'empty' or (container_category == 'empty'
+                                and cleaning_status == 'un_cleaned')) and
+                                ('DOTR' in combined_codes or 'DOTC' in combined_codes
+                                or 'DOTT' in combined_codes or 'DOTL' in combined_codes
+                                or 'OSTE' in combined_codes or 'OSTI' in combined_codes
+                                or 'ISTL' in combined_codes or 'TRAN' in combined_codes
+                                or 'SOCE' in combined_codes or 'FLBS' in combined_codes
+                                or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                or 'SOCI' in combined_codes or 'SOCR' in combined_codes)"
+                            invisible = "container_category == 'empty' and cleaning_status == 'cleaned'"
+                            readonly = "product_id != False or status not in ('draft')" force_save="1"/>
+                        <field name="un_no" invisible = "dg_product != 'yes'" readonly = "product_id != False or status not in ('draft')" force_save="1"/>
+                        <field name="imo_class" widget="no_special_char" invisible = "dg_product != 'yes'" readonly = "product_id != False or status not in ('draft')" force_save="1"/>
+                        <field name="sub_class1" widget="no_special_char" invisible = "dg_product != 'yes'" readonly = "product_id != False or status not in ('draft')" force_save="1"/>
+                    </group>
+                    <group>
+                        <field name="sub_class2" widget="no_special_char" invisible = "dg_product != 'yes'" readonly = "product_id != False or status not in ('draft')" force_save="1"/>
+                        <field name="pack_grp" invisible="dg_product != 'yes'" readonly = "product_id != False or status not in ('draft')" force_save="1"/>
+                        <field name="mar_poll" invisible="dg_product != 'yes'" readonly = "product_id != False or status not in ('draft')" force_save="1"/>
+                        <field name="tank_tcode_id" force_save="1" options="{'no_create': True}"
+                            invisible = "('DOTR' not in combined_codes and 'DOTC' not in combined_codes
+                                        and 'DOTT' not in combined_codes and 'DOTL' not in combined_codes
+                                        and 'OSTE' not in combined_codes and 'OSTI' not in combined_codes
+                                        and 'ISTL' not in combined_codes and 'TRAN' not in combined_codes
+                                        and 'SOCE' not in combined_codes and 'OSNR' not in combined_codes
+                                        and 'OSNB' not in combined_codes and 'SOCI' not in combined_codes
+                                        and 'SOCR' not in combined_codes) or (container_category == 'empty' and cleaning_status == 'cleaned')"
+                            readonly = "status not in ('draft')"/>
+                        <field name="tank_capacity"
+                            required = "('DOTR' in combined_codes or 'DOTC' in combined_codes
+                                        or 'DOTT' in combined_codes or 'DOTL' in combined_codes)
+                                        and (container_category != 'empty' or (container_category == 'empty'
+                                        and cleaning_status == 'un_cleaned'))"
+                            invisible = "('DOTR' not in combined_codes and 'DOTC' not in combined_codes
+                                        and 'DOTT' not in combined_codes and 'DOTL' not in combined_codes)
+                                        or (container_category == 'empty' and cleaning_status == 'cleaned')"
+                            readonly = "status not in ('draft')"/>
+                        <field name="tank_qty"
+                            required = "('OSTE' in combined_codes or 'OSTI' in combined_codes  or 'ISTL' in combined_codes
+                                        or 'SOCE' in combined_codes or 'TRAN' in combined_codes or 'DOTR' in combined_codes
+                                        or 'DOTC' in combined_codes or 'DOTT' in combined_codes or 'DOTL' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes or 'SOCI' in combined_codes
+                                        or 'SOCR' in combined_codes) and (container_category != 'empty' or 
+                                        (container_category == 'empty'
+                                        and cleaning_status == 'un_cleaned'))"
+                            invisible = "('OSTE' not in combined_codes and 'OSTI' not in combined_codes  and 'ISTL' not in combined_codes
+                                        and 'SOCE' not in combined_codes and 'TRAN' not in combined_codes and 'DOTR' not in combined_codes
+                                        and 'DOTC' not in combined_codes and 'DOTT' not in combined_codes and 'DOTL' not in combined_codes
+                                        and 'OSNR' not in combined_codes and 'OSNB' not in combined_codes and 'SOCI' not in combined_codes
+                                        and 'SOCR' not in combined_codes)
+                                        or (container_category == 'empty' and cleaning_status == 'cleaned')"
+                            readonly = "status not in ('draft')"/>
+                        <field name="mfg_id" invisible="container_category == 'empty' and cleaning_status == 'cleaned'" options="{'no_create': True}" readonly = "status not in ('draft')"/>
+                        <field name="sds_status" invisible = "container_category == 'empty' and cleaning_status == 'cleaned'" readonly = "1" force_save="1"/>
+                        <field name="sds_attach_ids"
+                            invisible = "('OSTE' not in combined_codes and 'OSTI' not in combined_codes  and 'ISTL' not in combined_codes
+                                        and 'SOCE' not in combined_codes and 'TRAN' not in combined_codes and 'DOTR' not in combined_codes
+                                        and 'DOTC' not in combined_codes and 'DOTT' not in combined_codes and 'DOTL' not in combined_codes
+                                        and 'FLBS' not in combined_codes and 'OSNR' not in combined_codes and 'OSNB' not in combined_codes
+                                        and 'SOCI' not in combined_codes and 'SOCR' not in combined_codes)
+                                        or (container_category == 'empty' and cleaning_status == 'cleaned')"
+                            readonly = "status not in ('draft')" widget="single_file_binary" force_save="1" options="{'no_create_edit': True}"/>
+                    </group>
+                </group>
+
+                <group string="Other Details">
+                    <group>
                         <field name="service_ids" widget="many2many_tags" options="{'no_create': True}" readonly = "status not in ('draft')"/>
+                        <field name="ship_term_id" options="{'no_create': True}" force_save="1"
+                            required="'OSTE' in combined_codes or 'OSTI' in combined_codes
+                                    or 'SOCE' in combined_codes or 'DOTC' in combined_codes
+                                    or 'DOTT' in combined_codes or 'OSNR' in combined_codes
+                                    or 'OSNB' in combined_codes or 'SOCI' in combined_codes
+                                    or 'SOCR' in combined_codes"
+                            invisible = "'OSTE' not in combined_codes and 'OSTI' not in combined_codes
+                                    and 'SOCE' not in combined_codes and 'DOTC' not in combined_codes
+                                    and 'DOTT' not in combined_codes and 'OSNR' not in combined_codes
+                                    and 'OSNB' not in combined_codes and 'SOCI' not in combined_codes
+                                    and 'SOCR' not in combined_codes" 
+                            readonly = "status not in ('draft')"/>
+                        <field name="ship_term" readonly = "1" invisible="1" force_save="1"/>
+                        <field name="del_address"
+                            required = "'FLAS' in combined_codes"
+                            invisible="'FLAS' not in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                        <field name="city_id"
+                            options="{'no_create': True}"
+                            required = "'FLAS' in combined_codes"
+                            invisible="'FLAS' not in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                    </group>
+                    <group>
                         <field name="spl_req" readonly = "status not in ('draft')"/>
                     </group>
                 </group>
-                
-                <group string="Trip Move Details" invisible="'OSTE' not in combined_codes and 'OSTI' not in combined_codes  and 'DOTC' not in combined_codes and 'DOTT' not in combined_codes and 'SOCT' not in combined_codes">
+
+                <group string="Trip Move Details" invisible="'OSTE' not in combined_codes
+                    and 'OSTI' not in combined_codes and 'SOCE' not in combined_codes
+                    and 'OSNR' not in combined_codes and 'OSNB' not in combined_codes
+                    and 'SOCI' not in combined_codes and 'SOCR' not in combined_codes">
                     <group>
-                        <field name="ship_term_id" options="{'no_create': True}" 
-                            required="'OSTE' in combined_codes or 'OSTI' in combined_codes or 'DOTC' in combined_codes or 'DOTT' in combined_codes or 'SOCT' in combined_codes" 
-                            readonly = "status not in ('draft')"/>
-                        <field name="net_rental" 
-                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'DOTC' in combined_codes or 'DOTT' in combined_codes or 'SOCT' in combined_codes"
-                            readonly = "status not in ('draft')"/>
+                        <field name="src_address" 
+                            required="('OSTE' in combined_codes or 'OSTI' in combined_codes or 'SOCE' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                        or 'SOCI' in combined_codes or 'SOCR' in combined_codes) and (ship_term in ('DOCY', 'DRDR'))" 
+                            invisible="ship_term not in ('DOCY', 'DRDR')"
+                            readonly = "status not in ('draft')" force_save="1"/>
+                        <field name="dest_address" 
+                            required="('OSTE' in combined_codes or 'OSTI' in combined_codes or 'SOCE' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                        or 'SOCI' in combined_codes or 'SOCR' in combined_codes) and (ship_term in ('CYDO', 'DRDR'))" 
+                            invisible="ship_term not in ('CYDO', 'DRDR')"
+                            readonly = "status not in ('draft')" force_save="1"/>
                         <field name="switch_bl_req" readonly = "status not in ('draft')"/>
+                        <field name="poo_port_id" options="{'no_create': True}" 
+                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'SOCE' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                        or 'SOCI' in combined_codes or 'SOCR' in combined_codes"
+                            readonly = "status not in ('draft')"/> 
+                        <field name="same_as_poo" options="{'no_create': True}" 
+                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'SOCE' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                        or 'SOCI' in combined_codes or 'SOCR' in combined_codes"
+                            readonly = "status not in ('draft')"/>                        
                         <field name="pol_port_id" options="{'no_create': True}" 
-                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'DOTC' in combined_codes or 'DOTT' in combined_codes or 'SOCT' in combined_codes"
+                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'SOCE' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                        or 'SOCI' in combined_codes or 'SOCR' in combined_codes"
                             readonly = "status not in ('draft')"/>
                         <field name="pol_terminal_id" options="{'no_create': True}" 
-                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'DOTC' in combined_codes or 'DOTT' in combined_codes or 'SOCT' in combined_codes"
-                            readonly = "status not in ('draft')" force_save="1"/>
-                    </group>
-                    <group>
+                            readonly = "status not in ('draft')" force_save="1" invisible="1"/>
                         <field name="pol_free_days" 
-                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'DOTC' in combined_codes or 'DOTT' in combined_codes or 'SOCT' in combined_codes"
+                            required = "('OSTE' in combined_codes or 'OSTI' in combined_codes or 'SOCE' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                        or 'SOCI' in combined_codes or 'SOCR' in combined_codes)
+                                        and container_category != 'empty'"
+                            invisible = "container_category == 'empty'"
                             readonly = "status not in ('draft')"/>
                         <field name="pod_port_id" options="{'no_create': True}" 
-                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'DOTC' in combined_codes or 'DOTT' in combined_codes or 'SOCT' in combined_codes"
+                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'SOCE' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                        or 'SOCI' in combined_codes or 'SOCR' in combined_codes"
                             readonly = "status not in ('draft')"/>
-                        <field name="pod_terminal_id" options="{'no_create': True}" 
-                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'DOTC' in combined_codes or 'DOTT' in combined_codes or 'SOCT' in combined_codes"
+                        <field name="pod_terminal_id" options="{'no_create': True}"
+                            readonly = "status not in ('draft')" force_save="1" invisible="1"/>
+                        
+                        <field name="same_as_pod" options="{'no_create': True}" 
+                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'SOCE' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                        or 'SOCI' in combined_codes or 'SOCR' in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                            
+                        <field name="fpod_port_id" options="{'no_create': True}" 
+                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'SOCE' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                        or 'SOCI' in combined_codes or 'SOCR' in combined_codes"
                             readonly = "status not in ('draft')" force_save="1"/>
+                    </group>
+                    <group>                        
+                        
                         <field name="pod_free_days"
-                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'DOTC' in combined_codes or 'DOTT' in combined_codes or 'SOCT' in combined_codes"
+                            required = "('OSTE' in combined_codes or 'OSTI' in combined_codes or 'SOCE' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                        or 'SOCI' in combined_codes or 'SOCR' in combined_codes)
+                                        and container_category != 'empty'"
+                            invisible = "container_category == 'empty'"
                             readonly = "status not in ('draft')"/>
-                        <field name="trip_pickup_depot_id" options="{'no_create': True}" 
-                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes or 'DOTC' in combined_codes or 'DOTT' in combined_codes"
+                        <field name="trip_pickup_depot_id" options="{'no_create': True}"                             
+                            readonly = "status not in ('draft')"/>                        
+                        <field name="payment_centre_port_id" options="{'no_create': True}" 
+                            required = "'OSTE' in combined_codes or 'OSTI' in combined_codes
+                                        or 'OSNR' in combined_codes or 'OSNB' in combined_codes
+                                        or 'SOCE' in combined_codes or 'SOCI' in combined_codes
+                                        or 'SOCR' in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                        <field name="empty_or_laden"
+                            required = "'SOCR' in combined_codes"
+                            invisible = "'SOCR' not in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                        <label for="pol_detention" invisible = "container_category == 'empty'"/>
+                        <div class="o_address_format">
+                            <field name="pol_detention" style="width: 25%%" 
+                                readonly = "status not in ('draft')"
+                                invisible = "container_category == 'empty'"/>
+                            <field name="pol_pod_currency_id" style="width: 22%%" options="{'no_create': True}" 
+                                readonly = "status not in ('draft')"
+                                required = "pol_detention > 0 and container_category != 'empty'"
+                                invisible = "container_category == 'empty'"/>
+                        </div>
+                        <label for="pod_detention" invisible = "container_category == 'empty'"/>
+                        <div class="o_address_format">
+                            <field name="pod_detention" style="width: 25%%" 
+                                readonly = "status not in ('draft')"
+                                invisible = "container_category == 'empty'"/>
+                            <field name="pol_pod_currency_id" style="width: 22%%" options="{'no_create': True}" 
+                                readonly = "status not in ('draft')"
+                                required = "pod_detention > 0 and container_category != 'empty'"
+                                invisible = "container_category == 'empty'"/>
+                        </div>
+                        <label for="ind_slot_rate"/>
+                        <div class="o_address_format">
+                            <field name="ind_slot_rate" style="width: 25%%" 
+                                readonly = "status not in ('draft')"/>
+                            <field name="ind_slot_currency_id" style="width: 22%%" options="{'no_create': True}" 
+                                readonly = "status not in ('draft')"
+                                required = "ind_slot_rate > 0"/>
+                        </div>
+                        <field name="nomination_port_id" options="{'no_create': True}" 
+                            required = "'OSNB' in combined_codes"
+                            invisible = "'OSNB' not in combined_codes"
                             readonly = "status not in ('draft')"/>
                     </group>
                 </group>
@@ -164,19 +363,41 @@
                         <field name="prod_weight_kg" 
                             required = "'TRAN' in combined_codes or 'DOTR' in combined_codes"
                             readonly = "status not in ('draft')"/>
-                        <field name="dotr_pol_free_days" 
-                            invisible="'DOTR' not in combined_codes"
-                            required = "'DOTR' in combined_codes"
-                            readonly = "status not in ('draft')"/>
-                        <field name="dotr_pod_free_days"
-                            invisible="'DOTR' not in combined_codes"
-                            required = "'DOTR' in combined_codes"
-                            readonly = "status not in ('draft')"/>
+
+                        <label for="dotr_pol_free_days" invisible="'DOTR' not in combined_codes"/>
+                        <div invisible="'DOTR' not in combined_codes">
+                            <div class="o_address_format">
+                                <field name="dotr_pol_free_days" 
+                                    invisible="'DOTR' not in combined_codes"
+                                    required = "'DOTR' in combined_codes"
+                                    readonly = "status not in ('draft')" style="width: 25%%"/>
+                                <field name="dotr_pol_hrs" 
+                                    invisible="'DOTR' not in combined_codes"
+                                    readonly = "1" style="width:6%%" force_save="1"/>
+                                <span>Hrs</span>
+                            </div>
+                        </div>
+                        
+                        <label for="dotr_pod_free_days" invisible="'DOTR' not in combined_codes"/>
+                        <div invisible="'DOTR' not in combined_codes">
+                            <div class="o_address_format">
+                                <field name="dotr_pod_free_days" 
+                                    invisible="'DOTR' not in combined_codes"
+                                    required = "'DOTR' in combined_codes"
+                                    readonly = "status not in ('draft')" style="width: 25%%"/>
+                                <field name="dotr_pod_hrs" 
+                                    invisible="'DOTR' not in combined_codes"
+                                    readonly = "1" style="width:6%%" force_save="1"/>
+                                <span>Hrs</span>
+                            </div>
+                        </div>
+
                         <field name="trailer_type" 
                             required = "'TRAN' in combined_codes or 'DOTR' in combined_codes" 
                             readonly = "status not in ('draft')"/>
                         <field name="free_hrs" 
-                            required = "'TRAN' in combined_codes or 'DOTR' in combined_codes"
+                            required = "'TRAN' in combined_codes"
+                            invisible="'TRAN' not in combined_codes"
                             readonly = "status not in ('draft')"/>
                         <field name="trans_route_id" options="{'no_create': True}" readonly = "status not in ('draft')"/>
                         <field name="from_trans_loc_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
@@ -191,22 +412,22 @@
                         <field name="trans_pickup_depot_id" options="{'no_create': True}"
                             required = "'TRAN' in combined_codes or 'DOTR' in combined_codes"
                             readonly = "status not in ('draft')"/>
-                        <field name="empty_pickup_loc_id" options="{'no_create': True}"
+                        <field name="empty_pickup_loc_id" options="{'no_create': True}" force_save="1"
                             required = "'TRAN' in combined_codes or 'DOTR' in combined_codes"
                             readonly = "status not in ('draft')"/>
-                        <field name="load_address" 
+                        <field name="load_address" force_save="1"
                             required = "'TRAN' in combined_codes or 'DOTR' in combined_codes"
                             readonly = "status not in ('draft')"/>
-                        <field name="load_zip_code"
+                        <field name="load_zip_code" force_save="1" widget="numeric"
                             required = "'TRAN' in combined_codes or 'DOTR' in combined_codes"
                             readonly = "status not in ('draft')"/>
-                        <field name="unload_address"
+                        <field name="unload_address" force_save="1"
                             required = "'TRAN' in combined_codes or 'DOTR' in combined_codes"
                             readonly = "status not in ('draft')"/>
-                        <field name="unload_zip_code"
+                        <field name="unload_zip_code" force_save="1" widget="numeric"
                             required = "'TRAN' in combined_codes or 'DOTR' in combined_codes"
                             readonly = "status not in ('draft')"/>
-                        <field name="empty_offload_loc_id" options="{'no_create': True}"
+                        <field name="empty_offload_loc_id" options="{'no_create': True}" force_save="1"
                             required = "'TRAN' in combined_codes or 'DOTR' in combined_codes"
                             readonly = "status not in ('draft')"/>
                     </group>
@@ -214,12 +435,27 @@
 
                 <group string="Flexi Bag Details" invisible="'FLBS' not in combined_codes">
                     <group>
-                        <field name="flexi_bag_type_id" options="{'no_create': True}"
+                        <field name="flexi_type"
+                            required = "'FLBS' in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                        <field name="flexi_layer_type_id"
+                            required = "'FLBS' in combined_codes"
+                            readonly = "status not in ('draft')" options="{'no_create': True}"/>
+                        <field name="flexi_capacity_id"
+                            required = "'FLBS' in combined_codes"
+                            readonly = "status not in ('draft')" options="{'no_create': True}"/>
+                        <field name="vendor_id" options="{'no_create': True}" readonly = "status not in ('draft')"/>
+                        <field name="accessories_req"
                             required = "'FLBS' in combined_codes"
                             readonly = "status not in ('draft')"/>
                         <field name="bag_qty"
                             required = "'FLBS' in combined_codes"
                             readonly = "status not in ('draft')"/>
+                        <field name="bag_req_date"
+                            required = "'FLBS' in combined_codes"
+                            readonly = "status not in ('draft')" options="{'min_date': today}"/>
+                    </group>
+                    <group>
                         <field name="del_address"
                             required = "'FLBS' in combined_codes"
                             readonly = "status not in ('draft')"/>
@@ -233,42 +469,37 @@
                         <field name="stuff_address"
                             required = "'FLBS' in combined_codes"
                             readonly = "status not in ('draft')" force_save="1"/>
-                    </group>
-                    <group>
-                        <field name="bag_req_date"
-                            required = "'FLBS' in combined_codes"
-                            readonly = "status not in ('draft')" options="{'min_date': today}"/>
-                        <field name="vendor_id" options="{'no_create': True}" readonly = "status not in ('draft')"/>
-                        <field name="accessories_req"
-                            required = "'FLBS' in combined_codes"
-                            readonly = "status not in ('draft')"/>
                         <field name="pod_services"
                             required = "'FLBS' in combined_codes"
                             readonly = "status not in ('draft')"/>
                     </group>
                 </group>
 
-                <group string="Flexi Operation Details" invisible="'FLOS' not in combined_codes">
+                <group string="Flexi Operational Service" invisible="'FLOS' not in combined_codes">
                     <group>
-                        <field name="flexi_stuff_qty" 
+                        <field name="operational_type" 
                             required="'FLOS' in combined_codes"
                             readonly = "status not in ('draft')"/>
-                        <field name="stuff_address"
+                        <field name="flexi_stuff_qty" 
                             required="'FLOS' in combined_codes"
                             readonly = "status not in ('draft')"/>
                     </group>
                     <group>
+                        <field name="stuff_address"
+                            required="'FLOS' in combined_codes"
+                            readonly = "status not in ('draft')"/>
                         <field name="stuff_date"
                             required="'FLOS' in combined_codes"
                             readonly = "status not in ('draft')" options="{'min_date': today}"/>
                     </group>
                 </group>
 
-                <group string="SOC Details" invisible="'SOCT' not in combined_codes">
+                <group string="SOC Details" invisible="'SOCE' not in combined_codes and 'SOCI' not in combined_codes and 'SOCR' not in combined_codes">
                     <group>
                         <field name="carrier_id" options="{'no_create': True}" readonly = "status not in ('draft')"/>
                         <field name="insurance" 
-                            required="'SOCT' in combined_codes"
+                            required="'SOCE' in combined_codes or 'SOCI' in combined_codes
+                                    or 'SOCR' in combined_codes"
                             readonly = "status not in ('draft')"/>
                     </group>
                     <group>
@@ -281,19 +512,235 @@
                     </group>
                 </group>
 
-                <group invisible="'FLAS' not in combined_codes">
+
+                <group string="Coastal Trip Move Details" invisible="'DOTC' not in combined_codes">
                     <group>
-                        <field name="del_address"
-                            required = "'FLAS' in combined_codes"
+                        <field name="coastal_pol_port_id" options="{'no_create': True}"
+                            required = "'DOTC' in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                        <field name="coastal_pol_terminal_id" options="{'no_create': True}" force_save="1"
+                            readonly = "status not in ('draft')" invisible="1"/>
+                        <field name="coastal_pol_free_days"
+                            required = "'DOTC' in combined_codes"
                             readonly = "status not in ('draft')"/>
                     </group>
                     <group>
-                        <field name="city_id"
-                            options="{'no_create': True}"
-                            required = "'FLAS' in combined_codes"
+                        <field name="coastal_pod_port_id" options="{'no_create': True}"
+                            required = "'DOTC' in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                        <field name="coastal_pod_terminal_id" options="{'no_create': True}" force_save="1"
+                            readonly = "status not in ('draft')" invisible="1"/>
+                        <field name="coastal_pod_free_days"
+                            required = "'DOTC' in combined_codes"
                             readonly = "status not in ('draft')"/>
                     </group>
                 </group>
+
+
+                <group string="Rail Trip Move Details" invisible="'DOTT' not in combined_codes">
+                    <group>
+                        <field name="rail_pol_port_id" options="{'no_create': True}"
+                            required = "'DOTT' in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                        <field name="rail_pol_free_days"
+                            required = "'DOTT' in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                    </group>
+                    <group>
+                        <field name="rail_pod_port_id" options="{'no_create': True}"
+                            required = "'DOTT' in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                        <field name="rail_pod_free_days"
+                            required = "'DOTT' in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                    </group>
+                </group>
+
+
+                <group string="Transport Details" invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes) or ship_term not in ('CYDO', 'DOCY', 'DRDR')">
+                    <group>
+                        <field name="gr_dep_id" options="{'no_create': True}"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                            readonly = "status not in ('draft')"/>
+                        <field name="prod_weight_kg" 
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                            readonly = "status not in ('draft')"/>
+                        
+                        <label for="dotr_pol_free_days" invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)"/>
+                        <div invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)">
+                            <div class="o_address_format">
+                                <field name="dotr_pol_free_days" 
+                                    invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)"
+                                    required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                                    readonly = "status not in ('draft')" style="width: 25%%"/>
+                                <field name="dotr_pol_hrs" 
+                                    invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)"
+                                    readonly = "1" style="width:6%%" force_save="1"/>
+                                <span>Hrs</span>
+                            </div>
+                        </div>
+                        
+                        <label for="dotr_pod_free_days" invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)"/>
+                        <div invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)">
+                            <div class="o_address_format">
+                                <field name="dotr_pod_free_days" 
+                                    invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)"
+                                    required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                                    readonly = "status not in ('draft')" style="width: 25%%"/>
+                                <field name="dotr_pod_hrs" 
+                                    invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)"
+                                    readonly = "1" style="width:6%%" force_save="1"/>
+                                <span>Hrs</span>
+                            </div>
+                        </div>
+                        
+                        
+                        <field name="trailer_type" 
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')" 
+                            readonly = "status not in ('draft')"/>
+                        <field name="free_hrs" 
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                            invisible="1"
+                            readonly = "status not in ('draft')"/>
+                        <field name="trans_route_id" options="{'no_create': True}" readonly = "status not in ('draft')"/>
+                        <field name="from_trans_loc_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
+                        <field name="from_city_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
+                        <field name="from_state_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
+                        <field name="to_trans_loc_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
+                        <field name="to_city_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
+                        <field name="to_state_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
+                    </group>
+                    <group>
+                        <field name="trip_start_date" readonly = "status not in ('draft')" options="{'min_date': today}"/>
+                        <field name="trans_pickup_depot_id" options="{'no_create': True}"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                            readonly = "status not in ('draft')"/>
+                        <field name="empty_pickup_loc_id" options="{'no_create': True}" force_save="1"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                            readonly = "status not in ('draft')"/>
+                        <field name="load_address" force_save="1"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                            readonly = "status not in ('draft')"/>
+                        <field name="load_zip_code" force_save="1" widget="numeric"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                            readonly = "status not in ('draft')"/>
+                        <field name="unload_address" force_save="1"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                            readonly = "status not in ('draft')"/>
+                        <field name="unload_zip_code" force_save="1" widget="numeric"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                            readonly = "status not in ('draft')"/>
+                        <field name="empty_offload_loc_id" options="{'no_create': True}" force_save="1"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                            readonly = "status not in ('draft')"/>
+                    </group>
+                </group>
+
+                <group string="Transport Details - POD" invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes) or ship_term != 'DRDR'">
+                    <group>
+                        <field name="end_gr_dep_id" options="{'no_create': True}"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term == 'DRDR'"
+                            readonly = "status not in ('draft')" force_save="1"/>
+                        <field name="end_prod_weight_kg" 
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term == 'DRDR'"
+                            readonly = "status not in ('draft')" force_save="1"/>
+
+                        <label for="end_dotr_pol_free_days" invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)"/>
+                        <div invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)">
+                            <div class="o_address_format">
+                                <field name="end_dotr_pol_free_days" 
+                                    invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)"
+                                    required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                                    readonly = "status not in ('draft')" style="width: 25%%" force_save="1"/>
+                                <field name="end_dotr_pol_hrs" 
+                                    invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)"
+                                    readonly = "1" style="width:6%%" force_save="1"/>
+                                <span>Hrs</span>
+                            </div>
+                        </div>
+                        
+                        <label for="end_dotr_pod_free_days" invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)"/>
+                        <div invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)">
+                            <div class="o_address_format">
+                                <field name="end_dotr_pod_free_days" 
+                                    invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)"
+                                    required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term in ('CYDO', 'DOCY', 'DRDR')"
+                                    readonly = "status not in ('draft')" style="width: 25%%" force_save="1"/>
+                                <field name="end_dotr_pod_hrs" 
+                                    invisible="('DOTT' not in combined_codes and 'DOTC' not in combined_codes)"
+                                    readonly = "1" style="width:6%%" force_save="1"/>
+                                <span>Hrs</span>
+                            </div>
+                        </div>
+
+                        <field name="end_trailer_type" 
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term == 'DRDR'" 
+                            readonly = "status not in ('draft')" force_save="1"/>
+                        <field name="end_free_hrs" 
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term == 'DRDR'"
+                            invisible="1"
+                            readonly = "status not in ('draft')"/>
+                        <field name="end_trans_route_id" options="{'no_create': True}" readonly = "status not in ('draft')"/>
+                        <field name="end_from_trans_loc_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
+                        <field name="end_from_city_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
+                        <field name="end_from_state_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
+                        <field name="end_to_trans_loc_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
+                        <field name="end_to_city_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
+                        <field name="end_to_state_id" options="{'no_create': True}" readonly = "1" force_save="1"/>
+                    </group>
+                    <group>
+                        <field name="end_trip_start_date" readonly = "status not in ('draft')" options="{'min_date': today}"/>
+                        <field name="end_trans_pickup_depot_id" options="{'no_create': True}"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term == 'DRDR'"
+                            readonly = "status not in ('draft')"/>
+                        <field name="end_empty_pickup_loc_id" options="{'no_create': True}" force_save="1"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term == 'DRDR'"
+                            readonly = "status not in ('draft')"/>
+                        <field name="end_load_address" force_save="1"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term == 'DRDR'"
+                            readonly = "status not in ('draft')"/>
+                        <field name="end_load_zip_code" force_save="1" widget="numeric"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term == 'DRDR'"
+                            readonly = "status not in ('draft')"/>
+                        <field name="end_unload_address" force_save="1"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term == 'DRDR'"
+                            readonly = "status not in ('draft')"/>
+                        <field name="end_unload_zip_code" force_save="1" widget="numeric"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term == 'DRDR'"
+                            readonly = "status not in ('draft')"/>
+                        <field name="end_empty_offload_loc_id" options="{'no_create': True}" force_save="1"
+                            required = "('DOTT' in combined_codes or 'DOTC' in combined_codes) and ship_term == 'DRDR'"
+                            readonly = "status not in ('draft')"/>
+                    </group>
+                </group>
+
+
+                <group string="Tank Sale Details" invisible="'DOTS' not in combined_codes">
+                    <group>
+                        <field name="tank_type"
+                            required = "'DOTS' in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                        <field name="tank_sale_qty"
+                            required = "'DOTS' in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                        <field name="year_built"
+                            required = "'DOTS' in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                        <field name="depot_ids" widget="many2many_tags" options="{'no_create': True}"
+                            required = "'DOTS' in combined_codes"
+                            readonly = "status not in ('draft')"/>
+                    </group>
+                    <group>
+                        <field name="tank_sale_product_id" options="{'no_create': True}"
+                            readonly = "status not in ('draft')"/>
+                        <field name="tank_sale_product"
+                            readonly = "status not in ('draft')"/>
+                        <field name="tank_sale_dg_product" 
+                            required = "tank_sale_product_id == False and 'DOTS' in combined_codes"
+                            readonly = "tank_sale_product_id != False or status not in ('draft')" force_save="1"/>
+                    </group>
+                </group>
+
                 <notebook>
                     <page string="Flexi Accessories Details" invisible="'FLAS' not in combined_codes">
                         <field name="line_ids" string="Flexi Accessories Details" colspan="4" nolabel="1" readonly = "status not in ('draft')" force_save="1">
@@ -301,34 +748,39 @@
                                 <field name="status" column_invisible="1"/>
                                 <field name="header_id" column_invisible="1"/>
                                 <field name="company_id" column_invisible="1"/>
-                                <field name="accessory_set_id"/>
+                                <field name="flexi_type"/>
+                                <field name="flexi_layer_type_id"/>
+                                <field name="flexi_capacity_id"/>
                                 <field name="accessory_set_qty" width="200px"/>
-                                <field name="line_count" string="No of Items" width="200px"/>
+                                <field name="line_count" width="200px"/>
                             </tree>
-                            <form string="Flexi Accessories Details">
+                            <form string="Flexi Accessories Details" create="0">
                                 <group>
                                     <group>
                                         <field name="status" invisible="1"/>
                                         <field name="header_id" invisible="1"/>
                                         <field name="company_id" invisible="1"/>
-                                        <field name="accessory_set_id" options="{'no_create': True}" required="1"/>
-                                        <field name="accessory_set_qty" required="1"/>
+                                        <field name="flexi_type" required="1"/>
+                                        <field name="flexi_layer_type_id" required="1" options="{'no_create': True}"/>
+                                        <field name="flexi_capacity_id" required="1" options="{'no_create': True}"/>
                                     </group>  
                                     <group>
-                                        <field name="line_count" string="No of Items"/>
+                                        <field name="vendor_id" required="1" options="{'no_create': True}"/>
+                                        <field name="accessory_set_qty" required="1"/>
+                                        <field name="line_count"/>
                                     </group>
                                 </group>
                                 <notebook>
-                                    <page string="Details">
+                                    <page string="Accessories Details">
                                         <field name="line_ids" nolabel="1" force_save="1">
                                             <tree editable="bottom">   
                                                 <field name="status" column_invisible="1"/>
                                                 <field name="header_id" column_invisible="1"/>
                                                 <field name="company_id" column_invisible="1"/>
-                                                <field name="is_select" required="1"/>
                                                 <field name="accessories_id" options="{'no_create': True}" required="1"/>
-                                                <field name="uom_id" options="{'no_create': True}" required="1"/>
+                                                <field name="uom_id" options="{'no_create': True}" force_save="1" readonly="1"/>
                                                 <field name="qty" required="1"/>
+                                                <field name="set_qty" column_invisible="1" force_save="1" readonly="1"/>
                                             </tree>
                                         </field>
                                     </page>
@@ -336,6 +788,8 @@
                             </form>
                         </field>
                     </page>
+                </notebook>
+                <notebook>
                     <page string="Attachments" >
                         <field name="line_ids_a" string="Attachments" colspan="4" nolabel="1" readonly = "status not in ('draft')">
                             <tree string="Attachments" editable="bottom">
@@ -351,19 +805,18 @@
                     </page>
                     <page string="Cancel Reason" invisible="status not in ('rfq_sent', 'quotation_sent', 'cancelled')">
                         <group>
-                            <field name="rej_remark_id" string="Reason" readonly = "status not in ('rfq_sent', 'quotation_sent')" options="{'no_create': True}"/>
-                            <field name="cancel_remark" string="Remark" readonly = "status not in ('rfq_sent', 'quotation_sent')"/>
+                            <field name="rej_remark_id" readonly = "status not in ('rfq_sent', 'quotation_sent')" options="{'no_create': True}"/>
+                            <field name="cancel_remark" readonly = "status not in ('rfq_sent', 'quotation_sent')"/>
                         </group>
                     </page>
                     <page string="More Info">
                         <group>
                             <group>
-                                <field name="draft_name" string="Enquiry Draft No" invisible="1"/>
                                 <field name="executed_user_id" options="{'no_create': True}"/>
+                                <field name="sales_lead_id" options="{'no_create': True}" readonly="1"/>
                             </group>
                             <group>
-                                <field name="draft_date" readonly = "1" invisible="1"/>
-                                <field name="bus_location" string="Business Location" readonly = "1" force_save="1"/>
+                                <field name="bus_location" readonly = "1" force_save="1"/>
                             </group>
                         </group>
                     </page>
@@ -426,9 +879,9 @@
                 <field name="entry_date"/>
                 <field name="service_id"/>
                 <field name="bkg_party_id"/>
-                <field name="product_id" string="Product"/>
-                <field name="dg_product" string="DG"/>
-                <field name="expiry_date" string="Last Date to Submit"/>
+                <field name="product_id"/>
+                <field name="dg_product"/>
+                <field name="expiry_date"/>
                 <field name="executed_user_id"/>
                 <field name="status" widget="badge" 
                     decoration-info = "status == 'draft'"
@@ -459,9 +912,9 @@
                 <field name="entry_date"/>
                 <field name="service_id"/>
                 <field name="bkg_party_id"/>
-                <field name="product_id" string="Product"/>
-                <field name="dg_product" string="DG"/>
-                <field name="expiry_date" string="Last Date to Submit"/>
+                <field name="product_id"/>
+                <field name="dg_product"/>
+                <field name="expiry_date"/>
                 <field name="executed_user_id"/>
                 <field name="status" widget="badge" 
                     decoration-info = "status == 'draft'"
@@ -481,6 +934,7 @@
             <search string="Enquiry">
                 <field name="name"/>
                 <field name="product_id"/>
+                <field name="sales_lead_id"/>
 
                 <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                 <filter name="RFQ Sent" domain="[('status', '=', 'rfq_sent')]"/>
@@ -501,9 +955,8 @@
                     <filter string="Entry Date" name="entry_date" domain="[]" context="{'group_by': 'entry_date'}"/>
                     <filter string="Service Name" name="service_id" domain="[]" context="{'group_by': 'service_id'}"/>
                     <filter string="Enquiry Source" name="enq_source_id" domain="[]" context="{'group_by': 'enq_source_id'}"/>
-                    <filter string="Agent Name" name="agent_id" domain="[]" context="{'group_by': 'agent_id'}"/>
                     <filter string="Product Name" name="product_id" domain="[]" context="{'group_by': 'product_id'}"/>
-                    <filter string="Dangerous Goods" name="dg_product" domain="[]" context="{'group_by': 'dg_product'}"/>
+                    <filter string="Product Type" name="dg_product" domain="[]" context="{'group_by': 'dg_product'}"/>
                     <filter string="Last Date to Submit" name="expiry_date" domain="[]" context="{'group_by': 'expiry_date'}"/>
                     <filter string="Executed By" name="executed_user_id" domain="[]" context="{'group_by': 'executed_user_id'}"/>
                     <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
@@ -520,9 +973,8 @@
             <kanban string="Enquiry" class="o_kanban_mobile" sample="1" quick_create="false">
                 <field name="name" decoration-bf="1"/>
                 <field name="entry_date"/>
-                <field name="agent_id"/>
                 <field name="executed_user_id"/>
-                <field name="expiry_date" string="Last Date to Submit Quote"/>
+                <field name="expiry_date"/>
                 <field name="status"/>
                 <progressbar field="status"
                     colors='{"draft": "info","rfq_sent": "bf","quotation_sent": "warning","won": "success","lost": "primary","lost": "cancelled"}'/>
@@ -536,14 +988,6 @@
                                     </div>
                                     <div class="kanban-cell" t-att-title="'Enquiry Date'">
                                         <field style="color: #808080; font-weight: bold; font-size: 14px;" name="entry_date"/>
-                                    </div>
-                                </div>
-                                <div class="kanban-row">
-                                    <div class="kanban-cell" t-att-title="'Agent Name'">
-                                        <i class="fa fa-user" style="color: #E91E63;" title="Customer Icon"></i> <field name="agent_id"/>
-                                    </div>
-                                    <div class="kanban-cell" t-att-title="'DG'">
-                                        <i class="fa fa-cogs" style="color: #4CAF50;" title="DG Icon"></i> <field name="dg_product"/>
                                     </div>
                                 </div>
                                 <div class="kanban-row">

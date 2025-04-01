@@ -21,12 +21,12 @@ ENTRY_MODE =  [('manual','Manual'),
 
 class CmRejectionRemark(models.Model):
     _name = 'cm.rejection.remark'
-    _description = 'Rejection Remark'
+    _description = 'Rejection Reason'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'avatar.mixin']
     _order = 'name asc'
 
 
-    name = fields.Char(string="Name", index=True, copy=False)
+    name = fields.Char(string="Reject Reason", index=True, copy=False)
     model_id = fields.Many2one('ir.model', string="Model Name", copy=False, c_rule=True)
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
@@ -34,7 +34,7 @@ class CmRejectionRemark(models.Model):
     company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -53,14 +53,14 @@ class CmRejectionRemark(models.Model):
     def name_validation(self):
         if self.name:
             if is_special_char(self.env, self.name):
-                raise UserError(_("Special character is not allowed in name field"))
+                raise UserError(_("Special character is not allowed in reject reason field"))
 
             name = self.name.upper().replace(" ", "")
             self.env.cr.execute(""" select upper(name)
             from cm_rejection_remark where upper(REPLACE(name, ' ', ''))  = '%s'
             and id != %s and company_id = %s""" %(name, self.id, self.company_id.id))
             if self.env.cr.fetchone():
-                raise UserError(_("Rejection remark name must be unique"))
+                raise UserError(_("Reject reason must be unique"))
 
     def validations(self):
         warning_msg = []
@@ -131,20 +131,7 @@ class CmRejectionRemark(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_rej_remark = self.env[CM_REJECTION_REMARK]
         result['all_draft'] = cm_rej_remark.search_count([('status', '=', 'draft')])

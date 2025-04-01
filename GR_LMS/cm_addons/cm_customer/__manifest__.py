@@ -7,7 +7,7 @@
     'description': """Scope of this module to fulfill the necessary features related to common customer master form.""",
 
     'author': "Karthikeyan S",
-    'website': "https://www.goodrich.co",
+    'website': "https://catalystsolutions.sg",
     'category': 'Custom Modules/custom_modules',
     'application' : True,
     'version': '0.1',
@@ -15,6 +15,7 @@
     'data': [
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
+        'data/default_data.xml',
         'data/audit_rule_data.xml',
         'views/cm_customer_view.xml',
         'wizard/cm_customer_batch_inactive_view.xml'
@@ -22,6 +23,7 @@
     'demo': [
         'demo/demo.xml',
     ],
+   
 
     'assets': {
         'web.assets_backend': [

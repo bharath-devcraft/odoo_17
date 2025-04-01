@@ -9,17 +9,19 @@
     """,
 
     'author': "Bharath",
-    'website': "https://www.goodrich.co",
+    'website': "https://catalystsolutions.sg",
     'category': 'Custom Modules/custom_modules',
     'application' : True,
     'version': '0.1',
 
-    'depends': ['base','mail','custom_properties','cm_fiscal_year'],
+    'depends': ['base','mail','custom_properties','cm_fiscal_year','cm_user_mgmt'],
 
     'data': [
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
         'data/audit_rule_data.xml',
+        'reports/ct_sales_lead_report.xml',
+        'reports/ct_sales_lead_template.xml',
         'views/ct_sales_lead_view.xml',
     ],
     'demo': [],

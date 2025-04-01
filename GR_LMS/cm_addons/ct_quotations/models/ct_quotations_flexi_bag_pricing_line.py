@@ -10,8 +10,8 @@ class CtQuotationsFlexiBagPricingLine(models.Model):
     _order = 'id asc'
 
     header_id = fields.Many2one('ct.quotations', string="Header Ref", index=True, required=True, ondelete='cascade', c_rule=True)
-    accessory_set_id = fields.Many2one('cm.accessories.set', string="Flexi Bag Type", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    bag_qty = fields.Float(string="Bag Quantity(Nos)", digits=(2, 3))
+    accessory_set_id = fields.Many2one('cm.accessories.set', string="Flexi Type", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    bag_qty = fields.Float(string="Set Quantity(Nos)", digits=(2, 3))
     acc_is_required = fields.Selection(selection=YES_OR_NO, string="Accessories Required", default='yes') #TODO
     line_count = fields.Integer(string="Line Count", default=0, readonly=True, store=True, compute='_compute_all_line')
     status = fields.Selection(related='header_id.status', store=True, c_rule=True)

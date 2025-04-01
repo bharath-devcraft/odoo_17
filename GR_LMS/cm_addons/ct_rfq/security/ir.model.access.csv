@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_rfq,ct.rfq,model_ct_rfq,custom_properties.group_erp_admin,1,1,1,1
+access_ct_rfq_line,ct.rfq.line,model_ct_rfq_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_rfq_attachment_line,ct.rfq.attachment.line,model_ct_rfq_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_rfq_batch_cancel,ct.rfq.batch.cancel,model_ct_rfq_batch_cancel,custom_properties.group_erp_admin,1,1,1,1
+access_ct_rfq_partner,ct.rfq.partner,model_ct_rfq_partner,custom_properties.group_erp_admin,1,1,1,1

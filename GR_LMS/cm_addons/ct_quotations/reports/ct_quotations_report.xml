@@ -8,8 +8,8 @@
             <field name="report_name">ct_quotations.report_ct_quotations</field>
             <field name="report_file">ct_quotations.report_ct_quotations</field>
             <field name="print_report_name">
-                (object.status not in ('draft') and 'Quotation Print - %s' % (object.name) or
-                'Quotation Print')</field>
+                '%s' % (object.name) if object.name else 'Quotation Draft'
+            </field>
             <field name="binding_model_id" ref="model_ct_quotations"/>
             <field name="binding_type">report</field>
         </record>

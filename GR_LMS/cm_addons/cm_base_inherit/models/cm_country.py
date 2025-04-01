@@ -17,6 +17,8 @@ CUSTOM_STATUS = [
 		('active', 'Active'),
 		('inactive', 'Inactive')]
 
+YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
+
 ENTRY_MODE =  [('manual','Manual'),
 			   ('auto', 'Auto')]
 
@@ -33,10 +35,12 @@ class CmCountry(models.Model):
 
 	status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
 	inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-	remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+	remarks = fields.Text(string="Remarks", copy=False)
+	mobile_no_digit = fields.Integer(string="Mobile No Digit", copy=False)
+	san_country = fields.Selection(selection=YES_OR_NO, string="Sanctioned Country", copy=False, default="yes")
 	company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 
-	active = fields.Boolean(string="Visible", default=True)
+	active = fields.Boolean(string="Visible in View", default=True)
 	active_rpt = fields.Boolean(string="Visible In Reports", default=True)
 	active_trans = fields.Boolean(string="Visible In Transactions", default=True)
 	entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -82,6 +86,8 @@ class CmCountry(models.Model):
 	def validations(self):
 		warning_msg = []        
 		is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
+		if self.mobile_no_digit <= 0:
+			warning_msg.append("Mobile No Digit should be greater than zero & minus.")
 		if not is_mgmt:
 			res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
 			if res_config_rule and self.user_id == self.env.user:
@@ -168,20 +174,7 @@ class CmCountry(models.Model):
 		
 	@api.model
 	def retrieve_dashboard(self):
-		result = {
-			'all_draft': 0,
-			'all_active': 0,
-			'all_inactive': 0,
-			'all_editable': 0,
-			'my_draft': 0,
-			'my_active': 0,
-			'my_inactive': 0,
-			'my_editable': 0,
-			'all_today_count': 0,
-			'all_today_value': 0,
-			'my_today_count': 0,
-			'my_today_value': 0,
-		}
+		result = {}
 		
 		cm_country = self.env[CM_COUNTRY]
 		result['all_draft'] = cm_country.search_count([('status', '=', 'draft')])

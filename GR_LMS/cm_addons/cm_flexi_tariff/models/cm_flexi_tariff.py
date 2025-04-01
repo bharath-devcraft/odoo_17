@@ -23,6 +23,10 @@ CUSTOM_STATUS = [
 ENTRY_MODE =  [('manual','Manual'),
                ('auto', 'Auto')]
 
+FLEXI_TYPE = [('tltd', 'TLTD'), ('tlbd', 'TLBD'), ('blbd', 'BLBD')]
+LAYER_TYPE = [('3_layer', '3+1 Layer'), ('4_layer', '4+1 Layer'), ('5_layer', '5+1 Layer')]
+CAPACITY = [('16kl', '16 KL'), ('18kl', '18 KL'), ('20kl', '20 KL'), ('22kl', '22 KL'), ('24kl', '24 KL')]
+
 class CmFlexiTariff(models.Model):
     _name = 'cm.flexi.tariff'
     _description = 'Flexi Tariff'
@@ -30,23 +34,25 @@ class CmFlexiTariff(models.Model):
     _order = 'name asc'
 
 
-    name = fields.Char(string="Name", index=True, copy=False)
-    flexi_bag_id = fields.Many2one('product.template', string="Flexi Bag Type", domain=[('status', '=', 'active'),('active_trans', '=', True),('custom_type', '=', 'flexi_bag')])
-    # vendor_id= fields.Many2one('cm.vendor.master', string="Vendor Name", domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    tax_ids = fields.Many2many(ACCOUNT_TAX, string="Taxes", ondelete='restrict', check_company=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])    
+    name = fields.Char(string="Name", index=True)
     city_id = fields.Many2one(CM_CITY, string="City", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    markup_val = fields.Float(string="Markup(%)", copy=False)
-    short_name = fields.Char(string="Short Name", copy=False, help="Maximum 4 char is allowed and will accept upper case only", size=4)
+    markup_val = fields.Float(string="Markup(%)")
+    short_name = fields.Char(string="Short Name", help="Maximum 4 char is allowed and will accept upper case only", size=4)
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-    remarks = fields.Html(string="Remarks", copy=False, sanitiz_compute_tot_ladene=False)
+    remarks = fields.Text(string="Remarks")
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
     eff_from_date = fields.Date(string="Effective From Date")
     standard_price = fields.Float(string="Cost Price")
     list_price = fields.Float(string="Sales Price", help="Sales price without tax", compute='_compute_list_price', store=True)
-    currency_id = fields.Many2one('res.currency', string="Currency", copy=False, ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    currency_id = fields.Many2one('res.currency', string="Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    vendor_id = fields.Many2one('cm.vendor.master', string="Vendor Name", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    flexi_type = fields.Selection(selection=FLEXI_TYPE, string="Flexi Type", help='TLTD (Top Loading Top Discharge),TLBD (Top Loading Bottom Discharge),BLBD (Bottom Load Bottom Discharge)')
+    layer_type_id = fields.Many2one('cm.flexi.layer.type', string="Layer Type", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    capacity_id = fields.Many2one('cm.flexi.capacity', string="Capacity", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    tot_amt = fields.Float(string="Total Amount", store=True, compute='_compute_all_line')
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -62,12 +68,18 @@ class CmFlexiTariff(models.Model):
     line_ids = fields.One2many('cm.flexi.tariff.line', 'header_id', string="Charges Details", copy=True, c_rule=True)
     line_ids_a = fields.One2many('cm.flexi.tariff.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
     
-    @api.constrains('flexi_bag_id','city_id')
-    def flexi_bag_id_validation(self):
-        if self.flexi_bag_id:
+    @api.depends('line_ids')
+    def _compute_all_line(self):
+        for rec in self:
+            rec.tot_amt =  sum(rec.line_ids.mapped('gr_cost'))
+
+    # @api.constrains('flexi_type','city_id','layer_type_id','capacity_id','vendor_id')
+    def duplicate_validation(self):
+        if self.flexi_type and self.vendor_id and self.city_id and self.layer_type_id and self.capacity_id:
             self.env.cr.execute(""" select id
-            from cm_flexi_tariff where flexi_bag_id  = '%s' and city_id  = '%s'
-            and id != %s and company_id = %s and status != 'inactive' """ %(self.flexi_bag_id.id, self.city_id.id, self.id, self.company_id.id))
+            from cm_flexi_tariff where flexi_type  = '%s' and city_id  = '%s'
+            and layer_type_id  = '%s' and capacity_id  = %s and vendor_id  = %s
+            and id != %s and company_id = %s and status != 'inactive' """ %(self.flexi_type, self.city_id.id, self.layer_type_id.id, self.capacity_id.id, self.vendor_id.id, self.id, self.company_id.id))
             if self.env.cr.fetchone():
                 raise UserError(_("Flexi bag type must be unique"))
             
@@ -76,10 +88,10 @@ class CmFlexiTariff(models.Model):
         if self.markup_val and self.markup_val < 0:
             raise UserError(_("Markup(%) should not allow negative value"))
     
-    @api.onchange('flexi_bag_id')
-    def onchange_flexi_bag_id(self):
-        if self.flexi_bag_id:
-            self.name = self.flexi_bag_id.name
+    @api.onchange('flexi_type')
+    def onchange_flexi_type(self):
+        if self.flexi_type:
+            self.name = dict(self._fields['flexi_type'].selection).get(self.flexi_type)  
         else:
             self.name = False
 
@@ -94,6 +106,7 @@ class CmFlexiTariff(models.Model):
     
     def validations(self):
         warning_msg = []
+        self.duplicate_validation()
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
         if not is_mgmt:
             res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
@@ -107,7 +120,6 @@ class CmFlexiTariff(models.Model):
 
     @validation
     def entry_approve(self):
-        print(self)
         if self.status in ('draft', 'editable'):
             self.validations()
             self.write({'status': 'active',
@@ -126,7 +138,6 @@ class CmFlexiTariff(models.Model):
     def entry_inactive(self):
         if self.status != 'active':
             raise UserError(_("Unable to inactive other than active entry"))
-        print(self.inactive_remark)
         remark = self.inactive_remark.strip() if self.inactive_remark else None
 
         if not remark:
@@ -162,20 +173,7 @@ class CmFlexiTariff(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_flexi_tariff = self.env[CM_FLEXI_TARIFF]
         result['all_draft'] = cm_flexi_tariff.search_count([('status', '=', 'draft')])

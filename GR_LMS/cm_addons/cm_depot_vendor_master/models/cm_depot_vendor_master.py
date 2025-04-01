@@ -11,6 +11,7 @@ CM_DEPOT_VENDOR_MASTER='cm.depot.vendor.master'
 CM_CITY = 'cm.city'
 TIME_FORMAT='%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 CUSTOM_STATUS = [
         ('draft', 'Draft'),
@@ -23,10 +24,9 @@ ENTRY_MODE =  [('manual','Manual'),
 
 YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 
+MSME_REG = [('registered', 'Registered'), ('not_registered', 'Not Registered')]
+
 CONTRACT_TYPE = [('own', 'Own'), ('lease', 'Lease'), ('rent', 'Rent')]
-
-GST_OPTIONS = [('registered', 'Registered'), ('un_registered', 'Un Registered')]
-
 
 ENTRY_TYPE =  [('new','New'),
 			   ('name_change', 'Name Change')]
@@ -38,16 +38,19 @@ class CmDepotVendorMaster(models.Model):
     _order = 'name asc'
 
     name = fields.Char(string="Name", index=True, copy=False)
-    short_name = fields.Char(string="Short Name", copy=False, help="Maximum 4 char is allowed and will accept upper case only", size=4)
+    short_name = fields.Char(string="Short Name", copy=False, help="Maximum 6 char is allowed and will accept upper case only", size=6)
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-    remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+    remarks = fields.Text(string="Remarks", copy=False)
     
 
     contact_person = fields.Char(string="Contact Person", size=50)
     mobile_no = fields.Char(string="Mobile No", size=15, copy=False)
     whatsapp_no = fields.Char(string="WhatsApp No",copy=False, size=15)
     phone_no = fields.Char(string="Landline No / Ext", size=12, copy=False)
+    mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     email = fields.Char(string="Email", copy=False, size=252)
     fax = fields.Char(string="Fax", copy=False, size=12)
     street = fields.Char(string="Address Line 1", size=252)
@@ -61,24 +64,31 @@ class CmDepotVendorMaster(models.Model):
     skype = fields.Char(string="Skype ID", copy=False, size=50)
     currency_id = fields.Many2one('res.currency', string="Currency", copy=False, default=lambda self: self.env.company.currency_id.id, ondelete='restrict', readonly=True, tracking=True)
     
-    parent_company_id = fields.Many2one('cm.depot.vendor.master', string="Parent Company", domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    parent_company_id = fields.Many2one(CM_DEPOT_VENDOR_MASTER, string="Parent Company", domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    is_registered = fields.Selection(selection=YES_OR_NO, string="Is Registered Depot Vendor",default='yes', copy=False)
     cin_no = fields.Char(string="CIN No", copy=False, size=21)
     tax_reg_no = fields.Char(string="Tax Reg No(TRC)", size=20)
     iso_certified = fields.Selection(selection=YES_OR_NO, string="ISO Certified", copy=False)
     transport_service = fields.Selection(selection=YES_OR_NO, string="Transport Service", copy=False)
     contract_type = fields.Selection(selection=CONTRACT_TYPE, string="Contract Type", copy=False)
+    
     pan_no = fields.Char(string="PAN No", copy=False, size=10)
-    gst_category = fields.Selection(selection=GST_OPTIONS, string="GST Category", copy=False)
     gst_no = fields.Char(string="GST No", copy=False, size=15)
     certification_no = fields.Char(string="Certification No", copy=False, size=15)
     no_of_employee = fields.Integer(string="No. Of Employees", copy=False)
     msme_no = fields.Integer(string="MSME No", copy=False)
+    msme_reg = fields.Selection(selection=MSME_REG, string="MSME Registration", copy=False)
+    attachment_ids = fields.Many2many('ir.attachment', string="Supporting Document", ondelete='restrict', check_company=True)
+
     transport_vendor_id = fields.Many2one('cm.transport.vendor', string="Transport Vendor Name", domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
     entry_type = fields.Selection(selection=ENTRY_TYPE, string="Entry Type", copy=False, default="new")
+    
+    same_as_bill_address = fields.Boolean(string="Same as Billing Address", default=False)
+    same_as_mobile = fields.Boolean(string="Same as Mobile Number", default=False, help="Click to apply same mobile number to whatsapp number")
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -96,7 +106,8 @@ class CmDepotVendorMaster(models.Model):
     line_ids_a = fields.One2many('cm.depot.vendor.master.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
     line_ids_b = fields.One2many('cm.depot.vendor.master.bank.details.line', 'header_id', string="Bank Details", copy=True, c_rule=True)
     line_ids_c = fields.One2many('cm.depot.vendor.master.depot.locations.line', 'header_id', string="Depot Locations", copy=True, c_rule=True)
-    
+    line_ids_d = fields.One2many('cm.depot.vendor.master.billing.address.line', 'header_id', string="Billing Address", copy=True, c_rule=True)
+
     @api.constrains('name')
     def name_validation(self):
         if self.name:
@@ -189,7 +200,7 @@ class CmDepotVendorMaster(models.Model):
             if not valid_gst_no(self.gst_no):
                 raise UserError(_("Invalid GST number. Please enter the correct GST number"))
             
-            if self.gst_category == 'registered' and self.entry_type != 'name_change':
+            if self.entry_type != 'name_change':
                 existing_gst = self.env[CM_DEPOT_VENDOR_MASTER].search_count([('gst_no', '=', self.gst_no), ('id', '!=', self.id), ('company_id', '=', self.company_id.id)])
                 if existing_gst > 0:
                     raise UserError(_("GST number must be unique"))
@@ -217,10 +228,19 @@ class CmDepotVendorMaster(models.Model):
             self.country_code = self.country_id.code
             self.city_id = False
             self.state_id = False
+            record = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1)
+            c_code = record.id if record else False
+            self.mb_cc_id = c_code
+            self.wh_cc_id = c_code
+            self.ph_cc_id = c_code
         else:
             self.country_code = False
             self.city_id = False
             self.state_id = False
+            self.mb_cc_id = False
+            self.wh_cc_id = False
+            self.ph_cc_id = False   
+            
     
     @api.onchange('city_id')
     def onchange_city_id(self):
@@ -228,6 +248,38 @@ class CmDepotVendorMaster(models.Model):
             self.state_id = self.city_id.state_id
         else:
             self.state_id = False
+    
+    @api.onchange('iso_certified')
+    def onchange_iso_certified(self):
+        if self.iso_certified != 'yes':
+            self.certification_no = False            
+
+    @api.onchange('same_as_bill_address','gst_no')
+    def onchange_same_as_bill_address(self):
+        if self.same_as_bill_address:
+            billing_lines = []
+            bill_values = {
+                'eff_from_date':time.strftime(TIME_FORMAT),
+                'street': self.street,
+                'street1': self.street1,
+                'city_id': self.city_id.id,
+                'state_id': self.state_id.id,
+                'country_id': self.country_id.id,
+                'country_code': self.country_code,
+                'pin_code': self.pin_code,
+                'gst_no': self.gst_no,
+            }
+            billing_lines.append((0, 0, bill_values))
+            self.line_ids_d = billing_lines
+        else:
+            self.line_ids_d = [(5, 0, 0)]
+            
+    @api.onchange('same_as_mobile','mobile_no')
+    def onchange_same_as_mobile(self):
+        if self.same_as_mobile:
+            self.whatsapp_no = self.mobile_no
+        else:
+            self.whatsapp_no = False
 
     def validations(self):
         warning_msg = []
@@ -297,20 +349,7 @@ class CmDepotVendorMaster(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         
         cm_depot_vendor_master = self.env[CM_DEPOT_VENDOR_MASTER]

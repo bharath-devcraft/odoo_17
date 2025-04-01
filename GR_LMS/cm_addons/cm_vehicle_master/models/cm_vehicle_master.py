@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import time
 from odoo.addons.custom_properties.decorators import validation, is_special_char, valid_cin_no
-from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from datetime import datetime,timedelta
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
@@ -17,8 +18,6 @@ CUSTOM_STATUS = [
         ('draft', 'Draft'),
         ('editable', 'Editable'),
         ('active', 'Active'),
-        ('not_in_use', 'Not In Use'),
-        ('under_maintenance', 'Under Maintenance'),
         ('inactive', 'Inactive')]
 
 ENTRY_MODE =  [('manual','Manual'),
@@ -28,7 +27,8 @@ YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 
 GST_OPTIONS = [('registered', 'Registered'), ('un_registered', 'Un Registered')]
 
-FUEL_TYPE_OPTION = [('diesel', 'Diesel'), ('petrol', 'Petrol'), ('gasoline', 'Gasoline'), ('electric', 'Electric')]
+FUEL_TYPE_OPTION = [('diesel', 'Diesel'), ('petrol', 'Petrol'), ('gasoline', 'Gasoline'), ('electric', 'Electric'), 
+                    ('hydrogen', 'Hydrogen'), ('hybrid', 'Hybrid'), ('cng', 'CNG')]
 
 TRANSMISSION_OPTION = [('auto', 'Auto'), ('manual', 'Manual'), ('both', 'Both')]
 
@@ -45,17 +45,17 @@ class CmVehicleMaster(models.Model):
     name = fields.Char(string="Name", index=True, copy=False)    
     vehicle_type_id = fields.Many2one('cm.vehicle.type', string="Vehicle Type", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     vehicle_make_id = fields.Many2one('cm.vehicle.make', string="Vehicle Make", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    model = fields.Integer(string="Model (Year)", copy=False)
+    model = fields.Char(string="Model (Yr)", copy=False)
     purchase_date = fields.Date(string="Purchase Date", copy=False)
-    vehicle_age = fields.Integer(string="Vehicle Age", copy=False)
+    vehicle_age = fields.Char(string="Vehicle Age (Yrs)", copy=False)
     engine_no = fields.Char(string="Engine No", size=252)
     chassis_no = fields.Char(string="Chassis Number", size=252)
     fuel_type = fields.Selection(selection=FUEL_TYPE_OPTION, string="Fuel Type", copy=False)
     transmission = fields.Selection(selection=TRANSMISSION_OPTION, string="Transmission", copy=False)
     axle = fields.Selection(selection=AXLE_OPTION, string="Axle", copy=False) 
-    engine_capacity = fields.Integer(string="Engine Capacity", copy=False)
-    vehicle_tare_weight = fields.Integer(string="Vehicle Tare Weight", copy=False)
-    vehicle_gross_weight = fields.Integer(string="Vehicle Gross Weight", copy=False)
+    engine_capacity = fields.Integer(string="Engine Capacity (CC)", copy=False)
+    vehicle_tare_weight = fields.Integer(string="Vehicle Tare Weight (Kgs)", copy=False)
+    vehicle_gross_weight = fields.Integer(string="Vehicle Gross Weight (Kgs)", copy=False)
     standard_mileage = fields.Integer(string="Standard Mileage", copy=False)
     gps_enabled = fields.Selection(selection=YES_OR_NO, string="GPS Enabled", copy=False)
     location = fields.Char(string="Location", copy=False, size=50)    
@@ -71,7 +71,7 @@ class CmVehicleMaster(models.Model):
    
 
     #RC Account Details
-    company_name_id = fields.Many2one(RES_COMPANY,string="Company Name", copy=False, ondelete='restrict')
+    company_name_id = fields.Many2one(RES_COMPANY,string="Registered Company Name", copy=False, ondelete='restrict')
     attachment_ids = fields.Many2many(IR_ATTACHMENT, string="RC Document", ondelete='restrict', check_company=True)
     
     #Insurance Details
@@ -81,7 +81,7 @@ class CmVehicleMaster(models.Model):
     validity_months = fields.Integer(string="Validity (Months)", copy=False)
     validity_days = fields.Integer(string="Validity (Days)", copy=False)
     to_date = fields.Date(string="To Date")
-    ins_doc_ids = fields.Many2many(IR_ATTACHMENT,'insurance_doc_m2m', string="Insurance Doc 1", ondelete='restrict', check_company=True)
+    ins_doc_ids = fields.Many2many(IR_ATTACHMENT,'insurance_doc_m2m', string="Insurance Certificate", ondelete='restrict', check_company=True)
     other_doc_ids = fields.Many2many(IR_ATTACHMENT,'insurance_others_m2m', string="Others", ondelete='restrict', check_company=True)
     escalation_mail_days = fields.Integer(string="Escalation Mail Days", copy=False, default="15")
 
@@ -101,7 +101,7 @@ class CmVehicleMaster(models.Model):
     nat_validity_month = fields.Integer(string="Validity (Months)", copy=False)
     nat_validity_days = fields.Integer(string="Validity (Days)", copy=False)
     national_to_date = fields.Date(string="To Date")
-    nat_doc_ids = fields.Many2many(IR_ATTACHMENT,'national_permit_doc_m2m', string="Permit Certificate", ondelete='restrict', check_company=True)
+    nat_doc_ids = fields.Many2many(IR_ATTACHMENT,'national_permit_doc_m2m', string="National Permit Certificate", ondelete='restrict', check_company=True)
     nat_oth_doc_ids = fields.Many2many(IR_ATTACHMENT,'national_permit_others_m2m', string="Others", ondelete='restrict', check_company=True)
     nat_esc_mail_days = fields.Integer(string="Escalation Mail Days", copy=False, default="15")    
     
@@ -122,7 +122,7 @@ class CmVehicleMaster(models.Model):
     road_tax_paid_date = fields.Date(string="Road Tax Paid Date")
     rt_validity_months = fields.Integer(string="Validity (Months)", copy=False)
     rt_validity_days = fields.Integer(string="Validity (Days)", copy=False)
-    rt_validity_to_date = fields.Date(string="Validity To Date")
+    rt_validity_to_date = fields.Date(string="To Date")
     road_tax_doc_ids = fields.Many2many(IR_ATTACHMENT,'road_tax_doc_ids_m2m', string="Road Tax Certificate", ondelete='restrict', check_company=True)
     rt_oth_doc_ids = fields.Many2many(IR_ATTACHMENT,'road_tax_doc_ids_m2m', string="Others", ondelete='restrict', check_company=True)
     rt_escalation_mail_days = fields.Integer(string="Escalation Mail Days", copy=False, default="15")
@@ -160,14 +160,14 @@ class CmVehicleMaster(models.Model):
     
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-    remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+    remarks = fields.Text(string="Remarks", copy=False)
     
 
     contact_person = fields.Char(string="Contact Person", size=50)
 
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -181,7 +181,7 @@ class CmVehicleMaster(models.Model):
     update_user_id = fields.Many2one(RES_USERS, string="Last Updated By", copy=False, ondelete='restrict', readonly=True)
 
 
-    line_ids = fields.One2many('cm.vehicle.master.line', 'header_id', string="Additional Contact Details", copy=True, c_rule=True)
+    line_ids = fields.One2many('cm.vehicle.master.line', 'header_id', string="AMC Details", copy=True, c_rule=True)
     line_ids_a = fields.One2many('cm.vehicle.master.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
     
     @api.constrains('name')
@@ -210,6 +210,186 @@ class CmVehicleMaster(models.Model):
             if self.env.cr.fetchone():
                 raise UserError(_("Vehicle Master short name must be unique"))
 
+    @api.onchange('purchase_date')
+    def onchange_vehicle_age(self):        
+        if self.purchase_date:
+            purchase_date = self.purchase_date
+            current_date = fields.Date.today()
+            rd = relativedelta(current_date, purchase_date)
+            self.vehicle_age = f"{rd.years} years and {rd.months} months"
+        else:
+            self.vehicle_age = False
+	
+    @api.onchange('insurance')
+    def onchange_insurance(self):
+        self.from_date = False
+        self.validity_months = 0
+        self.validity_days = 0
+        self.to_date = False
+        self.ins_company_name = False
+        self.ins_doc_ids = False
+        self.other_doc_ids = False
+    
+    @api.onchange('from_date', 'validity_months', 'validity_days')
+    def onchange_ins_validity_to_date(self):        
+        self.to_date = False 
+        if self.from_date and (self.validity_months or self.validity_days):
+            if self.validity_months < 0:
+                raise UserError("Validity (Months) should be greater than or equal to zero.")
+            if self.validity_days < 0:
+                raise UserError("Validity (Days) should be greater than or equal to zero.")
+            self.to_date = (self.from_date 
+                + relativedelta(months=self.validity_months) 
+                + timedelta(days=self.validity_days - 1))
+                
+    @api.onchange('permit')
+    def onchange_permit(self):
+        self.state_from_date = False
+        self.state_validity_months = 0
+        self.state_validity_days = 0
+        self.state_to_date = False
+        self.permit_doc_ids = False
+        self.state_oth_doc_ids = False
+    
+    @api.onchange('state_from_date', 'state_validity_months', 'state_validity_days')
+    def onchange_permit_validity_to_date(self):        
+        self.state_to_date = False 
+        if self.state_from_date and (self.state_validity_months or self.state_validity_days):
+            if self.state_validity_months < 0:
+                raise UserError("Validity (Months) should be greater than or equal to zero.")
+            if self.state_validity_days < 0:
+                raise UserError("Validity (Days) should be greater than or equal to zero.")
+            self.state_to_date = (self.state_from_date 
+                + relativedelta(months=self.state_validity_months) 
+                + timedelta(days=self.state_validity_days - 1))
+	
+    @api.onchange('national_permit')
+    def onchange_national_permit(self):
+        self.national_from_date = False
+        self.nat_validity_month = 0
+        self.nat_validity_days = 0
+        self.national_to_date = False
+        self.nat_doc_ids = False
+        self.nat_oth_doc_ids = False
+    
+    @api.onchange('national_from_date', 'nat_validity_month', 'nat_validity_days')
+    def onchange_national_permit_validity_to_date(self):        
+        self.national_to_date = False 
+        if self.national_from_date and (self.nat_validity_month or self.nat_validity_days):
+            if self.nat_validity_month < 0:
+                raise UserError("Validity (Months) should be greater than or equal to zero.")
+            if self.nat_validity_days < 0:
+                raise UserError("Validity (Days) should be greater than or equal to zero.")
+            self.national_to_date = (self.national_from_date 
+                + relativedelta(months=self.nat_validity_month) 
+                + timedelta(days=self.nat_validity_days - 1))
+                
+    @api.onchange('fc')
+    def onchange_fc(self):
+        self.last_fc_date = False
+        self.fc_validity_months = 0
+        self.fc_validity_days = 0
+        self.next_fc_date = False
+        self.fc_doc_ids = False
+        self.fc_oth_doc_ids = False
+    
+    @api.onchange('last_fc_date', 'fc_validity_months', 'fc_validity_days')
+    def onchange_fc_validity_next_fc_date(self):        
+        self.next_fc_date = False 
+        if self.last_fc_date and (self.fc_validity_months or self.nat_validity_days):
+            if self.fc_validity_months < 0:
+                raise UserError("Validity (Months) should be greater than or equal to zero.")
+            if self.fc_validity_days < 0:
+                raise UserError("Validity (Days) should be greater than or equal to zero.")
+            self.next_fc_date = (self.last_fc_date 
+                + relativedelta(months=self.fc_validity_months) 
+                + timedelta(days=self.fc_validity_days - 1))
+                
+    @api.onchange('road_tax')
+    def onchange_road_tax(self):
+        self.road_tax_paid_date = False
+        self.rt_validity_months = 0
+        self.rt_validity_days = 0
+        self.rt_validity_to_date = False
+        self.road_tax_doc_ids = False
+        self.rt_oth_doc_ids = False
+    
+    @api.onchange('road_tax_paid_date', 'rt_validity_months', 'rt_validity_days')
+    def onchange_road_tax_validity_to_date(self):        
+        self.rt_validity_to_date = False 
+        if self.road_tax_paid_date and (self.rt_validity_months or self.rt_validity_days):
+            if self.rt_validity_months < 0:
+                raise UserError("Validity (Months) should be greater than or equal to zero.")
+            if self.rt_validity_days < 0:
+                raise UserError("Validity (Days) should be greater than or equal to zero.")
+            self.rt_validity_to_date = (self.road_tax_paid_date 
+                + relativedelta(months=self.rt_validity_months) 
+                + timedelta(days=self.rt_validity_days - 1))
+                
+    @api.onchange('puc')
+    def onchange_puc(self):
+        self.puc_from_date = False
+        self.puc_validity_months = 0
+        self.puc_validity_days = 0
+        self.puc_to_date = False
+        self.puc_doc_ids = False
+        self.puc_oth_doc_ids = False
+    
+    @api.onchange('puc_from_date', 'puc_validity_months', 'puc_validity_days')
+    def onchange_puc_validity_to_date(self):        
+        self.puc_to_date = False 
+        if self.puc_from_date and (self.puc_validity_months or self.puc_validity_days):
+            if self.puc_validity_months < 0:
+                raise UserError("Validity (Months) should be greater than or equal to zero.")
+            if self.puc_validity_days < 0:
+                raise UserError("Validity (Days) should be greater than or equal to zero.")
+            self.puc_to_date = (self.puc_from_date 
+                + relativedelta(months=self.puc_validity_months) 
+                + timedelta(days=self.puc_validity_days - 1))
+                
+    @api.onchange('green_tax')
+    def onchange_green_tax(self):
+        self.green_tax_from_date = False
+        self.green_tax_validity_months = 0
+        self.green_tax_validity_days = 0
+        self.green_tax_to_date = False
+        self.gre_tax_doc_ids = False
+        self.gre_oth_doc_ids = False
+    
+    @api.onchange('green_tax_from_date', 'green_tax_validity_months', 'green_tax_validity_days')
+    def onchange_green_tax_validity_to_date(self):        
+        self.green_tax_to_date = False 
+        if self.green_tax_from_date and (self.green_tax_validity_months or self.green_tax_validity_days):
+            if self.green_tax_validity_months < 0:
+                raise UserError("Validity (Months) should be greater than or equal to zero.")
+            if self.green_tax_validity_days < 0:
+                raise UserError("Validity (Days) should be greater than or equal to zero.")
+            self.green_tax_to_date = (self.green_tax_from_date 
+                + relativedelta(months=self.green_tax_validity_months) 
+                + timedelta(days=self.green_tax_validity_days - 1))
+                
+    @api.onchange('speed_govener')
+    def onchange_speed_govener(self):
+        self.spd_gov_from_date = False
+        self.speed_limit_per = False
+        self.speed_govener_validity_months = 0
+        self.speed_govener_validity_days = 0
+        self.spd_gov_to_date = False
+        self.spd_gov_doc_ids = False
+        self.spd_gov_oth_doc_ids = False
+    
+    @api.onchange('spd_gov_from_date', 'speed_govener_validity_months', 'speed_govener_validity_days')
+    def onchange_speed_govener_validity_to_date(self):        
+        self.spd_gov_to_date = False 
+        if self.spd_gov_from_date and (self.speed_govener_validity_months or self.speed_govener_validity_days):
+            if self.speed_govener_validity_months < 0:
+                raise UserError("Validity (Months) should be greater than or equal to zero.")
+            if self.speed_govener_validity_days < 0:
+                raise UserError("Validity (Days) should be greater than or equal to zero.")
+            self.spd_gov_to_date = (self.spd_gov_from_date 
+                + relativedelta(months=self.speed_govener_validity_months) 
+                + timedelta(days=self.speed_govener_validity_days - 1))
+	
     @api.onchange('same_as_bill_address')
     def onchange_same_as_bill_address(self):
         if self.same_as_bill_address:
@@ -237,9 +417,7 @@ class CmVehicleMaster(models.Model):
             self.line_ids_d = [(5, 0, 0)]
 
     def validations(self):
-        warning_msg = []
-        if not self.line_ids:
-            warning_msg.append("System not allow to approve with empty additional contact details")
+        warning_msg = []        
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
         if not is_mgmt:
             res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
@@ -306,20 +484,7 @@ class CmVehicleMaster(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         
         cm_vehicle_master = self.env[CM_VEHICLE_MASTER]

@@ -41,7 +41,7 @@ class CtKeyFeatures(models.Model):
     update_user_id = fields.Many2one(RES_USERS, string="Last Updated By", copy=False, ondelete='restrict', readonly=True)
     update_date = fields.Datetime(string="Last Updated Date", copy=False, readonly=True)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
     @api.constrains('draft_date')

@@ -34,176 +34,235 @@
                             <group >
                                 <label for="carrier_id" class="name-lable"/>
                                 <div>
-                                    <field name="carrier_id" class="name-value" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    <field name="carrier_id" class="name-value" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                     <field name="name" class="name-value" widget="no_special_char" invisible="1" force_save="1" readonly = "status not in ('draft','editable')"/>
                                 </div>
-                                <field name="vendor_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="carrier_name" readonly = "status not in ('draft','editable')"/>
+                                <field name="vendor_id" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                 <field name="carrier_type" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="carrier_term_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="container_category" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="container_type" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="transit_time" required="1" readonly = "status not in ('draft','editable')"/>
                             </group>
                                 
                                     
                             <group>
-                                <field name="currency_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
-                                <field name="ves_serv_route_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <label for="sf_laden"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="sf_laden" style="width: 35%%" required="1" readonly = "status not in ('draft','editable')"/>
+                                        <field name="currency_id"  style="width: 20%%" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                <field name="service_name" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="routing" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="status" readonly = "1" invisible="1"/>
+                                <field name="ts_1_port_id" required="routing == 'ts'" invisible="routing != 'ts'" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="ts_2_port_id" invisible="routing != 'ts'" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="status" readonly = "1" force_save="1" invisible="1"/>
                             </group>
                         </group>
                         
                         <group string="POL Details">
                             <group >
-                                <field name="pol_ship_term_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                
                                 <field name="pol_country_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="pol_port_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                             </group>
                             <group>
-                                <field name="pol_port_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="pol_free_days" invisible="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                             </group>
                         </group>
                         
                         <group string="POD Details">
                             <group >
-                                <field name="pod_ship_term_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                
                                 <field name="pod_country_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="pod_port_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                             </group>
                             <group>
-                                <field name="pod_port_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
-                                <field name="pod_terminal_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="pod_free_days" invisible="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                             </group>
                         </group>
 
-                        <group string = "Rate Details(Per Tank)">
+                        <group string="DG Surcharge">
                             <group >
-                                <label string="Sea Freight(Non DG)" for= "sf_laden"  class="o_label_bold_l"/>
-                                <div class="o_row">
-                                    <div class="o_col">
-                                        <label string="Laden" for="sf_laden" class="o_label_bold_f"/>
-                                        <field name="sf_laden" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                    <div class="o_col">
-                                        <label string="MTY" for="sf_mty"  class="o_label_bold_f"/>
-                                        <field name="sf_mty" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                </div>
+                                <field name="dg_charge" required="1" readonly="status not in ('draft','editable')"/>
+                                <field name="pack_type1" readonly="status not in ('draft','editable')"/>
+                            </group>
 
-                                <label string="BAF/ LSS/ EFS" for= "baf_laden" class="o_label_bold_l"/>
-                                <div class="o_row">
-                                    <div class="o_col">
-                                        <label string="Laden" for="baf_laden" class="o_label_bold_f"/>
-                                        <field name="baf_laden" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                    <div class="o_col">
-                                        <label string="MTY" for="baf_mty" class="o_label_bold_f"/>
-                                        <field name="baf_mty" required="1" readonly = "status not in ('draft','editable')"/>
+                            <group>
+                                
+                                <field name="pack_type2" readonly="status not in ('draft','editable')"/>
+                                <field name="pack_type3" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                        </group>
+                        <group string = "IMO Class Wise">
+                            <group >
+                                <field name="imo_class_1" readonly = "status not in ('draft','editable')"/>
+                                <field name="imo_class_2" readonly = "status not in ('draft','editable')"/>
+                                <field name="imo_class_3" readonly = "status not in ('draft','editable')"/>
+                                <field name="imo_class_4" readonly = "status not in ('draft','editable')"/>
+                                <field name="imo_class_5" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="imo_class_6" readonly = "status not in ('draft','editable')"/>
+                                <field name="imo_class_7" readonly = "status not in ('draft','editable')"/>
+                                <field name="imo_class_8" readonly = "status not in ('draft','editable')"/>
+                                <field name="imo_class_9" readonly = "status not in ('draft','editable')"/>
+                                
+                            </group>
+                        </group> 
+                        <group string = "Per Tank Charges">
+                            <group >
+                                <label for="baf"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="baf" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="baf_currency_id"  style="width: 20%%" required="baf > 0" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                     </div>
                                 </div> 
+                                <label for="lss"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="lss" style="width: 35%%"  readonly = "status not in ('draft','editable')"/>
+                                        <field name="lss_currency_id"  style="width: 20%%" required="lss > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                <label for="efs"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="efs" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="efs_currency_id"  style="width: 20%%" required="efs > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                <label for="ecrs"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="ecrs" style="width: 35%%"  readonly = "status not in ('draft','editable')"/>
+                                        <field name="ecrs_currency_id"  style="width: 20%%" required="ecrs > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                <label for="pcs"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="pcs" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="pcs_currency_id"  style="width: 20%%" required="pcs > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                <label for="ewrs"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="ewrs" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="ewrs_currency_id"  style="width: 20%%" required="ewrs > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
                                 
-                                <label string="ECRS/ PCS" for= "ecrs_laden" class="o_label_bold_l"/>
-                                <div class="o_row">
-                                    <div class="o_col">
-                                        <label string="Laden" for="ecrs_laden" class="o_label_bold_f"/>
-                                        <field name="ecrs_laden" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                    <div class="o_col">
-                                        <label string="MTY" for="ecrs_mty" class="o_label_bold_f"/>
-                                        <field name="ecrs_mty" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                </div>
-
-                                <label string="EWRS" for= "ewrs_laden" class="o_label_bold_l"/>
-                                <div class="o_row">
-                                    <div class="o_col">
-                                        <label string="Laden" for="ewrs_laden" class="o_label_bold_f"/>
-                                        <field name="ewrs_laden" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                    <div class="o_col">
-                                        <label string="MTY" for="ewrs_mty" class="o_label_bold_f"/>
-                                        <field name="ewrs_mty" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                </div>
                             </group>
-
                             <group>
-
-                                <label string="ENS" for= "ewrs_laden" class="o_label_bold_l"/>
-                                <div class="o_row">
-                                    <div class="o_col">
-                                        <label string="Laden" for="ens_laden" class="o_label_bold_f"/>
-                                        <field name="ens_laden" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                    <div class="o_col">
-                                        <label string="MTY" for="ens_mty" class="o_label_bold_f"/>
-                                        <field name="ens_mty" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                </div>
-
-                                <label string="IPS" for= "ips_laden" class="o_label_bold_l"/>
-                                <div class="o_row">
-                                    <div class="o_col">
-                                        <label string="Laden" for="ips_laden" class="o_label_bold_f"/>
-                                        <field name="ips_laden" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                    <div class="o_col">
-                                        <label string="MTY" for="ips_mty" class="o_label_bold_f"/>
-                                        <field name="ips_mty" required="1" readonly = "status not in ('draft','editable')"/>
+                                <label for="ets"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="ets" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="ets_currency_id"  style="width: 20%%" required="ets > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                     </div>
                                 </div>
                                 
-                                <label string="Others" for= "oth_laden" class="o_label_bold_l"/>
-                                <div class="o_row">
-                                    <div class="o_col">
-                                        <label string="Laden" for="oth_laden" class="o_label_bold_f"/>
-                                        <field name="oth_laden" required="1" readonly = "status not in ('draft','editable')"/>
+                                <label for="ips"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="ips" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="ips_currency_id"  style="width: 20%%" required="ips > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                     </div>
-                                    <div class="o_col">
-                                        <label string="MTY" for="oth_mty" class="o_label_bold_f"/>
-                                        <field name="oth_mty" required="1" readonly = "status not in ('draft','editable')"/>
+                                </div>
+                                <label for="smd"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="smd" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="smd_currency_id"  style="width: 20%%" required="smd > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                <label for="ows"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="ows" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="ows_currency_id"  style="width: 20%%" required="ows > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                <label for="tank_surcharge"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="tank_surcharge" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="t_s_currency_id"  style="width: 20%%" required="tank_surcharge > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                <label for="others"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="others" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="ot_currency_id"  style="width: 20%%" required="others > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                     </div>
                                 </div>
 
-                                <label string="DG Surcharge" for= "pack_type1" class="o_label_bold_l"/>
-                                <div class="o_row" >
-                                    <div class="o_col">
-                                        <label string="Packing Type I" for="pack_type1" class="o_label_bold_f"/>
-                                        <field name="pack_type1" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                    <div class="o_col">
-                                        <label string="Packing Type II" for="pack_type2" class="o_label_bold_f"/>
-                                        <field name="pack_type2" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                    <div class="o_col">
-                                        <label string="Packing Type III" for="pack_type3" class="o_label_bold_f"/>
-                                        <field name="pack_type3" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                </div>
-                                
                             </group>
-                        </group>
-                        <group string = "Rate Details(Per BL)">
+                        </group>  
+                        <group string = "Per BL Charges">
                             <group >
-                                <field name="afr" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="ets" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="acd" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="flexi_surcharge" required="1" readonly = "status not in ('draft','editable')"/>
+                                <label for="afr"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="afr" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="afr_currency_id"  style="width: 20%%" required="afr > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                
+                                <label for="ens"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="ens" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="ens_currency_id"  style="width: 20%%" required="ens > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+
+                                <label for="acd"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="acd" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="acd_currency_id"  style="width: 20%%" required="acd > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
                             </group>
+                                
                             <group>
-                                <field name="tank_surcharge" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="over_wgt_surcharge" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="haz" required="1" readonly = "status not in ('draft','editable')"/>
+                                <label for="ems"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="ems" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="ems_currency_id"  style="width: 20%%" required="ems > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                <label for="bl_others"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="bl_others" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="bl_ot_currency_id"  style="width: 20%%" required="bl_others > 0"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>                            
                             </group>
                         </group>     
                         
-                        <group string="Total Value">
+                        <group string="Total Amount">
                             <group>
-                                <label for= "tot_laden" class="o_label_bold_c"/>
+                                <label for="tot_laden" class="o_label_bold_c"/>
                                 <div>
                                     <div class="o_address_format">
                                         <field name="tot_laden" style="width: 30%%"  required="1" readonly = "1" force_save="1"/>
                                         <field name="currency_id"  style="width: 20%%"  options="{'no_create': True}" required="1"  readonly = "1" force_save="1"/>
                                     </div>
                                 </div>
-
-                                <label for= "tot_laden_dg" class="o_label_bold_c"/>
+                            </group>
+                            <group>
+                                <label for="tot_laden_dg" class="o_label_bold_c"/>
                                 <div>
                                     <div class="o_address_format">
                                         <field name="tot_laden_dg" style="width: 30%%"  required="1" readonly = "1" force_save="1"/>
@@ -211,31 +270,21 @@
                                     </div>
                                 </div>
                             </group>
-                            <group>
-                                <label for= "tot_mty" class="o_label_bold_c"/>
-                                <div>
-                                    <div class="o_address_format">
-                                        <field name="tot_mty" style="width: 30%%" required="1" readonly = "1" force_save="1"/>
-                                        <field name="currency_id" style="width: 20%%"  options="{'no_create': True}" required="1" readonly = "1" force_save="1"/>
-                                    </div>
-                                </div>
-                                 
-                            </group>
                         </group>
                         <group string="More Details">
                             <group >
                                 <field name="valid_from_date" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="valid_to_date" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="contract_no" readonly = "status not in ('draft','editable')"/>
+                                
                             </group>
                             <group>
-                                <field name="fre_pay_center" readonly = "status not in ('draft','editable')"/>
+                                <field name="contract_no" readonly = "status not in ('draft','editable')"/>
                                 <field name="received_from" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="rate_received_date" required="1" readonly = "status not in ('draft','editable')"/>
                             </group>
                         </group>  
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
+                            <field name="note"/>
                         </group>   
                         
                         <notebook>
@@ -250,8 +299,8 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
-                                        <field name="entry_mode"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
+                                        <field name="entry_mode" readonly="1" force_save="1"/>
                                     </group>
                                 </group>
                                 <group>
@@ -289,15 +338,17 @@
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
-                    <field name="carrier_id"/>
-                    <field name="vendor_id"/>
+                    <field name="carrier_name"/>
                     <field name="carrier_type"/>
-                    <field name="ves_serv_route_id"/>
+                    <field name="container_category" string="Empty"/>
+                    <field name="routing"/>
+                    <field name="transit_time" string="TD"/>
                     <field name="pol_port_id"/>
                     <field name="pod_port_id"/>
-                    <field name="tot_laden" string="Total(Laden)"/>
-                    <field name="tot_mty" string="Total(MTY)"/>
-                    <field name="currency_id"/>
+                    <field name="tot_laden" string="Non DG Rate"/>
+                    <field name="tot_laden_dg" string="DG Rate"/>
+                    <field name="currency_id" nolabel="1"/>
+                    <field name="valid_to_date" string="Validity"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -316,15 +367,17 @@
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
-                    <field name="carrier_id"/>
-                    <field name="vendor_id"/>
+                    <field name="carrier_name"/>
                     <field name="carrier_type"/>
-                    <field name="ves_serv_route_id"/>
+                    <field name="container_category" string="Empty"/>
+                    <field name="routing"/>
+                    <field name="transit_time" string="TD"/>
                     <field name="pol_port_id"/>
                     <field name="pod_port_id"/>
-                    <field name="tot_laden" string="Total(Laden)"/>
-                    <field name="tot_mty" string="Total(MTY)"/>
-                    <field name="currency_id"/>
+                    <field name="tot_laden" string="Non DG Rate"/>
+                    <field name="tot_laden_dg" string="DG Rate"/>
+                    <field name="currency_id" nolabel="1"/>
+                    <field name="valid_to_date" string="Validity"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -340,16 +393,17 @@
             <field name="arch" type="xml">
                 <search string="Carrier Sea Freight Rate">
                     <field name="carrier_id" filter_domain="[('carrier_id','ilike',self)]"/>
+                    <field name="carrier_name" filter_domain="[('carrier_name','ilike',self)]"/>
                     <field name="vendor_id" filter_domain="[('vendor_id','ilike',self)]"/>
-                    <field name="ves_serv_route_id" filter_domain="[('ves_serv_route_id','ilike',self)]"/>
+                    <field name="service_name" filter_domain="[('service_name','ilike',self)]"/>
                     <field name="pol_port_id" filter_domain="[('pol_port_id','ilike',self)]"/>
                     <field name="pod_port_id" filter_domain="[('pod_port_id','ilike',self)]"/>
                     
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -357,14 +411,26 @@
                     <filter name="Hidden" domain="[('active', '=', False)]"/>
                     
                     <group expand="0" string="Group By">
-                        <filter string="Vendor Name" name="vendor_id" domain="[]" context="{'group_by': 'vendor_id'}"/>
-                        <filter string="Service Name" name="ves_serv_route_id" domain="[]" context="{'group_by': 'ves_serv_route_id'}"/>
+                        <filter string="New Carrier Name" name="carrier_name" domain="[]" context="{'group_by': 'carrier_name'}"/>
+                        <filter string="Carrier Name" name="carrier_id" domain="[]" context="{'group_by': 'carrier_id'}"/>
                         <filter string="Carrier Type" name="carrier_type" domain="[]" context="{'group_by': 'carrier_type'}"/>
+                        <filter string="Empty / Laden" name="container_category" domain="[]" context="{'group_by': 'container_category'}"/>
+                        <filter string="Routing" name="routing" domain="[]" context="{'group_by': 'routing'}"/>
+                        <filter string="T/T Days" name="transit_time" domain="[]" context="{'group_by': 'transit_time'}"/>
                         <filter string="POL" name="pol_port_id" domain="[]" context="{'group_by': 'pol_port_id'}"/>
                         <filter string="POD" name="pod_port_id" domain="[]" context="{'group_by': 'pod_port_id'}"/>
+                        <filter string="Non DG Total" name="tot_laden" domain="[]" context="{'group_by': 'tot_laden'}"/>
+                        <filter string="DG Total" name="tot_laden_dg" domain="[]" context="{'group_by': 'tot_laden_dg'}"/>
                         <filter string="Currency" name="currency_id" domain="[]" context="{'group_by': 'currency_id'}"/>
+                        <filter string="Validity To Date" name="valid_to_date" domain="[]" context="{'group_by': 'valid_to_date'}"/>
+                        <filter string="Entry Mode" name="entry_mode" domain="[]" context="{'group_by': 'entry_mode'}"/>
+                        <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -378,13 +444,14 @@
             <field name="domain">[]</field>
             <field name="view_id" ref="cm_carrier_sea_freight_rate_tree_js"/>
             <field name="search_view_id" ref="cm_carrier_sea_freight_rate_search"/>
-            <field name="context">{}</field>
+            <field name="context">{'default_status': 'draft'}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 
-        <menuitem name="Carrier Sea Freight Rate" id="cm_carrier_sea_freight_rate_act_menu" parent="cm_master.cm_tariff_master_m_parent" action="cm_carrier_sea_freight_rate_win_action" sequence="29"/>
+        <menuitem name="Carrier Sea Freight Rate" id="cm_carrier_sea_freight_rate_act_menu" parent="cm_master.cm_tariff_master_m_parent" action="cm_carrier_sea_freight_rate_win_action" sequence="32"/>
+        <menuitem name="Carrier Sea Freight Rate" id="cm_op_carrier_sea_freight_rate_act_menu" parent="cm_master.cm_op_tariff_master_m_parent" action="cm_carrier_sea_freight_rate_win_action" sequence="35"/>
 
     </data>
         

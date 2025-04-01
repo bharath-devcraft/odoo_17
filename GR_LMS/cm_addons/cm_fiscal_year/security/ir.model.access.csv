@@ -1,2 +1,9 @@
 "id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
-"access_cm_fiscal_year","cm.fiscal.year","model_cm_fiscal_year","custom_properties.group_erp_admin",1,1,1,1
+access_cm_fiscal_year_admin,cm.fiscal.year.admin,model_cm_fiscal_year,custom_properties.group_master_admin,1,1,1,1
+access_cm_fiscal_year_batch_inactive_admin,cm.fiscal.year.batch.inactive.admin,model_cm_fiscal_year_batch_inactive,custom_properties.group_master_admin,1,1,1,1
+access_cm_fiscal_year_attachment_line_admin,cm.fiscal.year.attachment.line.admin,model_cm_fiscal_year_attachment_line,custom_properties.group_master_admin,1,1,1,1
+access_cm_fiscal_year_user,cm.fiscal.year.user,model_cm_fiscal_year,custom_properties.group_master_user,1,0,0,0
+access_cm_fiscal_year_batch_inactive_user,cm.fiscal.year.batch.inactive.user,model_cm_fiscal_year_batch_inactive,custom_properties.group_master_user,1,0,0,0
+access_cm_fiscal_year_attachment_line_user,cm.fiscal.year.attachment.line.user,model_cm_fiscal_year_attachment_line,custom_properties.group_master_user,1,0,0,0
+
+

@@ -3,3 +3,6 @@ access_ct_sales_lead,ct.sales.lead,model_ct_sales_lead,custom_properties.group_e
 access_ct_sales_lead_progress_log_line,ct.sales.lead.progress.log.line,model_ct_sales_lead_progress_log_line,custom_properties.group_erp_admin,1,1,1,1
 access_ct_sales_lead_additional_contact_line,ct.sales.lead.additional.contact.line,model_ct_sales_lead_additional_contact_line,custom_properties.group_erp_admin,1,1,1,1
 access_ct_sales_lead_attachment_line,ct.sales.lead.attachment.line,model_ct_sales_lead_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_sales_lead_service_details_line,ct.sales.lead.service.details.line,model_ct_sales_lead_service_details_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_sales_lead_service_details_wizard,ct.sales.lead.service.details.wizard,model_ct_sales_lead_service_details_wizard,custom_properties.group_erp_admin,1,1,1,1
+access_ct_sales_lead_service_details_wizard_line,ct.sales.lead.service.details.wizard.line,model_ct_sales_lead_service_details_wizard_line,custom_properties.group_erp_admin,1,1,1,1

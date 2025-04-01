@@ -26,6 +26,8 @@ LOCATION = [('pan_india', 'PAN India'), ('exim', 'Exim(Global)')]
 
 CHARGES_CATEGORY = [('container_basis', 'Container Basis')]
 
+PRICE_OWNER = [('agent', 'Agent'),('operator', 'Operator')]
+
 class CmSurveyorTariff(models.Model):
     _name = 'cm.surveyor.tariff'
     _description = 'Surveyor Tariff'
@@ -33,20 +35,22 @@ class CmSurveyorTariff(models.Model):
     _order = 'name asc'
 
 
-    name = fields.Char(string="Name", index=True, copy=False)
+    name = fields.Char(string="Name", index=True)
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-    remarks = fields.Text(string="Remarks", copy=False)
+    remarks = fields.Text(string="Remarks")
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
     surveyor_id = fields.Many2one('cm.surveyor.master', string="Surveyor Name", domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    bus_location = fields.Selection(selection=LOCATION, string="Location", copy=False)
-    country_id = fields.Many2one('res.country', string="Country", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    country_code = fields.Char(string="Country Code", copy=False, size=252)
+    bus_location = fields.Selection(selection=LOCATION, string="Location")
+    country_id = fields.Many2one(RES_COUNTRY, string="Country", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    country_code = fields.Char(string="Country Code", size=252)
     state_id = fields.Many2one('res.country.state', string="State", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', country_id)]")
-    charges_category = fields.Selection(selection=CHARGES_CATEGORY, string="Charges Category",copy=False, default='container_basis')
+    charges_category = fields.Selection(selection=CHARGES_CATEGORY, string="Charges Category", default='container_basis')
     eff_from_date = fields.Date(string="Effective From Date")
+    price_owner = fields.Selection(selection=PRICE_OWNER, string="Price Owner")
+    tot_amt = fields.Float(string="Total Amount", store=True, compute='_compute_all_line')
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -62,16 +66,20 @@ class CmSurveyorTariff(models.Model):
     line_ids = fields.One2many('cm.surveyor.tariff.line', 'header_id', string="Charges Details", copy=True, c_rule=True)
     line_ids_a = fields.One2many('cm.surveyor.tariff.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
     
-    @api.constrains('surveyor_id','bus_location','charges_category','country_id','state_id')
-    def surveyor_id_validation(self):
-        if self.surveyor_id:
+    @api.depends('line_ids')
+    def _compute_all_line(self):
+        for rec in self:
+            rec.tot_amt =  sum(rec.line_ids.mapped('gr_cost'))
+
+    def duplicate_validation(self):
+        if self.surveyor_id and self.bus_location  and self.charges_category and self.country_id and self.state_id and self.price_owner:
             self.env.cr.execute(""" select surveyor_id
             from cm_surveyor_tariff where surveyor_id  = %s
             and id != %s and company_id = %s and bus_location = '%s' and charges_category = '%s' 
-            and country_id = %s and status != 'inactive' """ %(self.surveyor_id.id, 
-            self.id, self.company_id.id,self.bus_location,self.charges_category,self.country_id.id))
+            and country_id = %s and state_id =%s and status != 'inactive' and price_owner = '%s' """ %(self.surveyor_id.id, 
+            self.id, self.company_id.id,self.bus_location,self.charges_category,self.country_id.id, self.state_id.id, self.price_owner))
             if self.env.cr.fetchone():
-                raise UserError(_("Surveyor name must be unique"))
+                raise UserError(_("Surveyor tariff must be unique in state wise for PAN India else country wise unique"))
         
     
     @api.onchange('surveyor_id')
@@ -99,6 +107,7 @@ class CmSurveyorTariff(models.Model):
 
     def validations(self):
         warning_msg = []
+        self.duplicate_validation()
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
         if not is_mgmt:
             res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
@@ -166,34 +175,42 @@ class CmSurveyorTariff(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_surveyor_tariff = self.env[CM_SURVEYOR_TARIFF]
-        result['all_draft'] = cm_surveyor_tariff.search_count([('status', '=', 'draft')])
-        result['all_active'] = cm_surveyor_tariff.search_count([('status', '=', 'active')])
-        result['all_inactive'] = cm_surveyor_tariff.search_count([('status', '=', 'inactive')])
-        result['all_editable'] = cm_surveyor_tariff.search_count([('status', '=', 'editable')])
-        result['my_draft'] = cm_surveyor_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid)])
-        result['my_active'] = cm_surveyor_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid)])
-        result['my_inactive'] = cm_surveyor_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid)])
-        result['my_editable'] = cm_surveyor_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid)])
+        result['all_draft'] = cm_surveyor_tariff.search_count([('status', '=', 'draft'), ('price_owner', '=', 'agent')])
+        result['all_active'] = cm_surveyor_tariff.search_count([('status', '=', 'active'), ('price_owner', '=', 'agent')])
+        result['all_inactive'] = cm_surveyor_tariff.search_count([('status', '=', 'inactive'), ('price_owner', '=', 'agent')])
+        result['all_editable'] = cm_surveyor_tariff.search_count([('status', '=', 'editable'), ('price_owner', '=', 'agent')])
+        result['my_draft'] = cm_surveyor_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
+        result['my_active'] = cm_surveyor_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
+        result['my_inactive'] = cm_surveyor_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
+        result['my_editable'] = cm_surveyor_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
               
-        result['all_today_count'] = cm_surveyor_tariff.search_count([('crt_date', '>=', fields.Date.today())])
-        result['all_month_count'] = cm_surveyor_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1))])
-        result['my_today_count'] = cm_surveyor_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today())])
-        result['my_month_count'] = cm_surveyor_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1))])
+        result['all_today_count'] = cm_surveyor_tariff.search_count([('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'agent')])
+        result['all_month_count'] = cm_surveyor_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1)), ('price_owner', '=', 'agent')])
+        result['my_today_count'] = cm_surveyor_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'agent')])
+        result['my_month_count'] = cm_surveyor_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1)), ('price_owner', '=', 'agent')])
+
+        return result
+    
+    @api.model
+    def retrieve_op_dashboard(self):
+        result = {}
+        
+        cm_surveyor_tariff = self.env[CM_SURVEYOR_TARIFF]
+        result['all_draft'] = cm_surveyor_tariff.search_count([('status', '=', 'draft'), ('price_owner', '=', 'operator')])
+        result['all_active'] = cm_surveyor_tariff.search_count([('status', '=', 'active'), ('price_owner', '=', 'operator')])
+        result['all_inactive'] = cm_surveyor_tariff.search_count([('status', '=', 'inactive'), ('price_owner', '=', 'operator')])
+        result['all_editable'] = cm_surveyor_tariff.search_count([('status', '=', 'editable'), ('price_owner', '=', 'operator')])
+        result['my_draft'] = cm_surveyor_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+        result['my_active'] = cm_surveyor_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+        result['my_inactive'] = cm_surveyor_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+        result['my_editable'] = cm_surveyor_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+              
+        result['all_today_count'] = cm_surveyor_tariff.search_count([('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'operator')])
+        result['all_month_count'] = cm_surveyor_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1)), ('price_owner', '=', 'operator')])
+        result['my_today_count'] = cm_surveyor_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'operator')])
+        result['my_month_count'] = cm_surveyor_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1)), ('price_owner', '=', 'operator')])
 
         return result

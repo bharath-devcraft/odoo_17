@@ -8,7 +8,7 @@
                    <t t-call="SingleFileBinaryField.attachment_preview"/>
                 </t>
             </div>
-            <div t-if="!props.readonly" class="oe_add">
+            <div t-if="!props.readonly and files.length === 0" class="oe_add">
                 <FileInput
                     acceptedFileExtensions="props.acceptedFileExtensions"
                     multiUpload="true"

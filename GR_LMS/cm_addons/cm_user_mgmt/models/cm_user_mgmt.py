@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
-from odoo.addons.custom_properties.decorators import validation,is_special_char
+from odoo.addons.custom_properties.decorators import validation,is_special_char, valid_mobile_no
 from datetime import datetime
 from odoo import models, fields, tools, api, _
 from odoo.exceptions import UserError
@@ -68,8 +68,17 @@ class CmUserMgmt(models.Model):
         'department_id',
         store=True,
         string='Access Departments', ondelete='restrict', c_rule=True)
- 
+    
+    service_ids = fields.Many2many(
+        'cm.service',
+        'user_service_ids',
+        'user_id',
+        'service_id',
+        store=True,
+        string='Access Services', ondelete='restrict', c_rule=True)
+	
     mobile_no = fields.Char(string="Mobile No", size=15)
+    whatsapp_no = fields.Char(string="WhatsApp No",copy=False, size=15)
     ext_no = fields.Char(string="Ext No", copy=False, size=15)    
     sign_img = fields.Image(string="Signature Image", copy=False, max_height=128, max_width=128)   
     division_id = fields.Many2one('cm.department', string="Division", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)], tracking=True)
@@ -78,13 +87,14 @@ class CmUserMgmt(models.Model):
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)    
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
     note = fields.Html(string="Notes", copy=False, sanitize=False)
+    same_as_mobile = fields.Boolean(string="Same as Mobile No", default=False, help="Click to apply same mobile number to whatsapp number")
     
     user_category = fields.Selection(selection=USER_CATEGORY, string="User Category", copy=False, tracking=True)
     employee_id = fields.Many2one('cm.employee', string="Employee Name", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)], tracking=True)
     designation_id = fields.Many2one('cm.designation', string="Designation", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)], tracking=True)
 
     #Entry info
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -98,10 +108,8 @@ class CmUserMgmt(models.Model):
     update_user_id = fields.Many2one(RES_USERS, string="Last Updated By", copy=False, ondelete='restrict', readonly=True)
 
     
-    #constrains
     @api.constrains('name','login')
     def name_validation(self):
-        """ name_validation """
         if self.login:
             if is_special_char(self.env, self.login):
                 raise UserError(_('Special character is not allowed in login field'))
@@ -109,6 +117,32 @@ class CmUserMgmt(models.Model):
             if is_special_char(self.env, self.name):
                 raise UserError(_('Special character is not allowed in Display Name field'))            
         return True
+        
+    @api.constrains('groups_ids','user_menu_ids')
+    def service_validation(self):
+        for group_id in self.groups_ids:
+            if group_id.name == 'Service Admin' and not self.service_ids:
+                raise UserError(_('Service Admin group must have at least one service required.'))     
+        return True
+    
+    @api.constrains('mobile_no')
+    def mobile_no_validation(self):
+        if self.mobile_no:
+            if not valid_mobile_no(self.mobile_no):
+                raise UserError(_("Mobile number is invalid. Please enter correct mobile number"))
+    
+    @api.constrains('whatsapp_no')
+    def whatsapp_no_validation(self):
+        if self.whatsapp_no:
+            if not valid_mobile_no(self.whatsapp_no):
+                raise UserError(_("Whatsapp number is invalid. Please enter correct whatsapp number"))
+    
+    @api.onchange('same_as_mobile','mobile_no')
+    def onchange_same_as_mobile(self):
+        if self.same_as_mobile:
+            self.whatsapp_no = self.mobile_no
+        else:
+            self.whatsapp_no = False
     
     @api.onchange('employee_id')
     def onchange_employee(self):
@@ -215,20 +249,7 @@ class CmUserMgmt(models.Model):
             the transaction views.
         """
 
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         
         #counts

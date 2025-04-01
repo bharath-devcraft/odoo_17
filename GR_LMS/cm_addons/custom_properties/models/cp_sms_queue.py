@@ -33,7 +33,7 @@ class CpSmsQueue(models.Model):
     transaction_id = fields.Integer('Transaction ID')
 
     ### Entry Info ###
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", readonly=True, copy=False,
                                   tracking=True, default='manual')
     company_id = fields.Many2one('res.company', required=True, copy=False,

@@ -26,6 +26,11 @@ SERVICE_PROVIDER =  [('gmpl','GMPL'),
 PURPOSE =  [('costing_arrival','Costing Arrival'),
             ('mention_as_term', 'Mention as Term')]
 
+COSTING_TYPE =  [('per_tank','Per Tank'),
+                 ('per_document', 'Per Document'),
+                 ('per_hour', 'Per Hour'),
+                 ('per_day', 'Per Day')]
+
 class CmChargesHeads(models.Model):
     _name = 'cm.charges.heads'
     _description = 'Charges Heads'
@@ -41,9 +46,8 @@ class CmChargesHeads(models.Model):
     uom_id = fields.Many2one('uom.uom', string="UOM", copy=False, ondelete='restrict', tracking=True, default=_get_dynamic_domain, domain=[('status', '=', 'active'),('active_trans', '=', True)])
     service_provider = fields.Selection(selection=SERVICE_PROVIDER, string="Service Provider", copy=False)
     detail_desc = fields.Text(string="Detail Explanation", copy=False)
-    hs_id = fields.Many2one('cm.hsn.code', string=" HS/SAC Code Code", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    tax_ids = fields.Many2many('account.tax', string="Taxes", ondelete='restrict', check_company=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])    
     charges_purpose = fields.Selection(selection=PURPOSE, string="Purpose", copy=False, default='costing_arrival')
+    costing_type = fields.Selection(selection=COSTING_TYPE, string="Costing Type", copy=False)
 
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
@@ -51,7 +55,7 @@ class CmChargesHeads(models.Model):
     company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -92,13 +96,6 @@ class CmChargesHeads(models.Model):
             if self.env.cr.fetchone():
                 raise UserError(_("Charges heads short name must be unique"))
 
-    @api.onchange('hs_id')
-    def onchange_hs_id(self):
-        if self.hs_id:
-            self.tax_ids = [(6, 0, [self.hs_id.sgst_id.id, self.hs_id.cgst_id.id])]
-        else:
-            self.tax_ids = [(5, 0, 0)]
-
     def validations(self):
         warning_msg = []
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
@@ -116,11 +113,20 @@ class CmChargesHeads(models.Model):
     def entry_approve(self):
         if self.status in ('draft', 'editable'):
             self.validations()
+            self.tax_mapping_entry_creation()
             self.write({'status': 'active',
                         'ap_rej_user_id': self.env.user.id,
                         'ap_rej_date': time.strftime(TIME_FORMAT)
                         })
         return True
+
+    def tax_mapping_entry_creation(self):
+        if self.status == 'draft':
+            self.env['cm.tax.mapping'].create({
+                'charges_id' : self.id,
+                'name' : self.name,
+                'entry_mode' : 'auto'
+            })
 
     def entry_draft(self):
         if self.status == 'active':
@@ -168,20 +174,7 @@ class CmChargesHeads(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_charges_heads = self.env[CM_CHARGES_HEADS]
         result['all_draft'] = cm_charges_heads.search_count([('status', '=', 'draft')])

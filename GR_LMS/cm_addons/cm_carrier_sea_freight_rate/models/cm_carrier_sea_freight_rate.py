@@ -10,6 +10,8 @@ RES_USERS = 'res.users'
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
 RES_COMPANY = 'res.company'
+CM_PORT = 'cm.port'
+RES_CURRENCY = 'res.currency'
 
 CUSTOM_STATUS = [
         ('draft', 'Draft'),
@@ -20,10 +22,14 @@ CUSTOM_STATUS = [
 
 CARRIER_TYPE_OPTIONS = [('mlo', 'MLO'), ('feeder', 'Feeder'), ('agent', 'Agent')]
 
+CONTAINER_CATEGORY =  [('laden','Laden'),
+                       ('empty', 'Empty')]
+
 ROUTING = [('direct', 'Direct'), ('through', 'Through'), ('ts', 'T/S')]
+CONTAINER_TYPE = [('tk_20', 'TK20'), ('tk_40', 'TK40'), ('gp', 'GP')]
 
 ENTRY_MODE =  [('manual','Manual'),
-               ('auto', 'Auto')]
+               ('auto', 'Auto'),('imported', 'Imported')]
 
 class CmCarrierSeaFreightRate(models.Model):
     _name = 'cm.carrier.sea.freight.rate'
@@ -32,80 +38,114 @@ class CmCarrierSeaFreightRate(models.Model):
     _order = 'name asc'
 
 
-    name = fields.Char(string="Name", index=True, copy=False)
-    status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
+    name = fields.Char(string="Name", compute='_compute_name',index=True)
+    status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-    remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+    remarks = fields.Text(string="Remarks")
+    note = fields.Text(string="Notes")
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
     
     carrier_id= fields.Many2one('cm.carrier', string="Carrier Name", domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    carrier_name = fields.Char(string="New Carrier Name")
     vendor_id= fields.Many2one('cm.vendor.master', string="Vendor Name", domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    carrier_type = fields.Selection(selection=CARRIER_TYPE_OPTIONS, string="Carrier Type", copy=False)
-    currency_id = fields.Many2one('res.currency', string="Currency", copy=False, ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    ves_serv_route_id= fields.Many2one('cm.vessel.service.route', string="Service Name", domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    routing = fields.Selection(selection=ROUTING, string="Routing", copy=False)
+    carrier_type = fields.Selection(selection=CARRIER_TYPE_OPTIONS, string="Carrier Type")
+    container_type = fields.Selection(selection=CONTAINER_TYPE, string="Container Type", default='tk_20')
+    currency_id = fields.Many2one(RES_CURRENCY, string="Base Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    container_category = fields.Selection(selection=CONTAINER_CATEGORY, string="Empty / Laden")
+    service_name = fields.Char(string="Service Name")
+    routing = fields.Selection(selection=ROUTING, string="Routing")
+    ts_1_port_id = fields.Many2one(CM_PORT, string="T/S Port 1", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    ts_2_port_id = fields.Many2one(CM_PORT, string="T/S Port 2", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    carrier_term_id = fields.Many2one('cm.carrier.terms', string="Carrier Term", domain=[('status', '=', 'active'),('active_trans', '=', True)])
     
-    pol_ship_term_id = fields.Many2one('cm.shipment.term', string="Term", domain=[('status', '=', 'active'),('active_trans', '=', True)])
     pol_country_id = fields.Many2one('res.country', string="POL Country", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    pol_port_id = fields.Many2one('cm.port', string="POL", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', pol_country_id)]")
+    pol_port_id = fields.Many2one(CM_PORT, string="POL", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', pol_country_id)]")
     
-    pod_ship_term_id = fields.Many2one('cm.shipment.term', string="Term", domain=[('status', '=', 'active'),('active_trans', '=', True)])
     pod_country_id = fields.Many2one('res.country', string="POD Country", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    pod_port_id = fields.Many2one('cm.port', string="POD", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', pod_country_id)]")
-    pod_terminal_id = fields.Many2one('cm.port.terminal', string="POD Terminal", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('port_id', '=', pod_port_id)]")
+    pod_port_id = fields.Many2one(CM_PORT, string="POD", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', pod_country_id)]")
     
     
-    transit_time = fields.Integer(string="Transit Time(Days)", copy=False)
-    sf_laden = fields.Float(string="Laden", copy=False)	
-    sf_mty = fields.Float(string="MTY", copy=False)
+    transit_time = fields.Integer(string="T/T Days")
+    pol_free_days = fields.Integer(string="POL Free Days")
+    pod_free_days = fields.Integer(string="POD Free Days")
+    sf_laden = fields.Float(string="Sea Freight(Non DG)")	
     
-    pack_type1 = fields.Float(string="Packing Type I", copy=False)	
-    pack_type2 = fields.Float(string="Packing Type II", copy=False)	
-    pack_type3 = fields.Float(string="Packing Type III", copy=False)
+    dg_charge = fields.Float(string="DG Charge")	
+    pack_type1 = fields.Float(string="Packing Type I")	
+    pack_type2 = fields.Float(string="Packing Type II")	
+    pack_type3 = fields.Float(string="Packing Type III")
 
-    baf_laden = fields.Float(string="Laden", copy=False)	
-    baf_mty = fields.Float(string="MTY", copy=False)
+    imo_class_1 = fields.Float(string="Class 1")	
+    imo_class_2 = fields.Float(string="Class 2")	
+    imo_class_3 = fields.Float(string="Class 3")	
+    imo_class_4 = fields.Float(string="Class 4")	
+    imo_class_5 = fields.Float(string="Class 5")	
+    imo_class_6 = fields.Float(string="Class 6")	
+    imo_class_7 = fields.Float(string="Class 7")	
+    imo_class_8 = fields.Float(string="Class 8")	
+    imo_class_9 = fields.Float(string="Class 9")
+    imo_currency_id_1 = fields.Many2one(RES_CURRENCY, string="IMO Currency 1", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    imo_currency_id_2 = fields.Many2one(RES_CURRENCY, string="IMO Currency 2", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    imo_currency_id_3 = fields.Many2one(RES_CURRENCY, string="IMO Currency 3", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    imo_currency_id_4 = fields.Many2one(RES_CURRENCY, string="IMO Currency 4", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    imo_currency_id_5 = fields.Many2one(RES_CURRENCY, string="IMO Currency 5", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    imo_currency_id_6 = fields.Many2one(RES_CURRENCY, string="IMO Currency 6", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    imo_currency_id_7 = fields.Many2one(RES_CURRENCY, string="IMO Currency 7", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    imo_currency_id_8 = fields.Many2one(RES_CURRENCY, string="IMO Currency 8", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    imo_currency_id_9 = fields.Many2one(RES_CURRENCY, string="IMO Currency 9", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
-    ecrs_laden = fields.Float(string="Laden", copy=False)	
-    ecrs_mty = fields.Float(string="MTY", copy=False)
+    baf = fields.Float(string="BAF")	
+    lss = fields.Float(string="LSS")	
+    efs = fields.Float(string="EFS")	
+    ecrs = fields.Float(string="ECRS")	
+    pcs = fields.Float(string="PCS")	
+    ewrs = fields.Float(string="EWRS")	
+    ens = fields.Float(string="ENS ")	
+    ips = fields.Float(string="IPS ")	
+    smd = fields.Float(string="SMD")	
+    ows = fields.Float(string="OWS")	
+    tank_surcharge = fields.Float(string="Tank Surcharge")	
+    others = fields.Float(string="Others")
+
+    baf_currency_id = fields.Many2one(RES_CURRENCY, string="BAF Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    lss_currency_id = fields.Many2one(RES_CURRENCY, string="LSS Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    efs_currency_id = fields.Many2one(RES_CURRENCY, string="EFS Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    ecrs_currency_id = fields.Many2one(RES_CURRENCY, string="ECRS Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    pcs_currency_id = fields.Many2one(RES_CURRENCY, string="PCS Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    ewrs_currency_id = fields.Many2one(RES_CURRENCY, string="EWRS Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    ens_currency_id = fields.Many2one(RES_CURRENCY, string="ENS Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    ips_currency_id = fields.Many2one(RES_CURRENCY, string="IPS Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    smd_currency_id = fields.Many2one(RES_CURRENCY, string="SMD Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    ows_currency_id = fields.Many2one(RES_CURRENCY, string="OWS Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    t_s_currency_id = fields.Many2one(RES_CURRENCY, string="Tank Surcharge Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    ot_currency_id = fields.Many2one(RES_CURRENCY, string="Others Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
     
-    ewrs_laden = fields.Float(string="Laden", copy=False)	
-    ewrs_mty = fields.Float(string="MTY", copy=False) 
-    
-    ens_laden = fields.Float(string="Laden", copy=False)	
-    ens_mty = fields.Float(string="MTY", copy=False)
-    
-    ips_laden = fields.Float(string="Laden", copy=False)	
-    ips_mty = fields.Float(string="MTY", copy=False)
-    
-    oth_laden = fields.Float(string="Laden", copy=False)	
-    oth_mty = fields.Float(string="MTY", copy=False)
 
-    afr = fields.Float(string="AFR(Per BL)", copy=False)
-    ets = fields.Float(string="ETS(Per BL)", copy=False)
-    acd = fields.Float(string="ACD(Per BL)", copy=False)
-    flexi_surcharge = fields.Float(string="Flexi Surcharge", copy=False)
-    tank_surcharge = fields.Float(string="Tank Surcharge(Laden)", copy=False)
-    over_wgt_surcharge = fields.Float(string="Over Weight Surcharge", copy=False)
-    haz = fields.Float(string="HAZ - 5.1 / 5.2", copy=False)
+    afr = fields.Float(string="AFR")
+    ets = fields.Float(string="ETS")
+    acd = fields.Float(string="ACD")
+    ems = fields.Float(string="EMS")
+    bl_others = fields.Float(string="Others")
+    afr_currency_id = fields.Many2one(RES_CURRENCY, string=" AFR Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    ets_currency_id = fields.Many2one(RES_CURRENCY, string=" ETS Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    acd_currency_id = fields.Many2one(RES_CURRENCY, string=" ACD Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    ems_currency_id = fields.Many2one(RES_CURRENCY, string=" EMS Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
+    bl_ot_currency_id = fields.Many2one(RES_CURRENCY, string=" BL Others Currency", ondelete='restrict', tracking=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])	
 
-    tot_laden = fields.Float(string="Laden", compute='_compute_tot_laden', store=True, copy=False)	
-    tot_laden_dg = fields.Float(string="Laden(DG)", compute='_compute_tot_laden_dg', store=True, copy=False)	
-    tot_mty = fields.Float(string="MTY", compute='_compute_tot_mty', store=True, copy=False)
+    tot_laden = fields.Float(string="Non DG Total", compute='_compute_tot_laden', store=True)	
+    tot_laden_dg = fields.Float(string="DG Total", compute='_compute_tot_laden_dg', store=True)	
 
-    valid_from_date = fields.Date(string="Validity From Date", copy=False)
-    valid_to_date = fields.Date(string="Validity To Date", copy=False)
-    contract_no = fields.Char(string="Contract No", index=True, copy=False)
-    fre_pay_center = fields.Char(string="Freight Payment Center", index=True, copy=False)
-    received_from = fields.Char(string="Received From", index=True, copy=False)
-    rate_received_date = fields.Date(string="Rate Received Date", copy=False)   
+    valid_from_date = fields.Date(string="Validity From Date")
+    valid_to_date = fields.Date(string="Validity To Date")
+    contract_no = fields.Char(string="Contract No", index=True)
+    received_from = fields.Char(string="Received From", index=True)
 
 
     
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
-    entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
+    entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True)
     crt_date = fields.Datetime(string="Creation Date", copy=False, default=fields.Datetime.now, readonly=True)
     user_id = fields.Many2one(RES_USERS, string="Created By", copy=False, default=lambda self: self.env.user.id, ondelete='restrict', readonly=True)
     ap_rej_date = fields.Datetime(string="Approved / Rejected Date", copy=False, readonly=True)
@@ -115,18 +155,6 @@ class CmCarrierSeaFreightRate(models.Model):
     update_date = fields.Datetime(string="Last Updated Date", copy=False, readonly=True)
     update_user_id = fields.Many2one(RES_USERS, string="Last Updated By", copy=False, ondelete='restrict', readonly=True)
     
-    # @api.constrains('name')
-    # def name_validation(self):
-    #     if self.name:
-    #         if is_special_char(self.env, self.name):
-    #             raise UserError(_("Special character is not allowed in name field"))
-
-    #         name = self.name.upper().replace(" ", "")
-    #         self.env.cr.execute(""" select upper(name)
-    #         from cm_carrier_sea_freight_rate where upper(REPLACE(name, ' ', ''))  = '%s'
-    #         and id != %s and company_id = %s and status != 'inactive' """ %(name, self.id, self.company_id.id))
-    #         if self.env.cr.fetchone():
-    #             raise UserError(_("Carrier Sea Freight Rate name must be unique"))
 
     @api.constrains('valid_from_date','valid_to_date')
     def validity_validations(self):
@@ -134,59 +162,105 @@ class CmCarrierSeaFreightRate(models.Model):
             if self.valid_from_date > self.valid_to_date:
                 raise UserError(_("Validity from date should be less than validity to date"))
             
-    @api.depends('sf_laden', 'baf_laden', 'ecrs_laden','ewrs_laden','ens_laden','ips_laden','oth_laden')
+    @api.depends('baf', 'lss', 'efs', 'ecrs', 'pcs', 'ewrs', 'ets', 'ips', 'smd', 'ows', 'tank_surcharge', 'others', 'sf_laden', 'currency_id', 'baf_currency_id', 'lss_currency_id', 'efs_currency_id', 'ecrs_currency_id', 'pcs_currency_id', 'ewrs_currency_id', 'ets_currency_id', 'ips_currency_id', 'smd_currency_id', 'ows_currency_id', 't_s_currency_id', 'ot_currency_id')
     def _compute_tot_laden(self):
+        exchange_rate = self.env['cm.exchange.rate']
         for record in self:
-            record.tot_laden = record.sf_laden + record.baf_laden + record.ecrs_laden + record.ewrs_laden + record.ens_laden + record.ips_laden + record.oth_laden
-    
-    @api.depends('tot_laden', 'pack_type1', 'pack_type2','pack_type3')
+            tot_laden=record.sf_laden
+            
+            def convert_if_needed(amount, amount_currency, base_currency):
+                if amount and amount_currency and base_currency:
+                    if amount_currency.name == base_currency.name:
+                        return amount
+                    return exchange_rate.convert_to_base_currency(base_currency.name, amount_currency.name, amount)['converted_value']
+                return 0 
+        
+            fields_with_currency = [
+                ('baf', 'baf_currency_id'),
+                ('lss', 'lss_currency_id'),
+                ('efs', 'efs_currency_id'),
+                ('ecrs', 'ecrs_currency_id'),
+                ('pcs', 'pcs_currency_id'),
+                ('ewrs', 'ewrs_currency_id'),
+                ('ets', 'ets_currency_id'),
+                ('ips', 'ips_currency_id'),
+                ('smd', 'smd_currency_id'),
+                ('ows', 'ows_currency_id'),
+                ('tank_surcharge', 't_s_currency_id'),
+                ('others', 'ot_currency_id'),
+            ]
+            
+            for field, currency_field in fields_with_currency:
+                tot_laden += convert_if_needed(getattr(record, field), getattr(record, currency_field), record.currency_id)
+            
+            record.tot_laden = tot_laden 
+             
+
+    @api.depends('tot_laden','dg_charge','pack_type1', 'pack_type2','pack_type3','imo_class_1','imo_class_2','imo_class_3','imo_class_4','imo_class_5','imo_class_6','imo_class_7','imo_class_8','imo_class_9')
     def _compute_tot_laden_dg(self):
         for record in self:
-            record.tot_laden_dg = record.tot_laden + record.pack_type1 + record.pack_type2 + record.pack_type3 
+            dg_surcharge= record.dg_charge or record.pack_type1 or record.pack_type2 or record.pack_type3 or 0
+            imo_charge = record.imo_class_1 or record.imo_class_2 or record.imo_class_3 or record.imo_class_4 or record.imo_class_5 or record.imo_class_6 or record.imo_class_7 or record.imo_class_8 or record.imo_class_9 or 0 
+            record.tot_laden_dg = record.tot_laden + dg_surcharge or imo_charge
     
-    @api.depends('sf_mty', 'baf_mty', 'ecrs_mty','ewrs_mty','ens_mty','ips_mty','oth_mty')
-    def _compute_tot_mty(self):
+    @api.constrains('dg_charge','pack_type1', 'pack_type2','pack_type3','imo_class_1','imo_class_2','imo_class_3','imo_class_4','imo_class_5','imo_class_6','imo_class_7','imo_class_8','imo_class_9')
+    def dg_charge_validation(self):
         for record in self:
-            record.tot_mty = record.sf_mty + record.baf_mty + record.ecrs_mty + record.ewrs_mty + record.ens_mty + record.ips_mty + record.oth_mty
-    
-    def validate_laden_mty(self, field_name, field_value):
+            fields = [record.dg_charge,record.pack_type1, record.pack_type2, 
+                record.pack_type3, record.imo_class_1, record.imo_class_2, record.imo_class_3, 
+                record.imo_class_4, record.imo_class_5, record.imo_class_6, record.imo_class_7, 
+                record.imo_class_8, record.imo_class_9] 
+            filtered_fields = list(filter(lambda x:x not in (None,0),fields))
+            
+            if len(filtered_fields)==0:
+                raise UserError(_("DG Charge, Packing Types, or IMO Classes either one is must"))
+            
+            if len(filtered_fields)>1:
+                raise UserError(_("Please ensure that only one field is filled. You cannot have values in more than one of the following fields: DG Charge, Packing Types, or IMO Classes"))
+
+    def validate_negative_value(self, field_name, field_value):
         if field_value and field_value < 0:
             raise UserError(_(f"Negative value should not allow in {field_name}, Ref: {field_value}"))
         
-    @api.constrains('sf_laden', 'baf_laden', 'ecrs_laden','ewrs_laden','ens_laden','ips_laden','oth_laden')
-    def laden_validation(self):
-        self.validate_laden_mty('laden', self.sf_laden)
-        self.validate_laden_mty('laden', self.baf_laden)
-        self.validate_laden_mty('laden', self.ecrs_laden)
-        self.validate_laden_mty('laden', self.ewrs_laden)
-        self.validate_laden_mty('laden', self.ens_laden)
-        self.validate_laden_mty('laden', self.ips_laden)
-        self.validate_laden_mty('laden', self.oth_laden)
-    
-    @api.constrains('sf_mty', 'sf_mty', 'ecrs_mty','ewrs_mty','ens_mty','ips_mty','oth_mty')
-    def mty_validation(self):
-        self.validate_laden_mty('MTY', self.sf_mty)
-        self.validate_laden_mty('MTY', self.sf_mty)
-        self.validate_laden_mty('MTY', self.ecrs_mty)
-        self.validate_laden_mty('MTY', self.ewrs_mty)
-        self.validate_laden_mty('MTY', self.ens_mty)
-        self.validate_laden_mty('MTY', self.ips_mty)
-        self.validate_laden_mty('MTY', self.oth_mty)
-    
-    @api.constrains('afr', 'ets', 'acd','flexi_surcharge','tank_surcharge','over_wgt_surcharge','haz')
-    def mty_validation(self):
-        self.validate_laden_mty('AFR(Per BL)', self.afr)
-        self.validate_laden_mty('ETS(Per BL)', self.ets)
-        self.validate_laden_mty('ACD(Per BL)', self.acd)
-        self.validate_laden_mty('Flexi Surcharge', self.flexi_surcharge)
-        self.validate_laden_mty('Tank Surcharge(Laden)', self.tank_surcharge)
-        self.validate_laden_mty('Over Weight Surcharge', self.over_wgt_surcharge)
-        self.validate_laden_mty('HAZ - 5.1 / 5.2', self.haz)
-            
-    @api.onchange('carrier_id')
-    def onchange_carrier_id(self):
+    # @api.constrains('sf_laden', 'baf_laden', 'ecrs_laden','ewrs_laden','ens_laden','ips_laden','oth_laden')
+    # def per_tank_validation(self):
+    #     self.validate_negative_value('laden', self.sf_laden)
+    #     self.validate_negative_value('laden', self.baf_laden)
+    #     self.validate_negative_value('laden', self.ecrs_laden)
+    #     self.validate_negative_value('laden', self.ewrs_laden)
+    #     self.validate_negative_value('laden', self.ens_laden)
+    #     self.validate_negative_value('laden', self.ips_laden)
+    #     self.validate_negative_value('laden', self.oth_laden)
+
+        
+    @api.constrains('afr', 'ets', 'acd')
+    def per_bl_validation(self):
+        self.validate_negative_value('AFR', self.afr)
+        self.validate_negative_value('ETS', self.ets)
+        self.validate_negative_value('ACD', self.acd)
+        
+    @api.constrains('carrier_id','carrier_name')
+    def carrier_validation(self):
+        if self.entry_mode != 'imported':
+            if not (self.carrier_id or self.carrier_name):
+                raise UserError(_("Carrier Name or New Carrier Name is mandatory"))
+            if self.carrier_id and self.carrier_name:
+                raise UserError(_("Please enter either Carrier Name or New Carrier Name, but not both"))
+
+    @api.depends('carrier_id','carrier_name')
+    def _compute_name(self):
         if self.carrier_id:
             self.name = self.carrier_id.name
+        elif self.carrier_name:
+            self.name = self.carrier_name
+            if self.entry_mode == 'imported':
+                carrier_id = self.env['cm.carrier'].search([('name','=',self.carrier_name.strip()),('status','=','active')],limit=1)
+                self.ap_rej_date = time.strftime(TIME_FORMAT)
+                self.ap_rej_user_id = self.env.user.id
+                if carrier_id:
+                    self.carrier_name=False
+                    self.carrier_id=carrier_id.id
+                
         else:
             self.name = False
 
@@ -197,6 +271,13 @@ class CmCarrierSeaFreightRate(models.Model):
             res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
             if res_config_rule and self.user_id == self.env.user:
                 warning_msg.append("Created user is not allow to approve the entry")
+        
+        if not self.transit_time:
+            warning_msg.append("T/T days value should be greater than zero.")
+            
+        if not self.sf_laden:
+            warning_msg.append("Sea Freight(Non DG) value should be greater than zero.")
+
         if warning_msg:
             formatted_messages = "\n".join(warning_msg)
             raise UserError(_(formatted_messages))
@@ -259,20 +340,7 @@ class CmCarrierSeaFreightRate(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_carrier_sea_freight_rate = self.env[CM_CARRIER_SEA_FREIGHT_RATE]
         result['all_draft'] = cm_carrier_sea_freight_rate.search_count([('status', '=', 'draft')])

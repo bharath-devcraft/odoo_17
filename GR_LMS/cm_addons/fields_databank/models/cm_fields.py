@@ -226,7 +226,81 @@ RELATIONSHIP_TYPE = [('mother', 'Mother'), ('father', 'Father'),
                      ('brother', 'Brother'), ('sister', 'Sister'),
                      ('wife', 'Wife'), ('son', 'Son'), ('guardian', 'Guardian')]
 
+CUSTOMER_TYPE =  [('new','New'),
+               ('existing', 'Existing')]          
+LEAD_TYPE =  [('marketing_lead','Marketing Lead'),
+               ('tender', 'Tender')]
+ACCOUNT_TYPE =  [('current','Current'),
+			   ('savings', 'Savings')]
+CUSTOM_TYPE = [('flexi_bag', 'Flexi Bag'), ('flexi_accessories', 'Flexi Accessories'), ('consumables', 'Consumables'), ('asset', 'Asset')]
 
+ACCEPTABILITY = [('acceptable','Acceptable'),('not_acceptable', 'Not Acceptable')]
+
+PACK_GRP = [('1', 'I'), ('2', 'II'), ('3', 'III')]
+
+OWNERSHIP_TYPE = [('own', 'Own'), ('loan', 'Loan(HP)'), ('lease', 'Lease'), ('rent', 'Rent'), ('soc', 'SOC'), ('other', 'Other Operators')]
+SUB_TYPE = [('liquid','Liquid'),
+            ('gas', 'Gas'),
+            ('cryogenic', 'Cryogenic')]
+            
+SUB_TYPE2 = [('swap_body','Swap Body'),
+            ('baffle', 'Baffle'),
+            ('foodgrade', 'Foodgrade'),
+            ('industrial', 'Industrial')]
+ 
+TOP_DIS_ASSEMBLY =  [('blank','Blank'),('valve', 'Valve')]
+
+SRV_TYPE =  [('pressure','Pressure'),('vaccum', 'Vaccum'),('Both', 'Both')]
+
+SRV_FIX_TYPE =  [('Threaded','Threaded'),('flange', 'Flange')]
+
+FRAME_TYPE =  [('box','Box'),('beam', 'Beam')]
+
+MFG_WARRANTY =  [('no_warranty','No Warranty'),('limited', 'Limited'),('perpetual', 'Perpetual'),('expired', 'Expired')]
+
+PERIODIC_INS =  [('required','Required'),('not_required', 'Not Required')]
+
+
+TYPE_INS = [('external', 'External'), ('cleaning', 'Cleaning'), ('condition', 'Condition'), ('on_hire', 'On Hire'), ('off_hire', 'Off Hire'), ('all', 'All')]
+
+PASS_FAIL = [('pass', 'Pass'), ('fail', 'Fail')]
+
+INSURANCE = [('active', 'Active'), ('expired', 'Expired'), ('not_required', 'Not Required')]
+
+APPLICABLE_OPTION = [('applicable', 'Applicable'),
+                     ('not_applicable', 'Not Applicable')]
+                     
+SHIP_TRIP_TYPE = [('import', 'Import'),
+                ('export', 'Export'),
+                ('cross_trade', 'Cross Trade'),
+                ('domestic', 'Domestic'),
+                ('empty_movement', 'Empty Movement'),
+                ('flexi', 'Flexi'),
+                ('tank_lease', 'Tank Lease')]
+                
+PERIOD_CHOICES = [('day', 'Day'), ('month', 'Month'), ('year', 'Year')]
+
+TRAILER_TYPE = [('20_feet', '20 Feet'), ('40_feet', '40 Feet'), ('both', 'Both')]
+
+POD_SERVICES = [('disposal', 'Disposal'), ('discharge', 'Discharge'), ('both', 'Both'), ('not_required', 'Not Required')]
+
+
+PURPOSE =  [('costing_arrival','Costing Arrival'),
+            ('mention_as_term', 'Mention as Term')]
+            
+RESTRICTION_FLAG = [('white', 'White'), ('grey', 'Grey')]
+
+RENTAL_TYPE = [('per_day', 'Per Day Basis'), ('container', ' Container Basis'), ('monthly', 'Monthly Basis')]
+
+S_NO = [('required', 'Required'), ('not_required', 'Not Required')]
+
+PAD_TYPE = [('with_heating_pad', 'With Heating Pad'), ('without_heating_pad', 'Without Heating Pad')]
+
+ELIGIBLE_LOCATION = [('exim', 'EXIM'), ('domestic', 'Domestic'), ('both', 'Both')]
+
+CARRIER_TYPE_OPTIONS = [('mlo', 'MLO'), ('feeder', 'Feeder'), ('agent', 'Agent')]
+
+ROUTING = [('direct', 'Direct'), ('through', 'Through'), ('ts', 'T/S')]
 
 
 
@@ -293,6 +367,56 @@ class FieldsDatabank(models.TransientModel):
     seq_year = fields.Char(string="Sequence Year", copy=False, size=252)
     fiscal_year_code = fields.Char(string="Fiscal Year Code", copy=False, size=5)
     
+    ## Karthi Added
+    customer_name = fields.Char(string="Customer Name", size=50)
+    service_name = fields.Char(string="Required Services", size=252)
+    product_desc = fields.Char(string="Product", size=252, copy=False)
+    sys_ref = fields.Char(string="System Ref", copy=False, size=252)
+    che_name = fields.Char(string="Chemical Name", index=True, copy=False)
+    ship_name = fields.Char(string="Proper Shipping Name", index=True, copy=False)
+    gra_den = fields.Char(string="Specific Gravity / Density", copy=False)
+    spl_req = fields.Char(string="Special Requirements", copy=False)
+    un_no = fields.Char( string="UN Number", copy=False)
+    imo_class = fields.Char(string="IMO Class (Range 1 - 9)", size =10)
+    sub_class1 = fields.Char(string="Sub Class I", size =10)
+    sub_class2 = fields.Char(string="Sub Class II", size =10)
+    psa_class = fields.Char(string="PSA Class")
+    lpk_class = fields.Char(string="LPK Class")
+    ems_class = fields.Char(string="EMS Code")
+    payment_contact_person = fields.Char(string="Contact Person", size=50)
+    payment_designation = fields.Char(string="Designation", size=252)
+    payment_mobile_no = fields.Char(string="Mobile No", size=15, copy=False)
+    payment_email = fields.Char(string="Email", copy=False, size=252)
+    payment_street = fields.Char(string="Address Line 1", size=252)
+    payment_street1 = fields.Char(string="Address Line 2", size=252)
+    payment_pin_code = fields.Char(string="Zip Code", copy=False, size=10)
+    owner_name= fields.Char(string="Original Owner Name", index=True, copy=False)
+    size_dim = fields.Char( string="Size And Dimensions(LWH)") 
+    pay_cap = fields.Integer( string="Payload Capacity(Kgs)") 
+    tube_assembly = fields.Char( string="Steam Tube Assembly - Inlet And Outlet")
+    bot_dis_assembly = fields.Char( string="Bottom Discharge Assembly")
+    air_assembly = fields.Char( string="Airline Assembly - Size & Type")
+    ext_clad = fields.Char( string="Exterior Cladding")
+    type_walkway = fields.Char( string="Type Of Walkway")
+    off_location = fields.Char(string="Off Hire Location", copy=False)
+    bl_ref_no = fields.Char(string="BL Reference No")
+    policy_no = fields.Char(string="Policy No")
+    new_bkg_party = fields.Char(string="New Booking Party", copy=False)
+    new_shipper = fields.Char(string="New Shipper", copy=False)
+    load_address = fields.Char(string="Loading Address", size=252)
+    load_zip_code = fields.Char(string="Exact Loading Location Zip Code", copy=False, size=10)
+    unload_address = fields.Char(string="Unloading Address", size=252)
+    unload_zip_code = fields.Char(string="Exact Unloading Location Zip Code", copy=False, size=10)
+    stuff_address = fields.Char(string="Exact Stuffing Address", size=252)
+    combined_codes = fields.Char(string="Combined Codes", readonly=True)
+    country_code = fields.Char(string="Country Code", copy=False, size=252)
+    valve_size = fields.Char(string="Valve Size(Inch)", copy=False, size=50)
+    group_name = fields.Char(string="Group Name", copy=False)
+    halt_address = fields.Char(string="Halt Address", size=252)
+    fre_pay_center = fields.Char(string="Freight Payment Center", index=True, copy=False)
+    received_from = fields.Char(string="Received From", index=True, copy=False)
+    
+    
     #Catalyst 
     iom_no = fields.Char(string="IMO Number", copy=False, size=7)
     other_facility = fields.Char(string="Other Facility", copy=False, size=252)
@@ -354,6 +478,54 @@ class FieldsDatabank(models.TransientModel):
     grade = fields.Selection(selection=GRADE_OPTIONS, string="Grade", copy=False)
     rating = fields.Selection(selection=RATING_OPTIONS, string="Rating", copy=False)
     format_type = fields.Selection(selection=FORMAT_TYPE_OPTIONS, string="Format Type", nolabel=True, widget='selection')
+    
+    ## Karthi
+    customer_type = fields.Selection(selection=CUSTOMER_TYPE, string="Customer Type", copy=False, tracking=True)
+    lead_type = fields.Selection(selection=LEAD_TYPE, string="Lead Type", copy=False, default= 'marketing_lead', tracking=True)
+    account_type = fields.Selection(selection=ACCOUNT_TYPE, string="Account Type", copy=False)
+    custom_type = fields.Selection(selection=CUSTOM_TYPE, string="Type", copy=False)
+    acceptability = fields.Selection(selection=ACCEPTABILITY, string="Acceptability", copy=False)
+    pack_grp = fields.Selection(selection=PACK_GRP, string="Packing Group", copy=False)
+    mar_poll = fields.Selection(selection=YES_OR_NO, string="Marine Pollutant", copy=False)
+    fosfa = fields.Selection(selection=YES_OR_NO, string="FOSFA Approved", copy=False)
+    kosher = fields.Selection(selection=YES_OR_NO, string="Kosher Certified", copy=False)
+    ownership_type = fields.Selection(selection=OWNERSHIP_TYPE, string="Ownership Type", copy=False)
+    sub_type = fields.Selection(selection=SUB_TYPE, string="Sub Type", copy=False) 
+    sub_type2 = fields.Selection(selection=SUB_TYPE2, string="Sub Type 2", copy=False)
+    baffle = fields.Selection(selection=YES_OR_NO, string="Baffle", copy=False)
+    top_dis_assembly = fields.Selection(selection=TOP_DIS_ASSEMBLY, string="Top Discharge Assembly", copy=False)
+    srv_type = fields.Selection(selection=SRV_TYPE, string="SRV Type", copy=False)
+    srv_fix_type = fields.Selection(selection=SRV_FIX_TYPE, string="SRV Fixture Type", copy=False)
+    rup_disc = fields.Selection(selection=YES_OR_NO, string="Rupture Disc", copy=False)
+    bot_out_hous = fields.Selection(selection=YES_OR_NO, string="Bottom Outlet Housing", copy=False)
+    spill_box_cover = fields.Selection(selection=YES_OR_NO, string="Spill Box Cover", copy=False)
+    shyp_tube = fields.Selection(selection=YES_OR_NO, string="Shyphon Tube", copy=False)
+    frame_type = fields.Selection(selection=FRAME_TYPE, string="Frame Type", copy=False)
+    hand_rail = fields.Selection(selection=YES_OR_NO, string="Hand Rail", copy=False)
+    vacuum_valve = fields.Selection(selection=YES_OR_NO, string="Vacuum Valve", copy=False)
+    mfg_warranty = fields.Selection(selection=MFG_WARRANTY, string="Manufacturer Warranty", copy=False)
+    periodic_ins = fields.Selection(selection=PERIODIC_INS, string="Periodic Inspection", copy=False)
+    pneu_test = fields.Selection(selection=YES_OR_NO, string="Pneumatic Test", copy=False)
+    type_ins = fields.Selection(selection=TYPE_INS, string="Type of Inspection", copy=False)
+    ins_status = fields.Selection(selection=PASS_FAIL, string="Inspection Status", copy=False)
+    insurance = fields.Selection(selection=INSURANCE, string="Insurance", copy=False)
+    rebate = fields.Selection(selection=APPLICABLE_OPTION, string="Rebate", copy=False)
+    ship_trip_type = fields.Selection(selection=SHIP_TRIP_TYPE, string="Shipment Trip Type", copy=False)
+    switch_bl_req = fields.Selection(selection=YES_OR_NO, string="Switch BL Required", copy=False)
+    trailer_type = fields.Selection(selection=TRAILER_TYPE, string="Trailer Type", copy=False, default='20_feet')
+    accessories_req = fields.Selection(selection=YES_OR_NO, string="Accessories Required", copy=False, default='yes')
+    pod_services = fields.Selection(selection=POD_SERVICES, string="POD Services", copy=False)
+    charges_purpose = fields.Selection(selection=PURPOSE, string="Purpose", copy=False)
+    restriction_flag = fields.Selection(selection=RESTRICTION_FLAG, string="Restriction Flag", copy=False, default='white')
+    rental_type = fields.Selection(selection=RENTAL_TYPE, string="Rental Type", copy=False)
+    serial_no_req = fields.Selection(selection=S_NO, string="Serial No", copy=False)
+    pad_type = fields.Selection(selection=PAD_TYPE, string="Pad Type", copy=False)
+    interim_halt = fields.Selection(selection=APPLICABLE_OPTION, string="Interim Halt", copy=False)
+    eligible_location = fields.Selection(selection=ELIGIBLE_LOCATION, string="Eligible Location", copy=False)
+    carrier_type = fields.Selection(selection=CARRIER_TYPE_OPTIONS, string="Carrier Type", copy=False)
+    routing = fields.Selection(selection=ROUTING, string="Routing", copy=False)
+    
+    
     
     #Catalyst
     transport_service = fields.Selection(selection=YES_OR_NO, string="Transport Service", copy=False)
@@ -476,7 +648,7 @@ class FieldsDatabank(models.TransientModel):
     validity_range = fields.Selection(selection=VALIDITY_RANGE, string="Validity Range", copy=False)
     
     #Boolean 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     manual_round_off = fields.Boolean(string="Apply Manual Round Off", default=False)
@@ -624,7 +796,32 @@ class FieldsDatabank(models.TransientModel):
     minimum_days = fields.Integer(string="Minimum days", copy=False)
     maximum_days = fields.Integer(string="Maximum days", copy=False)
     interval = fields.Integer(string="Interval", copy=False)
-
+	
+    ##Karthi
+    
+    re_use_days = fields.Integer(string="Avg Transhipment Days", copy=False)
+    avg_trans_days = fields.Integer(string="Cleaning / Repair / Booking Days", copy=False)
+    max_cross_wgt = fields.Integer(string="Max Cross Weight(Kgs)", copy=False) 
+    tare_wgt = fields.Integer(string="Tare Weight(Kgs)", copy=False) 
+    gross_wgt = fields.Integer(string="Gross Weight(Kgs)", copy=False) 
+    moc_shell = fields.Char(string="MOC Of Shell", copy=False) 
+    tank_mawp = fields.Integer(string="Tank Mawp(Bar)", copy=False)
+    test_test_pres = fields.Integer(string="Tank Test Pressure(Bar)", copy=False)
+    steam_mawp = fields.Integer(string="Steam Mawp(Bar)", copy=False)
+    steam_test_pres = fields.Integer(string="Steam Test Pressure(Bar)", copy=False)
+    heat_area = fields.Integer(string="Effective Heating Area(Sqm)", copy=False)
+    steam_runs = fields.Integer(string="No. Of Steam Runs", copy=False)
+    tank_capacity = fields.Integer(string="Tank Capacity(KL)", copy=False)
+    tank_qty = fields.Integer(string="Tank Quantity(TEUS)", copy=False)
+    pol_free_days = fields.Integer(string="POL Free Days", copy=False)
+    pod_free_days = fields.Integer(string="POD Free Days", copy=False)
+    lease_period = fields.Integer(string="Lease Period", copy=False)
+    prod_weight_kg = fields.Integer(string="Product Weight(Kgs)", copy=False)
+    free_hrs = fields.Integer(string="Free Hrs", copy=False, default=24)
+    age = fields.Integer( string="Age(Yrs.)", compute='_compute_age', store=False)
+    transit_time = fields.Integer(string="Transit Time(Days)", copy=False)
+    revision_no = fields.Integer(string="Revision No", copy=False)
+	
 
     #Text
     cancel_remark = fields.Text(string="Cancel Remarks", copy=False)
@@ -705,10 +902,24 @@ class FieldsDatabank(models.TransientModel):
     spd_gov_to_date = fields.Date(string="To Date", copy=False)
     amc_from_date = fields.Date(string="From Date", copy=False)
     amc_to_date = fields.Date(string="To Date", copy=False)
-    eff_from_date = fields.Date(string="Effective From Date", copy=False)
     mhc_date = fields.Date(string="Last Health Checkup Date", copy=False)
     next_mhc_date = fields.Date(string="Next Health Checkup Date", copy=False)
     lic_expire_date = fields.Date(string="License Expiry Date", copy=False)
+    last_followup_date = fields.Date(string="Last Followup Date", copy=False)
+    next_followup_date = fields.Date(string="Next Followup Date", copy=False)    
+    issue_date = fields.Date(string="Issue Date", copy=False)
+    mfg_date = fields.Date(string="Manufacturing Date", copy=False)
+    on_hire_date = fields.Date(string="On Hire Date", copy=False)
+    off_hire_date = fields.Date(string="Off Hire Date", copy=False)
+    last_inspection_date = fields.Date(string="Last Inspection Date", copy=False)
+    hyd_test_date = fields.Date(string="Hydraulic Test Date", copy=False)
+    trip_start_date = fields.Date(string="Tentative Trip Start Date", copy=False)
+    bag_req_date = fields.Date(string="Bag Required Date", copy=False)
+    ls_valid_from_date = fields.Date(string="Validity From Date", copy=False)
+    ls_valid_to_date = fields.Date(string="Validity To Date", copy=False)
+    valid_from_date = fields.Date(string="Validity From Date", copy=False)
+    valid_to_date = fields.Date(string="Validity To Date", copy=False)
+    received_date = fields.Date(string="Rate Received Date", copy=False)
 
     #Datetime
     confirm_date = fields.Datetime(string="Confirmed Date", copy=False, readonly=True)

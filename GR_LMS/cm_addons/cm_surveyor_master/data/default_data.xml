@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <record id="data_insert_01" model="cm.surveyor.master">
+		<field name="name">No Parent Company</field>
+		<field name="short_name">NPC</field>
+		<field name="entry_mode">auto</field>
+		<field name="country_id" ref="base.in"/>
+		<field name="status">active</field>
+    </record>
+</odoo>
+

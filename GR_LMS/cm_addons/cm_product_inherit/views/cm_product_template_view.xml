@@ -39,13 +39,14 @@
                                 </div>
                                 <field name="vendor_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                 <field name="flexi_type" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="layer_type" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="capacity" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="layer_type_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="capacity_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                 <field name="valve_size" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="valve_type" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="uom_po_id" string="Purchase UOM" options="{'no_create': True}" required="1" domain="[('status', '=', 'active'),('active_trans', '=', True)]" readonly = "status not in ('draft','editable')" />
+                                <field name="uom_id" string="Store UOM" options="{'no_create': True}" required="1" domain="[('status', '=', 'active'),('active_trans', '=', True)]" readonly = "status not in ('draft','editable')" />
                             </group>
                             <group>
-                                <!-- <field name="short_name" widget="upper_case" required="1" readonly = "status not in ('draft','editable')"/> -->
                                 
                                 <field name="pad_type" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="halal_certification" readonly = "status not in ('draft','editable')"/>
@@ -53,6 +54,8 @@
                                 <field name="warranty_period" required="warranty == 'applicable'" invisible="warranty!='applicable'" readonly = "status not in ('draft','editable')"/>
                                 <field name="mfg_lead_time" readonly = "status not in ('draft','editable')"/>
                                 <field name="bag_costing_method" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="Load_Params" readonly = "status not in ('draft','editable')"/>                                
+                                <field name="uom_coff" string="UOM Conversion Factor" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                         </group>
@@ -61,7 +64,6 @@
                                 <field name="moc_id" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                 <field name="weight" readonly = "status not in ('draft','editable')"/>
                                 <field name="thickness" readonly = "status not in ('draft','editable')"/>
-                                <field name="hs_id" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                             </group>
                             <group>
                                 <field name="bus_vert_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
@@ -107,7 +109,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -127,6 +129,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -151,8 +154,8 @@
                     <field name="name"/>
                     <field name="vendor_id"/>
                     <field name="flexi_type"/>
-                    <field name="layer_type"/>
-                    <field name="capacity"/>
+                    <field name="layer_type_id"/>
+                    <field name="capacity_id"/>
                     <field name="valve_type"/>
                     <field name="bag_costing_method"/>
                     <field name="bus_vert_id"/>
@@ -177,8 +180,8 @@
                     <field name="name"/>
                     <field name="vendor_id"/>
                     <field name="flexi_type"/>
-                    <field name="layer_type"/>
-                    <field name="capacity"/>
+                    <field name="layer_type_id"/>
+                    <field name="capacity_id"/>
                     <field name="valve_type"/>
                     <field name="bag_costing_method"/>
                     <field name="bus_vert_id"/>
@@ -201,11 +204,11 @@
                     <field name="bus_vert_id" string="Business Vertical" filter_domain="[('bus_vert_id','ilike',self)]"/>
                     <field name="bus_vert_sub_type_id" string="Business Vertical Sub Type" filter_domain="[('bus_vert_sub_type_id','ilike',self)]"/>
                     
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -215,14 +218,18 @@
                     <group expand="0" string="Group By">
                         <filter string="Vendor Name" name="vendor_id" domain="[]" context="{'group_by': 'vendor_id'}"/>
                         <filter string="Flexi Type" name="flexi_type" domain="[]" context="{'group_by': 'flexi_type'}"/>
-                        <filter string="Layer Type" name="layer_type" domain="[]" context="{'group_by': 'layer_type'}"/>
-                        <filter string="Capacity(L)" name="capacity" domain="[]" context="{'group_by': 'capacity'}"/>
+                        <filter string="Layer Type" name="layer_type_id" domain="[]" context="{'group_by': 'layer_type_id'}"/>
+                        <filter string="Capacity" name="capacity_id" domain="[]" context="{'group_by': 'capacity_id'}"/>
                         <filter string="Valve Type" name="valve_type" domain="[]" context="{'group_by': 'valve_type'}"/>
                         <filter string="Bag Costing Method" name="bag_costing_method" domain="[]" context="{'group_by': 'bag_costing_method'}"/>
                         <filter string="Business Vertical" name="bus_vert_id" domain="[]" context="{'group_by': 'bus_vert_id'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -235,9 +242,9 @@
             <field name="view_mode">tree,form</field>
             <field name="domain">[('custom_type','=','flexi_bag')]</field>
             <field name="search_view_id" ref="cm_product_template_search"/>
-            <field name="context">{'default_custom_type':'flexi_bag'}</field>
+            <field name="context">{'default_custom_type':'flexi_bag','default_uom_coff':'1.00'}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
             <field name="view_ids" eval="[(5, 0, 0), 
                                   (0, 0, {'view_mode': 'tree', 'view_id': ref('cm_product_template_tree_js')}),
@@ -246,7 +253,7 @@
         </record>
 
 
-        <menuitem name="Flexi Bag" id="cm_product_template_act_menu" parent="cm_master.cm_crm_master_m_parent" action="cm_product_template_win_action" sequence="74"/>
+        <menuitem name="Flexi Bag" id="cm_product_template_act_menu" parent="cm_master.cm_flexi_master_m_parent" action="cm_product_template_win_action" sequence="2"/>
 
     </data>
         

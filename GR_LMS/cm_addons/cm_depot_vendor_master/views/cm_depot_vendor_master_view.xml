@@ -6,7 +6,7 @@
             <field name="name">Form view</field>
             <field name="model">cm.depot.vendor.master</field>
             <field name="arch" type="xml">
-                <form string="Depot Vendor Master">
+                <form string="Depot Vendors">
                     
                     <header>
                         <button string="Approve"
@@ -33,36 +33,42 @@
                     </header>
                     
                     <sheet>
+                        <widget name="web_ribbon" title="Draft" bg_color="bg-info" invisible = "status != 'draft'"/>
+                        <widget name="web_ribbon" title="Editable" bg_color="bg-warning" invisible = "status != 'editable'"/>
                         <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+                        <widget name="web_ribbon" title="Inactive" bg_color="bg-danger" invisible = "status != 'inactive'"/>
                         <group>
                             <group>
                                 <label for="name" class="name-lable"/>
                                 <div>
-                                    <field name="name" class ="name-value" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+                                    <field name="name" class ="name-value" widget="auto_fill" required="1" readonly = "status not in ('draft','editable')"/>
                                 </div>
                                 <field name="entry_type" required="1" readonly = "status in ('active','inactive')"/>
                             </group>
                             <group>
-                                <field name="short_name" widget="upper_case" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="short_name" style="width: 90%%" widget="upper_case" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                         </group>
                         
                         <group string = "Company Information" >
                             <group>
-                                <field name="parent_company_id" required = "entry_type != 'new'" invisible = "entry_type == 'new'" readonly = "status not in ('draft','editable')"/>
+                                <field name="parent_company_id" required = "1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="is_registered" required = "1"  readonly = "status not in ('draft','editable')"/>
+                                <field name="msme_reg" required = "1"  readonly = "status not in ('draft','editable')"/>
+                                <field name="msme_no" required="msme_reg == 'registered'" invisible="msme_reg != 'registered'" readonly = "status not in ('draft','editable')"/>
+                                <field name="attachment_ids" widget="single_file_binary" required="msme_reg == 'not_registered'" invisible="msme_reg != 'not_registered'" readonly = "status not in ('draft','editable')"/>
                                 <field name="cin_no" string="Company Reg No(CIN)" widget="upper_case" readonly = "status not in ('draft','editable')"/>
                                 <field name="tax_reg_no" widget="upper_case" readonly = "status not in ('draft','editable')"/>
-                                <field name="gst_category" readonly = "status not in ('draft','editable')"/>
-                                <field name="gst_no" widget="upper_case" required="gst_category == 'registered'" readonly = "status not in ('draft','editable')"/>
-                                <field name="pan_no" widget="upper_case" readonly = "status not in ('draft','editable')"/>
-                                <field name="msme_no" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="gst_no" widget="upper_case" readonly = "status not in ('draft','editable')"/>
+                                <field name="pan_no" widget="upper_case" required="country_code == 'IN'" readonly = "status not in ('draft','editable')"/>
+                                
                             </group>
                             <group>
-                                <field name="iso_certified" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="iso_certified" readonly = "status not in ('draft','editable')"/>
                                 <field name="certification_no" required="iso_certified == 'yes'" invisible="iso_certified != 'yes'" readonly = "status not in ('draft','editable')"/>
                                 <field name="transport_service" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="transport_vendor_id" required="transport_service == 'yes'" invisible="transport_service != 'yes'" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="transport_vendor_id"  options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                 <field name="no_of_employee" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="contract_type" readonly = "status not in ('draft','editable')"/>
                             </group>
@@ -72,9 +78,29 @@
                             <group>
                                 <field name="contact_person" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="designation" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="mobile_no" widget="numeric" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="whatsapp_no" widget="numeric" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="phone_no" widget="numeric" readonly = "status not in ('draft','editable')"/>
+                                <label for= "mobile_no"/>
+                                <div>
+                                    <div class="o_address_format" style="display: flex; align-items: flex-start;">
+                                        <field name="mb_cc_id"  invisible="country_id == False or mb_cc_id == False" style="width: 15%%"  options="{'no_create': True,'no_open': True}" force_save="1" readonly = "1"/>
+										<field name="mobile_no" widget="numeric" style="width: 85%%" required="1" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                <field name="same_as_mobile" readonly = "status not in ('draft','editable')"/>
+                                <label for= "whatsapp_no"/>
+                                <div>
+                                    <div class="o_address_format" style="display: flex; align-items: flex-start;">
+                                        <field name="wh_cc_id"  invisible="country_id == False or wh_cc_id == False" style="width: 15%%"  options="{'no_create': True,'no_open': True}" force_save="1" readonly = "1"/>
+										<field name="whatsapp_no" widget="numeric" style="width: 85%%" required="1" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                
+                                <label for= "phone_no"/>
+                                <div>
+                                    <div class="o_address_format" style="display: flex; align-items: flex-start;">
+                                        <field name="ph_cc_id"  invisible="country_id == False or ph_cc_id == False" style="width: 15%%"  options="{'no_create': True,'no_open': True}" force_save="1" readonly = "1"/>
+										<field name="phone_no" widget="numeric" style="width: 85%%" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
                                 <field name="email" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="skype" readonly = "status not in ('draft','editable')"/>
                                 <field name="fax" widget="numeric" readonly = "status not in ('draft','editable')"/>
@@ -87,6 +113,7 @@
                                 <field name="city_id" required="country_code == 'IN'" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
                                 <field name="state_id" force_save="1" readonly = "1" options="{'no_create': True}"/>
                                 <field name="pin_code" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+                                s<field name="same_as_bill_address" readonly = "status not in ('draft','editable')"/>
                                 
                             </group>
                         </group>
@@ -112,9 +139,29 @@
                                                 <field name="company_id" invisible="1"/>
                                             </group>  
                                             <group>
-                                                <field name="mobile_no" widget="numeric" required="1"/>
-                                                <field name="whatsapp_no" widget="numeric" required="1"/>
-                                                <field name="phone_no" widget="numeric"/>
+                                                <label for= "mobile_no"/>
+												<div>
+													<div class="o_address_format" style="display: flex; align-items: flex-start;">
+														<field name="mb_cc_id"  style="width: 28%%"  options="{'no_create': True,'no_open': True}" required="1"/>
+														<field name="mobile_no" widget="numeric" style="width: 72%%" required="1"/>
+													</div>
+												</div>
+												<field name="same_as_mobile"/>
+												<label for= "whatsapp_no"/>
+												<div>
+													<div class="o_address_format" style="display: flex; align-items: flex-start;">
+														<field name="wh_cc_id"  style="width: 28%%"  options="{'no_create': True,'no_open': True}" required="1"/>
+														<field name="whatsapp_no" widget="numeric" style="width: 72%%" required="1" />
+													</div>
+												</div>
+												
+												<label for= "phone_no"/>
+												<div>
+													<div class="o_address_format" style="display: flex; align-items: flex-start;">
+														<field name="ph_cc_id"  style="width: 28%%"  options="{'no_create': True,'no_open': True}"/>
+														<field name="phone_no" widget="numeric" style="width: 72%%"/>
+													</div>
+												</div>
                                                 <field name="email" required="1"/>
                                                 <field name="skype"/>
                                             </group>
@@ -123,6 +170,48 @@
                                     </form>
                                 </field>
                             </page>
+                            <page string="Billing Address" >
+                                <field name="line_ids_d" string="Billing Address" nolabel="1" readonly = "status not in ('draft','editable')">
+                                    <tree>
+                                        <field name="eff_from_date" width="150px"/>
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="street"/>
+                                        <field name="street1"/>
+                                        <field name="city_id"/>
+                                        <field name="state_id"/>
+                                        <field name="country_id"/>
+                                    </tree>
+                                    <form>
+                                        <group>
+                                            <group>
+                                                <field name="eff_from_date" required="1"/>
+                                                <field name="street" required="1"/>
+                                                <field name="street1" />
+                                            </group>
+                                            <group>
+                                                <field name="country_id" required="1" options="{'no_create': True}"/>
+                                                <field name="country_code" required="1" invisible="1"/>
+                                                <field name="city_id" required="country_code == 'IN'" options="{'no_create': True}"/>
+                                                <field name="state_id" force_save="1" readonly = "1" options="{'no_create': True}"/> 
+                                                <field name="pin_code" widget="no_special_char" required="1"/>
+                                                <field name="gst_no" widget="upper_case" required="1"/>
+                                                <field name="company_id" invisible="1"/>
+                                            </group>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                            
+                            <page string="Depot Locations" >
+                                <field name="line_ids_c" nolabel="1" readonly = "1">
+                                    <tree editable="bottom">
+                                        <field name="header_id" column_invisible="1"/>
+                                        <field name="depot_id"  options="{'no_create': True}" readonly="1" />
+                                        <field name="status"  readonly="1"/>
+                                    </tree>
+                                </field>
+                            </page>
+
                             <page string="Bank Details" >
                                 <field name="line_ids_b" nolabel="1" readonly = "status not in ('draft','editable')">
                                     <tree>
@@ -130,8 +219,8 @@
                                         <field name="bank_name" />
                                         <field name="branch_name"/>
                                         <field name="ifsc_code" />
-                                        <field name="acc_holder_name"/>
                                         <field name="account_type"/>
+                                        <field name="acc_holder_name"/>
                                         <field name="account_no" string="Account Number"/>
                                         <field name="company_id" column_invisible="1"/>                               
                                     </tree>
@@ -161,16 +250,7 @@
                                     </form>
                                 </field>
                             </page>
-                            
-                            <page string="Depot Locations" >
-                                <field name="line_ids_c" nolabel="1" readonly = "status not in ('draft','editable')">
-                                    <tree editable="bottom">
-                                        <field name="header_id" column_invisible="1"/>
-                                        <field name="depot_id" required="1" options="{'no_create': True}" />
-                                        <field name="status" required="1"/>
-                                    </tree>
-                                </field>
-                            </page>
+
                             <page string="Attachments" >
                                 <field name="line_ids_a" nolabel="1" readonly = "status not in ('draft','editable')">
                                     <tree editable="bottom">
@@ -194,7 +274,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -214,6 +294,7 @@
                                 </group>
                             </page>
                         </notebook>
+                       <br></br> 
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -230,7 +311,7 @@
             <field name="model">cm.depot.vendor.master</field>
             <field name="priority" eval="10"/>
             <field name="arch" type="xml">
-                <tree string="Depot Vendor Master" js_class="cm_depot_vendor_master_list"
+                <tree string="Depot Vendors" js_class="cm_depot_vendor_master_list"
                         decoration-info="status == 'draft'" 
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status in ('active','draft')"
@@ -257,7 +338,7 @@
             <field name="model">cm.depot.vendor.master</field>
             <field name="priority" eval="1"/>
             <field name="arch" type="xml">
-                <tree string="Depot Vendor Master" 
+                <tree string="Depot Vendors" 
                         decoration-info="status == 'draft'" 
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status in ('active','draft')"
@@ -283,7 +364,7 @@
             <field name="name">Search View</field>
             <field name="model">cm.depot.vendor.master</field>
             <field name="arch" type="xml">
-                <search string="Depot Vendor Master">
+                <search string="Depot Vendors">
                     <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
                     <field name="short_name" string="Short Name" filter_domain="[('short_name','ilike',self)]"/>
                     <field name="contact_person" string="Contact Person" filter_domain="[('contact_person','ilike',self)]"/>
@@ -294,11 +375,11 @@
                     <field name="cin_no" string="Company Reg No(CIN)" filter_domain="[('cin_no','ilike',self)]"/>
                     <field name="tax_reg_no" string="Tax Reg No(TRC)" filter_domain="[('tax_reg_no','ilike',self)]"/>
 
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/>
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/>
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -311,15 +392,19 @@
                         <filter string="State" name="state_id" domain="[]" context="{'group_by': 'state_id'}"/>
                         <filter string="Country" name="country_id" domain="[]" context="{'group_by': 'country_id'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
         </record>
 
         <record id="cm_depot_vendor_master_win_action" model="ir.actions.act_window">
-            <field name="name">Depot Vendor Master</field>
+            <field name="name">Depot Vendors</field>
             <field name="res_model">cm.depot.vendor.master</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[]</field>
@@ -327,11 +412,11 @@
             <field name="search_view_id" ref="cm_depot_vendor_master_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 
-        <menuitem name="Depot Vendor Master" id="cm_depot_vendor_master_act_menu" parent="cm_master.cm_crm_master_m_parent" action="cm_depot_vendor_master_win_action" sequence="56"/>
+        <menuitem name="Depot Vendors" id="cm_depot_vendor_master_act_menu" parent="cm_master.cm_depot_master_m_parent" action="cm_depot_vendor_master_win_action" sequence="2"/>
 
     </data>
         

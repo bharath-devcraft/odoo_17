@@ -9,6 +9,7 @@ CM_EMPLOYEE = 'cm.employee'
 RES_USERS = 'res.users'
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 CUSTOM_STATUS = [
 		('draft', 'Draft'),
@@ -30,22 +31,25 @@ class CmEmployee(models.Model):
 	short_name = fields.Char(string="Employee Code", copy=False, help="Maximum 15 char is allowed and will accept upper case only", size=15, c_rule=True)
 	status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
 	inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-	remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+	remarks = fields.Text(string="Remarks", copy=False)
 	company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 	
 	department_id = fields.Many2one('cm.department', string="Department", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	sub_department_id = fields.Many2one('cm.department', string="Sub Department", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	mobile_no = fields.Char(string="Mobile No", size=15, copy=False)
 	whatsapp_no = fields.Char(string="WhatsApp No", size=15, copy=False)
-	mb_cc_id = fields.Many2one('cm.country.code', string="Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-	wh_cc_id = fields.Many2one('cm.country.code', string="Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-	sc_cc_id = fields.Many2one('cm.country.code', string="Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	sc_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Secondary Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	same_as_mobile = fields.Boolean(string="Same as Mobile No", default=False, help="Click to apply same mobile number to whatsapp number")
 	email = fields.Char(string="Email", copy=False, size=252)
 	secondary_mobile_no = fields.Char(string="Secondary Contact No", size=15, copy=False)
 	reporting_id = fields.Many2one(CM_EMPLOYEE, string="Reporting To", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	designation_id = fields.Many2one('cm.designation', string="Designation", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)], tracking=True)
+	country_code = fields.Char(string="Country Code", copy=False, size=252)	
+	country_id = fields.Many2one('res.country', string="Country", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
-	active = fields.Boolean(string="Visible", default=True)
+	active = fields.Boolean(string="Visible in View", default=True)
 	active_rpt = fields.Boolean(string="Visible In Reports", default=True)
 	active_trans = fields.Boolean(string="Visible In Transactions", default=True)
 	entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -64,7 +68,7 @@ class CmEmployee(models.Model):
 	def name_validation(self):
 		if self.name:
 			if is_special_char(self.env, self.name):
-				raise UserError(_("Special character is not allowed in name field"))
+				raise UserError(_("Special character is not allowed in employee name field"))
 
 			name = self.name.upper().replace(" ", "")
 			self.env.cr.execute(""" select upper(name)
@@ -77,14 +81,38 @@ class CmEmployee(models.Model):
 	def short_name_validation(self):
 		if self.short_name:
 			if is_special_char(self.env, self.short_name):
-				raise UserError(_("Special character is not allowed in short name field"))
+				raise UserError(_("Special character is not allowed in employee code field"))
 
 			short_name = self.short_name.upper().replace(" ", "")
 			self.env.cr.execute(""" select upper(short_name)
 			from cm_employee where upper(REPLACE(short_name, ' ', ''))  = '%s'
 			and id != %s and company_id = %s""" %(short_name, self.id, self.company_id.id))
 			if self.env.cr.fetchone():
-				raise UserError(_("Employee short name must be unique"))
+				raise UserError(_("Employee code must be unique"))
+
+	@api.onchange('same_as_mobile','mobile_no','mb_cc_id')
+	def onchange_same_as_mobile(self):
+		for rec in self:
+			if rec.same_as_mobile:
+				rec.whatsapp_no = rec.mobile_no
+				rec.wh_cc_id = rec.mb_cc_id
+			elif rec.mobile_no:
+				rec.whatsapp_no = False
+    
+	@api.onchange('country_id')
+	def onchange_country_id(self):
+		if self.country_id:
+			self.country_code = self.country_id.code
+			record = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1)
+			c_code = record.id if record else False
+			self.mb_cc_id = c_code
+			self.wh_cc_id = c_code
+			self.sc_cc_id = c_code
+		else:
+			self.country_code = False
+			self.mb_cc_id = False
+			self.wh_cc_id = False
+			self.sc_cc_id = False
 
 	def validations(self):
 		warning_msg = []        
@@ -155,20 +183,7 @@ class CmEmployee(models.Model):
 	 
 	@api.model
 	def retrieve_dashboard(self):
-		result = {
-			'all_draft': 0,
-			'all_active': 0,
-			'all_inactive': 0,
-			'all_editable': 0,
-			'my_draft': 0,
-			'my_active': 0,
-			'my_inactive': 0,
-			'my_editable': 0,
-			'all_today_count': 0,
-			'all_today_value': 0,
-			'my_today_count': 0,
-			'my_today_value': 0,
-		}
+		result = {}
 		
 		cm_employee = self.env[CM_EMPLOYEE]
 		result['all_draft'] = cm_employee.search_count([('status', '=', 'draft')])

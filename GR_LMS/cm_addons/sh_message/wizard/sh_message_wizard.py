@@ -41,8 +41,10 @@ class ShMessageWizard(models.TransientModel):
         transaction_model_methods = {
             'ct.key.features': {'wfa': 'entry_approve'},
             'cm.key.features': {'draft': 'entry_approve', 'editable': 'entry_approve'},
-            'cm.fiscal.year': {'draft': 'entry_approve', 'editable': 'entry_approve'},
-            'cm.supplier.customer': {'draft': 'entry_approve', 'editable': 'entry_approve'}
+            'cm.supplier.customer': {'draft': 'entry_approve', 'editable': 'entry_approve'},
+            'ct.enquiry': {'draft': 'entry_confirm'},
+            'ct.quotations': {'draft': 'entry_confirm'},
+
         }
         
         # Check if the current transaction model and stage are defined in the mapping

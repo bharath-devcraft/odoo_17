@@ -5,6 +5,7 @@ from odoo.exceptions import UserError
 
 RES_COMPANY = 'res.company'
 CM_CITY = 'cm.city'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 class CmProfileMasterDeliveryAddressLine(models.Model):
     _name = 'cm.profile.master.delivery.address.line'
@@ -16,18 +17,19 @@ class CmProfileMasterDeliveryAddressLine(models.Model):
     short_name = fields.Char(string="Short Name", copy=False, help="Maximum 4 char is allowed and will accept upper case only", size=4)
     street = fields.Char(string="Address Line 1", size=252)
     street1 = fields.Char(string="Address Line 2", size=252)
-    pin_code = fields.Char(string="Zip code", copy=False, size=10)
+    pin_code = fields.Char(string="Zip Code", copy=False, size=10)
     country_id = fields.Many2one('res.country', string="Country", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     country_code = fields.Char(string="Country Code", copy=False, size=252)
     city_id = fields.Many2one(CM_CITY, string="City", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', country_id)]")
     state_id = fields.Many2one('res.country.state', string="State", ondelete='restrict')
     phone_no = fields.Char(string="Landline No / Ext", size=12, copy=False)
+    ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     email = fields.Char(string="Email", copy=False, size=252)
     fax = fields.Char(string="Fax", copy=False, size=12)
     website = fields.Char(string="Website", copy=False, size=100)
     cin_no = fields.Char(string="CIN No", copy=False, size=21)
     gst_no = fields.Char(string="GST No", copy=False, size=15)
-    eff_from_date = fields.Date(string="Effect From Date")
+    eff_from_date = fields.Date(string="Effective From Date")
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
     
     
@@ -40,8 +42,8 @@ class CmProfileMasterDeliveryAddressLine(models.Model):
         for line in self:
             line.validate_special_char('name', line.name)
             line.validate_special_char('short name', line.short_name)
-            line.validate_special_char('street', line.street)
-            line.validate_special_char('street1', line.street1)
+            line.validate_special_char('Address Line 1', line.street)
+            line.validate_special_char('Address Line 2', line.street1)
 
     @api.constrains('phone_no')
     def phone_no_validation(self):
@@ -77,9 +79,18 @@ class CmProfileMasterDeliveryAddressLine(models.Model):
     def eff_from_date_validation(self):
         for line in self:
             if line.eff_from_date:
+                if line.eff_from_date <= fields.Date.today():
+                    raise UserError(_("The effective from date cannot be in past or current date. Please select a future date in delivery address tab"))
+                
+                latest_record = line.search([('header_id', '=', line.header_id.id)],order="eff_from_date desc", limit=1)
+                if line.eff_from_date < latest_record.eff_from_date:
+                    raise UserError(_("The effective from date cannot be earlier than the existing effective from date in delivery address tab"))
+
                 duplicate_count = line.search_count([('eff_from_date', '=', line.eff_from_date), ('header_id', '=', line.header_id.id)])
                 if duplicate_count > 1:
-                    raise UserError(_("Multiple billing addresses with the same effective from date are not allowed"))
+                    raise UserError(_("Multiple delivery addresses cannot have the same effective from date. Please choose a different effective from date in billing address tab"))
+            else:
+                raise UserError(_("The Effective From Date is mandatory for the address added in the Delivery Address tab. Please add it to proceed further"))
 
     @api.constrains('cin_no')
     def cin_no_validation(self):
@@ -103,14 +114,27 @@ class CmProfileMasterDeliveryAddressLine(models.Model):
             self.country_code = self.country_id.code
             self.city_id = False
             self.state_id = False
+            record = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1)
+            c_code = record.id if record else False
+            self.ph_cc_id = c_code
         else:
             self.country_code = False
             self.city_id = False
             self.state_id = False
+            self.ph_cc_id = False
     
     @api.onchange('city_id')
     def onchange_city_id(self):
         if self.city_id:
             self.state_id = self.city_id.state_id
+            self.pin_code = False
         else:
             self.state_id = False
+            self.pin_code = False
+
+    @api.onchange('city_id','state_id','header_id.pan_no','header_id.gst_category')
+    def onchange_gst_category(self):
+        if self.state_id and self.header_id.pan_no and self.header_id.gst_category=='registered':
+            self.gst_no = str(self.state_id.short_name) + str(self.header_id.pan_no)
+        else:
+            self.gst_no = False

@@ -39,28 +39,33 @@
                                 <field name="port_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="terminal_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="country_id" options="{'no_create': True}" force_save="1" readonly = "1"/>
+                                <field name="port_category" force_save="1" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="import_export" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="t_s_type" force_save="1" required="import_export == 't_s'" invisible="import_export != 't_s'" readonly = "status not in ('draft','editable')"/>
                             </group>
                             <group>
-                                <field name="import_export" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="container_category" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="cargo_category" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="port_pro_grp_id" options="{'no_create': True}" force_save="1" invisible="cargo_category != 'dg'" readonly = "status not in ('draft','editable')"/>
                                 <field name="pack_grp" required="cargo_category == 'dg'" readonly = "status not in ('draft','editable')" invisible="cargo_category != 'dg'" force_save="1"/>
-                                <field name="container_size" required="1" readonly = "1"/>
+                                <field name="container_size" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="carrier_terms_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="carrier_type" readonly="1" force_save="1"/>
+                                <field name="tot_amt" readonly = "1"/>
                                 <field name="status" readonly = "1" invisible="1"/>
                                 <field name="name" readonly = "1" invisible="1" force_save="1"/>
                             </group>
                         </group>
                         
                         <notebook>
-                            <page string="THC Details" >
+                            <page string="Charges Details" >
                                 <field name="line_ids" nolabel="1" readonly = "status not in ('draft','editable')">
-                                    <tree string="THC Details" editable="bottom">
+                                    <tree string="Charges Details" editable="bottom">
                                         <field name="header_id" column_invisible="1"/>
                                         <field name="charges_id" options="{'no_create': True}" required="1"/>
                                         <field name="mandatory" required="1"/>
                                         <field name="currency_id" options="{'no_create': True}" required="1"/>
-                                        <field name="tax_ids" widget="many2many_tags" options="{'no_create': True}" force_save="1"/>
-                                        <field name="costing_type" required="1" width="200px"/>
+                                        <field name="costing_type" force_save="1" required="1" width="200px"/>
                                         <field name="actual_cost" required="1" width="200px"/>
                                         <field name="gr_cost" required="1" width="200px"/>
                                         <field name="company_id" column_invisible="1"/>                           
@@ -90,7 +95,8 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="price_owner" readonly = "1"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -111,9 +117,9 @@
                             </page>
                         </notebook>
                         <notebook>
-                            <page string="Demurrage Details" >
-                                <field name="line_ids_a" nolabel="1" readonly = "status not in ('draft','editable')">
-                                    <tree string="Demurrage Details" editable="bottom">
+                            <page string="Demurrage(Port Storage / Ground Rent) Details" >
+                                <field name="line_ids_a" nolabel="1" readonly = "status not in ('draft','editable')" force_save="1">
+                                    <tree string="Demurrage(Port Storage / Ground Rent) Details" editable="bottom">
                                         <field name="header_id" column_invisible="1"/>
                                         <field name="minimum_days" required="1" width="200px"/>
                                         <field name="maximum_days" required="1" width="200px"/>
@@ -125,6 +131,7 @@
                                 </field>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -152,6 +159,31 @@
                     <field name="import_export"/>
                     <field name="container_category"/>
                     <field name="cargo_category"/>
+                    <field name="tot_amt"/>
+                    <field name="status" widget="badge" decoration-info = "status == 'draft'"
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status == 'active'"
+                        decoration-primary = "status == 'inactive'"/>
+                </tree>
+            </field>
+        </record>
+        <record id="cm_op_port_tariff_tree_js" model="ir.ui.view">
+            <field name="name">Dashboard View</field>
+            <field name="model">cm.port.tariff</field>
+            <field name="priority" eval="10"/>
+            <field name="arch" type="xml">
+                <tree string="Port Tariff" js_class="cm_op_port_tariff_list"
+                        decoration-info="status == 'draft'" 
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status in ('active','draft')"
+                        decoration-primary = "status == 'inactive'">
+                    <field name="port_id"/>
+                    <field name="terminal_id"/>
+                    <field name="country_id"/>
+                    <field name="import_export"/>
+                    <field name="container_category"/>
+                    <field name="cargo_category"/>
+                    <field name="tot_amt"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -209,11 +241,15 @@
                         <filter string="Terminal Name" name="terminal_id" domain="[]" context="{'group_by': 'terminal_id'}"/>
                         <filter string="Country" name="country_id" domain="[]" context="{'group_by': 'country_id'}"/>
                         <filter string="Import / Export" name="import_export" domain="[]" context="{'group_by': 'import_export'}"/>
-                        <filter string="Container Category" name="container_category" domain="[]" context="{'group_by': 'container_category'}"/>
-                        <filter string="Cargo Category" name="cargo_category" domain="[]" context="{'group_by': 'cargo_category'}"/>
+                        <filter string="Empty / Laden" name="container_category" domain="[]" context="{'group_by': 'container_category'}"/>
+                        <filter string="Product Type" name="cargo_category" domain="[]" context="{'group_by': 'cargo_category'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -224,17 +260,39 @@
             <field name="name">Port Tariff</field>
             <field name="res_model">cm.port.tariff</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[]</field>
+            <field name="domain">[('price_owner','=','agent')]</field>
             <field name="view_id" ref="cm_port_tariff_tree_js"/>
             <field name="search_view_id" ref="cm_port_tariff_search"/>
-            <field name="context">{}</field>
+            <field name="context">{'default_price_owner':'agent'}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                                  (0, 0, {'view_mode': 'tree', 'view_id': ref('cm_port_tariff_tree_js')}),
+                                  (0, 0, {'view_mode': 'form', 'view_id': ref('cm_port_tariff_form')})
+                                 ]"/>
+        </record>
+        <record id="cm_op_port_tariff_win_action" model="ir.actions.act_window">
+            <field name="name">Port Tariff</field>
+            <field name="res_model">cm.port.tariff</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('price_owner','=','operator')]</field>
+            <field name="view_id" ref="cm_op_port_tariff_tree_js"/>
+            <field name="search_view_id" ref="cm_port_tariff_search"/>
+            <field name="context">{'default_price_owner':'operator'}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
+            </field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                                  (0, 0, {'view_mode': 'tree', 'view_id': ref('cm_op_port_tariff_tree_js')}),
+                                  (0, 0, {'view_mode': 'form', 'view_id': ref('cm_port_tariff_form')})
+                                 ]"/>
         </record>
 
  
         <menuitem name="Port Tariff" id="cm_port_tariff_act_menu" parent="cm_master.cm_tariff_master_m_parent" action="cm_port_tariff_win_action" sequence="2"/>
+        
+        <menuitem name="Port Tariff" id="cm_op_port_tariff_act_menu" parent="cm_master.cm_op_tariff_master_m_parent" action="cm_op_port_tariff_win_action" sequence="2"/>
 
     </data>
         

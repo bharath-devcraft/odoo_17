@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="ct_sales_return.CtSalesReturnListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CtSalesReturnDashBoard />
+        </xpath>
+    </t>
+</templates>

@@ -11,3 +11,5 @@ access_cm_carrier_attachment_line_user,cm.carrier.attachment.line.user,model_cm_
 access_cm_carrier_checklist_line_user,cm.carrier.checklist.line.user,model_cm_carrier_checklist_line,custom_properties.group_master_user,1,0,0,0
 access_cm_carrier_bank_details_line_user,cm.carrier.bank.details.line.user,model_cm_carrier_bank_details_line,custom_properties.group_master_user,1,0,0,0
 access_cm_carrier_batch_inactive_user,cm.carrier.batch.inactive.user,model_cm_carrier_batch_inactive,custom_properties.group_master_user,1,0,0,0
+access_cm_carrier_payment_centre_details_line_user,cm.carrier.payment.centre.details.line.user,model_cm_carrier_payment_centre_details_line,custom_properties.group_master_user,1,0,0,0
+access_cm_carrier_payment_centre_details_line_admin,cm.carrier.payment.centre.details.line.admin,model_cm_carrier_payment_centre_details_line,custom_properties.group_master_admin,1,1,1,1

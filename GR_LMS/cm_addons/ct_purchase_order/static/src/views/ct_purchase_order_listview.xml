@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="ct_purchase_order.CtPurchaseOrderListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CtPurchaseOrderDashBoard />
+        </xpath>
+    </t>
+</templates>

@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_eway_bill,ct.eway.bill,model_ct_eway_bill,custom_properties.group_erp_admin,1,1,1,1
+access_ct_eway_bill_attachment_line,ct.eway.bill.attachment.line,model_ct_eway_bill_attachment_line,custom_properties.group_erp_admin,1,1,1,1

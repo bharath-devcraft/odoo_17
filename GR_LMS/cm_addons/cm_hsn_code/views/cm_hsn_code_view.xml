@@ -5,7 +5,7 @@
             <field name="name">Form View</field>
             <field name="model">cm.hsn.code</field>
             <field name="arch" type="xml">
-                <form string=" HS/SAC Code">
+                <form string="HS/SAC Code">
                     <header>
                         <button string="Approve" 
                             class="btn btn-success" 
@@ -34,7 +34,7 @@
                             <group>
                                 <label for="name" class="name-lable"/>
                                 <div>
-                                    <field name="name" string=" HS/SAC Code" class="name-value" widget="numeric" required="1" readonly = "status not in ('draft','editable')"/>
+                                    <field name="name" string="HS/SAC Code" class="name-value" widget="numeric" required="1" readonly = "status not in ('draft','editable')"/>
                                 </div> 
                                 <field name="commodity_desc" required="1" readonly = "status not in ('draft','editable')"/>
                             </group>
@@ -70,7 +70,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -90,6 +90,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -106,12 +107,12 @@
             <field name="model">cm.hsn.code</field>
             <field name="priority" eval="10"/>
             <field name="arch" type="xml">
-                <tree string=" HS/SAC Code" js_class="cm_hsn_code_list"
+                <tree string="HS/SAC Code" js_class="cm_hsn_code_list"
                         decoration-info="status == 'draft'" 
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
-                    <field name="name" string=" HS/SAC Code"/>
+                    <field name="name" string="HS/SAC Code"/>
                     <field name="cgst_id"/>
                     <field name="sgst_id"/>
                     <field name="igst_id"/>
@@ -130,12 +131,12 @@
             <field name="model">cm.hsn.code</field>
             <field name="priority" eval="1"/>
             <field name="arch" type="xml">
-                <tree string=" HS/SAC Code"
+                <tree string="HS/SAC Code"
                         decoration-info="status == 'draft'" 
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
-                    <field name="name" string=" HS/SAC Code"/>
+                    <field name="name" string="HS/SAC Code"/>
                     <field name="cgst_id"/>
                     <field name="sgst_id"/>
                     <field name="igst_id"/>
@@ -154,8 +155,8 @@
             <field name="name">Search View</field>
             <field name="model">cm.hsn.code</field>
             <field name="arch" type="xml">
-                <search string=" HS/SAC Code">
-                    <field name="name" string=" HS/SAC Code" filter_domain="[('name','ilike',self)]"/>
+                <search string="HS/SAC Code">
+                    <field name="name" string="HS/SAC Code" filter_domain="[('name','ilike',self)]"/>
                     <field name="commodity_desc" filter_domain="[('commodity_desc','ilike',self)]"/>
                     
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
@@ -174,8 +175,12 @@
                         <filter string="SGST" name="sgst_id" domain="[]" context="{'group_by': 'sgst_id'}"/>
                         <filter string="IGST" name="igst_id" domain="[]" context="{'group_by': 'igst_id'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -183,7 +188,7 @@
 
 
         <record id="cm_hsn_code_win_action" model="ir.actions.act_window">
-            <field name="name"> HS/SAC Code</field>
+            <field name="name">HS/SAC Code</field>
             <field name="res_model">cm.hsn.code</field>
             <field name="view_mode">tree,form</field>
             <field name="domain">[]</field>
@@ -191,11 +196,11 @@
             <field name="search_view_id" ref="cm_hsn_code_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 
-        <menuitem name=" HS/SAC Code" id="cm_hsn_code_act_menu" parent="cm_master.cm_crm_master_m_parent" action="cm_hsn_code_win_action" sequence="95"/>
+        <menuitem name="HS/SAC Code" id="cm_hsn_code_act_menu" parent="cm_master.cm_crm_master_m_parent" action="cm_hsn_code_win_action" sequence="95"/>
 
     </data>
         

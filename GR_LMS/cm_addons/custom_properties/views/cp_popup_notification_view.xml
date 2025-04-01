@@ -46,7 +46,7 @@
         <field name="context">{}</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
-            No popup notification record found. Let's create one!
+            No popup notification record found. Let's create one !
           </p><p>
             This is for popup notification.
           </p>

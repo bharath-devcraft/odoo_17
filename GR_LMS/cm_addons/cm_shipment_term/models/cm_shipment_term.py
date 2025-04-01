@@ -20,6 +20,8 @@ CUSTOM_STATUS = [
 ENTRY_MODE =  [('manual','Manual'),
                ('auto', 'Auto')]
 
+YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
+
 class CmShipmentTerm(models.Model):
     _name = 'cm.shipment.term'
     _description = 'Shipment Term'
@@ -35,10 +37,13 @@ class CmShipmentTerm(models.Model):
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
     description = fields.Char(string="Description", size=252)
 
-    active = fields.Boolean(string="Visible", default=True)
+    house_bl_req = fields.Selection(selection=YES_OR_NO, string="House BL Required", copy=False)
+
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
+    sys_ref = fields.Char(string="System Ref", copy=False, size=252)
     crt_date = fields.Datetime(string="Creation Date", copy=False, default=fields.Datetime.now, readonly=True)
     user_id = fields.Many2one(RES_USERS, string="Created By", copy=False, default=lambda self: self.env.user.id, ondelete='restrict', readonly=True)
     ap_rej_date = fields.Datetime(string="Approved / Rejected Date", copy=False, readonly=True)
@@ -145,20 +150,7 @@ class CmShipmentTerm(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_shipment_term = self.env[CM_SHIPMENT_TERM]
         result['all_draft'] = cm_shipment_term.search_count([('status', '=', 'draft')])

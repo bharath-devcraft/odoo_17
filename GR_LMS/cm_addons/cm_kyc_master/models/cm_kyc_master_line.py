@@ -12,7 +12,7 @@ CUSTOM_STATUS = [
 
 YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 
-VALIDITY_OPTION = [('perpetual','Perpetual'), ('limited','Limited')]
+VALIDITY_OPTION = [('perpetual','Perpetual/Life Time'), ('limited','Limited')]
 class CmKycMasterLine(models.Model):
     _name = 'cm.kyc.master.line'
     _description = 'Document Details'

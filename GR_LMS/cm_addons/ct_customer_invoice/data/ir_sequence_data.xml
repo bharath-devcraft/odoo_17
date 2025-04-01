@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="seq_ct_customer_invoice" model="ir.sequence">
+        <field name="name">CT Customer Invoice</field>
+        <field name="code">ct.customer.invoice</field>
+        <field name="prefix">CI/%(year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+</odoo>

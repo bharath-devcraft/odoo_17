@@ -23,7 +23,7 @@
     </record>
 
     <record id="action_cm_rejection_remark_batch_inactive" model="ir.actions.act_window">
-        <field name="name">Batch Inactive</field>
+        <field name="name"> ≣ Batch Inactive</field>
         <field name="res_model">cm.rejection.remark.batch.inactive</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="cm_rejection_remark_batch_inactive_form"/>

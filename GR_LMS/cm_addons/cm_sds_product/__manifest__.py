@@ -8,7 +8,7 @@
     'description': """Scope of this module to fulfill the necessary features related to common SDS product form.""",
 
     'author': "Praveenkumar M",
-    'website': "https://www.goodrich.co",
+    'website': "https://catalystsolutions.sg",
     'category': 'Custom Modules/custom_modules',
     'application' : True,
     'version': '0.1',
@@ -17,6 +17,7 @@
         'security/ir.model.access.csv',
         'data/audit_rule_data.xml',
         'data/security_rule.xml',
+        'data/cron_auto_expire.xml',
         'views/cm_sds_product_view.xml',
         'wizard/cm_sds_product_batch_inactive_view.xml',
     ],

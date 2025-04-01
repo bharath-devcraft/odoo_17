@@ -34,8 +34,18 @@
 			            </li>
 			    	</t>
 				</ul>
-				<div style="padding:5px;width:flex;background-color:#EEEEEE;position: -webkit-sticky; position: sticky;bottom: 0px;">
-					<i t-on-click="closeTab" id="arrow_icon" class="fa fa-chevron-left rounded mx-auto" style="font-size:18px;color: #000000;left:40px;"/>
+				<div id="slide" style="padding:5px;width:flex;background-color:#EEEEEE;position: -webkit-sticky; position: sticky;bottom: 0px;display: flex;align-items: center;">
+					<i 
+						id="arrow_icon" 
+						class="fa fa-chevron-left rounded" 
+						style="font-size:18px;color:#000000;cursor:pointer;margin-right:15px;"
+						t-on-click="closeTab">
+					</i>
+					<span 
+						id="powered_by_msg" 
+						style="font-size:12px;color:blue;display:none;text-align:right;">
+						Powered By Catalyst
+					</span>
 				</div>
 			</div>
 		</div>

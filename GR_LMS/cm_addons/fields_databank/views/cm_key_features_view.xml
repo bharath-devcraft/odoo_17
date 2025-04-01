@@ -130,7 +130,7 @@
             <field name="search_view_id" ref="cm_key_features_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No master record found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No master record found. Let's create one !</p>
             </field>
         </record>
 

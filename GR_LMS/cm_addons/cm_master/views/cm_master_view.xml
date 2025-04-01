@@ -29,12 +29,15 @@
                     </header>
                     
                     <sheet>                    
+                        <widget name="web_ribbon" title="Draft" bg_color="bg-info" invisible = "status != 'draft'"/>
+                        <widget name="web_ribbon" title="Editable" bg_color="bg-warning" invisible = "status != 'editable'"/>
                         <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+                        <widget name="web_ribbon" title="Inactive" bg_color="bg-danger" invisible = "status != 'inactive'"/>
                         <group>
                             <group >
                                 <label for="name" class="name-lable"/>
                                 <div>
-                                    <field name="name" class="name-value" widget="auto_fill_1" required="1" readonly = "status not in ('draft','editable')"/>
+                                    <field name="name" class="name-value" widget="auto_fill" required="1" readonly = "status not in ('draft','editable')"/>
                                 </div> 
                             </group>
                             <group>
@@ -42,8 +45,7 @@
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                         </group>
-                        <br>
-                        </br>
+                        <br></br>
                         
                         <notebook>
                             <page string="Details" >
@@ -80,7 +82,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -100,6 +102,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -121,8 +124,8 @@
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
-                    <field name="name"/>
                     <field name="short_name"/>
+                    <field name="name"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -143,8 +146,8 @@
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
-                    <field name="name"/>
                     <field name="short_name"/>
+                    <field name="name"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -199,23 +202,35 @@
             <field name="search_view_id" ref="cm_master_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 
         <menuitem name="Masters" web_icon="cm_master,static/description/icon.png" id="cm_master_m_root" sequence="2"/>
         
         <menuitem name="CRM Masters" id="cm_crm_master_m_parent" parent="cm_master_m_root" sequence="2"/>
-        
-        <menuitem name="Tariff Masters" id="cm_tariff_master_m_parent" parent="cm_master_m_root" sequence="4"/>
 
-        <menuitem name="Store Masters" id="cm_store_master_m_parent" parent="cm_master_m_root" sequence="6"/>
-        
-        <menuitem name="Company Tree" id="cm_company_tree_m_parent" parent="cm_master_m_root" sequence="7"/>
+        <menuitem name="Flexi Masters" id="cm_flexi_master_m_parent" parent="cm_master_m_root" sequence="4"/>
 
-        <menuitem name="General Masters" id="cm_master_m_parent" parent="cm_master_m_root" sequence="8"/>
+        <menuitem name="Transport Masters" id="cm_transport_master_m_parent" parent="cm_master_m_root" sequence="6"/>
+
+        <menuitem name="Tank Masters" id="cm_tank_master_m_parent" parent="cm_master_m_root" sequence="7"/>
+
+        <menuitem name="Depot Masters" id="cm_depot_master_m_parent" parent="cm_master_m_root" sequence="8"/>
         
-        <menuitem name="Template" id="cm_master_tem_parent" parent="cm_master_m_root" sequence="10"/>
+        <menuitem name="Operator Tariff" id="cm_op_tariff_master_m_parent" parent="cm_master_m_root" sequence="9"/>
+        
+        <menuitem name="Tariff Masters" id="cm_tariff_master_m_parent" parent="cm_master_m_root" sequence="10"/>
+
+        <menuitem name="Store Masters" id="cm_store_master_m_parent" parent="cm_master_m_root" sequence="12"/>
+        
+        <menuitem name="Company Tree" id="cm_company_tree_m_parent" parent="cm_master_m_root" sequence="14"/>
+
+        <menuitem name="General Masters" id="cm_master_m_parent" parent="cm_master_m_root" sequence="16"/>
+
+        <menuitem name="Inventory Masters" id="cm_inventory_master_m_parent" parent="cm_master_m_root" sequence="17"/>
+        
+        <menuitem name="Template" id="cm_master_tem_parent" parent="cm_master_m_root" sequence="18"/>
 
         <menuitem name="Master" id="cm_master_act_menu" parent="cm_master_tem_parent" action="cm_master_win_action" sequence="2"/>
 

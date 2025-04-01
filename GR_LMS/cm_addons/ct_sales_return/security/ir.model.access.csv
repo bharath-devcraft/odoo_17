@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_sales_return,ct.sales.return,model_ct_sales_return,custom_properties.group_erp_admin,1,1,1,1
+access_ct_sales_return_attachment_line,ct.sales.return.attachment.line,model_ct_sales_return_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_sales_return_acc_line,ct.sales.return.acc.line,model_ct_sales_return_acc_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_sales_return_acc_details_line,ct.sales.return.acc.details.line,model_ct_sales_return_acc_details_line,custom_properties.group_erp_admin,1,1,1,1

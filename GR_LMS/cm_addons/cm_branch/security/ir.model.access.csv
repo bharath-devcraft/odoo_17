@@ -1,0 +1,9 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_cm_branch_admin","cm.branch.admin","model_cm_branch","custom_properties.group_master_admin",1,1,1,1
+"access_cm_branch_line_admin","cm.branch.line.admin","model_cm_branch_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_branch_attachment_line_admin","cm.branch.attachment.line.admin","model_cm_branch_attachment_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_branch_batch_inactive_admin","cm.branch.batch.inactive.admin","model_cm_branch_batch_inactive","custom_properties.group_master_admin",1,1,1,1
+"access_cm_branch_user","cm.branch.user","model_cm_branch","custom_properties.group_master_user",1,0,0,0
+"access_cm_branch_line_user","cm.branch.line.user","model_cm_branch_line","custom_properties.group_master_admin",1,0,0,0
+"access_cm_branch_attachment_line_user","cm.branch.attachment.line.user","model_cm_branch_attachment_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_branch_batch_inactive_user","cm.branch.batch.inactive.user","model_cm_branch_batch_inactive","custom_properties.group_master_user",1,0,0,0

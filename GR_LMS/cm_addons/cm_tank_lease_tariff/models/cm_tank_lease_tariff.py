@@ -28,20 +28,23 @@ class CmTankLeaseTariff(models.Model):
 	_order = 'name asc'
 
 
-	name = fields.Char(string="Name", index=True, copy=False)
+	name = fields.Char(string="Name", index=True)
 	status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
 	inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-	remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+	remarks = fields.Text(string="Remarks")
 	company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 	
-	business_location = fields.Selection(selection=BUSINESS_LOCATION, string="Business Location", copy=False, tracking=True, readonly=True)
+	business_location = fields.Selection(selection=BUSINESS_LOCATION, string="Business Location", tracking=True, readonly=True)
 	eff_from_date = fields.Date(string="Effective From Date")
 	operating_cost = fields.Float(string="Operating Cost(Per Day)")
-	currency_id = fields.Many2one('res.currency', string="Currency", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-	re_use_days = fields.Integer(string="Cleaning / Repair / Booking Days", copy=False)
-	avg_trans_days = fields.Integer(string="Avg Transhipment Days", copy=False)
+	currency_id = fields.Many2one('res.currency', string="Currency", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	re_use_days = fields.Integer(string="Cleaning / Repair / Booking Days")
+	avg_trans_days = fields.Integer(string="Avg Transhipment Days")
+	markup_val = fields.Float(string="Default Markup(%)")
+	state_id = fields.Many2one('res.country.state', string="State", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	tot_amt = fields.Float(string="Total Amount", store=True, compute='_compute_all_line')
 
-	active = fields.Boolean(string="Visible", default=True)
+	active = fields.Boolean(string="Visible in View", default=True)
 	active_rpt = fields.Boolean(string="Visible In Reports", default=True)
 	active_trans = fields.Boolean(string="Visible In Transactions", default=True)
 	entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -56,6 +59,11 @@ class CmTankLeaseTariff(models.Model):
 
 	line_ids = fields.One2many('cm.tank.lease.tariff.line', 'header_id', string="Details", copy=True, c_rule=True)
 	line_ids_a = fields.One2many('cm.tank.lease.tariff.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
+	
+	@api.depends('line_ids')
+	def _compute_all_line(self):
+		for rec in self:
+			rec.tot_amt =  sum(rec.line_ids.mapped('unit_value'))
 	
 	@api.onchange('business_location')
 	def onchange_business_location(self):
@@ -137,34 +145,42 @@ class CmTankLeaseTariff(models.Model):
 	 
 	@api.model
 	def retrieve_dashboard(self):
-		result = {
-			'all_draft': 0,
-			'all_active': 0,
-			'all_inactive': 0,
-			'all_editable': 0,
-			'my_draft': 0,
-			'my_active': 0,
-			'my_inactive': 0,
-			'my_editable': 0,
-			'all_today_count': 0,
-			'all_today_value': 0,
-			'my_today_count': 0,
-			'my_today_value': 0,
-		}
+		result = {}
 		
 		cm_tank_lease_tariff = self.env['cm.tank.lease.tariff']
-		result['all_draft'] = cm_tank_lease_tariff.search_count([('status', '=', 'draft')])
-		result['all_active'] = cm_tank_lease_tariff.search_count([('status', '=', 'active')])
-		result['all_inactive'] = cm_tank_lease_tariff.search_count([('status', '=', 'inactive')])
-		result['all_editable'] = cm_tank_lease_tariff.search_count([('status', '=', 'editable')])
-		result['my_draft'] = cm_tank_lease_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid)])
-		result['my_active'] = cm_tank_lease_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid)])
-		result['my_inactive'] = cm_tank_lease_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid)])
-		result['my_editable'] = cm_tank_lease_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid)])
+		result['all_draft'] = cm_tank_lease_tariff.search_count([('status', '=', 'draft'), ('business_location', '=', 'pan_india')])
+		result['all_active'] = cm_tank_lease_tariff.search_count([('status', '=', 'active'), ('business_location', '=', 'pan_india')])
+		result['all_inactive'] = cm_tank_lease_tariff.search_count([('status', '=', 'inactive'), ('business_location', '=', 'pan_india')])
+		result['all_editable'] = cm_tank_lease_tariff.search_count([('status', '=', 'editable'), ('business_location', '=', 'pan_india')])
+		result['my_draft'] = cm_tank_lease_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid), ('business_location', '=', 'pan_india')])
+		result['my_active'] = cm_tank_lease_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid), ('business_location', '=', 'pan_india')])
+		result['my_inactive'] = cm_tank_lease_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid), ('business_location', '=', 'pan_india')])
+		result['my_editable'] = cm_tank_lease_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid), ('business_location', '=', 'pan_india')])
 			  
-		result['all_today_count'] = cm_tank_lease_tariff.search_count([('crt_date', '>=', fields.Date.today())])
-		result['all_month_count'] = cm_tank_lease_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1))])
-		result['my_today_count'] = cm_tank_lease_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today())])
-		result['my_month_count'] = cm_tank_lease_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1))])
+		result['all_today_count'] = cm_tank_lease_tariff.search_count([('crt_date', '>=', fields.Date.today()), ('business_location', '=', 'pan_india')])
+		result['all_month_count'] = cm_tank_lease_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1)), ('business_location', '=', 'pan_india')])
+		result['my_today_count'] = cm_tank_lease_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today()), ('business_location', '=', 'pan_india')])
+		result['my_month_count'] = cm_tank_lease_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1)), ('business_location', '=', 'pan_india')])
+
+		return result
+	
+	@api.model
+	def retrieve_op_dashboard(self):
+		result = {}
+		
+		cm_tank_lease_tariff = self.env['cm.tank.lease.tariff']
+		result['all_draft'] = cm_tank_lease_tariff.search_count([('status', '=', 'draft'), ('business_location', '=', 'exim')])
+		result['all_active'] = cm_tank_lease_tariff.search_count([('status', '=', 'active'), ('business_location', '=', 'exim')])
+		result['all_inactive'] = cm_tank_lease_tariff.search_count([('status', '=', 'inactive'), ('business_location', '=', 'exim')])
+		result['all_editable'] = cm_tank_lease_tariff.search_count([('status', '=', 'editable'), ('business_location', '=', 'exim')])
+		result['my_draft'] = cm_tank_lease_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid), ('business_location', '=', 'exim')])
+		result['my_active'] = cm_tank_lease_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid), ('business_location', '=', 'exim')])
+		result['my_inactive'] = cm_tank_lease_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid), ('business_location', '=', 'exim')])
+		result['my_editable'] = cm_tank_lease_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid), ('business_location', '=', 'exim')])
+			  
+		result['all_today_count'] = cm_tank_lease_tariff.search_count([('crt_date', '>=', fields.Date.today()), ('business_location', '=', 'exim')])
+		result['all_month_count'] = cm_tank_lease_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1)), ('business_location', '=', 'exim')])
+		result['my_today_count'] = cm_tank_lease_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today()), ('business_location', '=', 'exim')])
+		result['my_month_count'] = cm_tank_lease_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1)), ('business_location', '=', 'exim')])
 
 		return result

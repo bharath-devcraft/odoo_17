@@ -8,11 +8,11 @@
     'description': """Scope of this module to fulfill the necessary features related to common product form.""",
 
     'author': "Praveenkumar M",
-    'website': "https://www.goodrich.co",
+    'website': "https://catalystsolutions.sg",
     'category': 'Custom Modules/custom_modules',
     'application' : True,
     'version': '0.1',
-    'depends': ['base','mail'],
+    'depends': ['base','mail','cm_tank_tcode'],
     'data': [
         'security/ir.model.access.csv',
         'data/audit_rule_data.xml',

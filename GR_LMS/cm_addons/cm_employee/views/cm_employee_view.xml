@@ -29,43 +29,48 @@
                     </header>
                     
                     <sheet>                    
+                        <widget name="web_ribbon" title="Draft" bg_color="bg-info" invisible = "status != 'draft'"/>
+                        <widget name="web_ribbon" title="Editable" bg_color="bg-warning" invisible = "status != 'editable'"/>
                         <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+                        <widget name="web_ribbon" title="Inactive" bg_color="bg-danger" invisible = "status != 'inactive'"/>
                         <group>
                             <group >
                                 <label for="name" class="name-lable"/>
                                 <div>
-                                    <field name="name" class="name-value" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+                                    <field name="name" class="name-value" widget="auto_fill" required="1" readonly = "status not in ('draft','editable')"/>
                                 </div>
                                 <field name="company_id" required="1" readonly = "status not in ('draft','editable')"/> 
                                 <field name="department_id" required="1" readonly = "status not in ('draft','editable')"/> 
                                 <field name="sub_department_id" required="1" readonly = "status not in ('draft','editable')"/> 
-                                <label for= "mobile_no"/>
-                                <div>
-                                    <div class="o_address_format">
-                                        <field name="mb_cc_id"  style="width: 20%%"  options="{'no_create': True,'no_open': True}" required="1"/>
-										<field name="mobile_no" widget="numeric" style="width: 40%%" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                </div>
-                                <label for= "whatsapp_no"/>
-                                <div>
-                                    <div class="o_address_format">
-                                        <field name="wh_cc_id"  style="width: 20%%"  options="{'no_create': True,'no_open': True}" required="1"/>
-										<field name="whatsapp_no" widget="numeric" style="width: 40%%" required="1" readonly = "status not in ('draft','editable')"/>
-                                    </div>
-                                </div>
+                                <field name="designation_id" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="reporting_id" readonly = "status not in ('draft','editable')"/>
+                                <field name="email" widget="valid_email" required="1" readonly = "status not in ('draft','editable')"/>
                             </group>
                             <group>
-								<field name="short_name" widget="upper_case" required="1" readonly = "status not in ('draft','editable')"/>								 
-								<field name="email" required="1" readonly = "status not in ('draft','editable')"/> 
-								<label for= "secondary_mobile_no"/>
+								<field name="short_name" style="width: 90%%" widget="upper_case" required="1" readonly = "status not in ('draft','editable')"/>								 
+                                <field name="country_id" style="width: 96%%" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <label for= "mobile_no"/>
                                 <div>
-                                    <div class="o_address_format">
-                                        <field name="sc_cc_id"  style="width: 20%%"  options="{'no_create': True,'no_open': True}" required="1"/>
-										<field name="secondary_mobile_no" widget="numeric" style="width: 40%%" required="1" readonly = "status not in ('draft','editable')"/>
+                                    <div class="o_address_format" style="display: flex; align-items: flex-start;">
+                                        <field name="mb_cc_id" invisible="country_id == False or mb_cc_id == False" style="width: 15%%"  options="{'no_create': True,'no_open': True}" force_save="1" readonly = "1"/>
+										<field name="mobile_no" force_save="1" widget="numeric" style="width: 85%%" required="1" readonly = "status not in ('draft','editable')"/>
                                     </div>
-                                </div> 
-                                <field name="reporting_id" readonly = "status not in ('draft','editable')"/>
-                                <field name="designation_id" required="1" readonly = "status not in ('draft','editable')"/>
+                                </div>
+                                <field name="same_as_mobile" readonly = "status not in ('draft','editable')"/>
+                                <label for= "whatsapp_no"/>
+                                <div>
+                                    <div class="o_address_format" style="display: flex; align-items: flex-start;">
+                                        <field name="wh_cc_id" invisible="country_id == False or wh_cc_id == False" style="width: 15%%"  options="{'no_create': True,'no_open': True}" force_save="1" readonly = "1"/>
+										<field name="whatsapp_no" force_save="1" widget="numeric" style="width: 85%%" required="1" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                <label for= "secondary_mobile_no"/>
+                                <div>
+                                    <div class="o_address_format" style="display: flex; align-items: flex-start;">
+                                        <field name="sc_cc_id" invisible="country_id == False or sc_cc_id == False" style="width: 15%%"  options="{'no_create': True,'no_open': True}" force_save="1" readonly = "1"/>
+										<field name="secondary_mobile_no" force_save="1" widget="numeric" style="width: 85%%" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>								
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                         </group>
@@ -93,7 +98,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -112,7 +117,8 @@
                                     </group>
                                 </group>
                             </page>
-                        </notebook>
+                        </notebook>                        
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -182,13 +188,13 @@
                 <search string="Employee">
                     <field name="name" string="Employee Name" filter_domain="[('name','ilike',self)]"/>
                     <field name="short_name" string="Employee Code" filter_domain="[('short_name','ilike',self)]"/>
-                    <field name="reporting_id" string="Reporting To" filter_domain="[('reporting_id','ilike',self)]"/>
-                    
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
+                    <field name="reporting_id" string="Reporting To" filter_domain="[('reporting_id','ilike',self)]"/>                    
+                     
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/>
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -200,8 +206,12 @@
                         <filter string="Department" name="department_id" domain="[]" context="{'group_by': 'department_id'}"/>
                         <filter string="Sub Department" name="sub_department_id" domain="[]" context="{'group_by': 'sub_department_id'}"/>
                         <filter string="Reporting To" name="reporting_id" domain="[]" context="{'group_by': 'reporting_id'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -217,7 +227,7 @@
             <field name="search_view_id" ref="cm_employee_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 

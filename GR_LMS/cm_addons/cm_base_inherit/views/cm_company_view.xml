@@ -20,7 +20,7 @@
                     <field name="logo" widget='image' class="oe_avatar" options='{"zoom": true, "preview_image": "logo"}' />
                    <group>    
                     <group>						
-						<field name="name" String ="Company Name" placeholder="Company Name" readonly = "status not in ('draft','editable')"/>                        
+						<field name="name" String ="Company Name" class ="name-value" widget="no_special_char" placeholder="Company Name" readonly = "status not in ('draft','editable')"/>                        
 						<field name="entry_type" required="1" readonly = "status not in ('draft','editable')"/> 
                    </group>
 					<group>    
@@ -29,7 +29,7 @@
 					</group>                    
 					<group string = "Company Information">
                             <group>
-                                <field name="parent_company_id" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>								
+                                <field name="parent_company_id" required = "entry_type in ('name_change')" invisible = "entry_type in ('new')" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>								
 								<field name="is_registered_company" required="1" readonly = "status not in ('draft','editable')"/>
 								<field name="cin_no" readonly = "status not in ('draft','editable')"/>	
 								<field name="tax_reg_no" readonly = "status not in ('draft','editable')"/>	
@@ -42,7 +42,7 @@
                                 <field name="iec_no" readonly = "status not in ('draft','editable')"/>
                                 <field name="dpd" readonly = "status not in ('draft','editable')"/>
                                 <field name="dpd_cfs" readonly = "status not in ('draft','editable')"/> 
-                                <field name="pan_no" readonly = "status not in ('draft','editable')"/>
+                                <field name="pan_no" required="country_code == 'IN'" readonly = "status not in ('draft','editable')"/>
                                 <field name="aadhaar_no" string="Aadhaar No" readonly = "status not in ('draft','editable')"/>  
                                 <field name="working_day_hrs" readonly = "status not in ('draft','editable')"/>                                                     
                             </group>
@@ -59,7 +59,7 @@
 										<field name="mobile" widget="numeric" style="width: 40%%" required="1" readonly = "status not in ('draft','editable')"/>
                                     </div>
                                 </div>
-                                
+                                <field name="same_as_mobile" readonly = "status not in ('draft','editable')"/>
                                 <label for= "whatsapp_no"/>
                                 <div>
                                     <div class="o_address_format">
@@ -118,24 +118,24 @@
 											<label for= "mobile_no"/>
 												<div>
 													<div class="o_address_format">
-														<field name="mb_cc_id"  style="width: 25%%"  options="{'no_create': True,'no_open': True}" required="1"/>
-														<field name="mobile_no" widget="numeric" style="width: 45%%" required="1"/>
+														<field name="mb_cc_id"  style="width: 28%%"  options="{'no_create': True,'no_open': True}" required="1"/>
+														<field name="mobile_no" widget="numeric" style="width: 72%%" required="1"/>
 													</div>
 												</div>
-												
+												<field name="same_as_mobile"/>
 												<label for= "whatsapp_no"/>
 												<div>
 													<div class="o_address_format">
-														<field name="wh_cc_id"  style="width: 25%%"  options="{'no_create': True,'no_open': True}" required="1"/>
-														<field name="whatsapp_no" widget="numeric" style="width: 45%%" required="1" />
+														<field name="wh_cc_id"  style="width: 28%%"  options="{'no_create': True,'no_open': True}" required="1"/>
+														<field name="whatsapp_no" widget="numeric" style="width: 72%%" required="1" />
 													</div>
 												</div>
 												
 												<label for= "phone_no"/>
 												<div>
 													<div class="o_address_format">
-														<field name="ph_cc_id"  style="width: 25%%"  options="{'no_create': True,'no_open': True}"/>
-														<field name="phone_no" string="Landline No / Ext" widget="numeric" style="width: 45%%"/>
+														<field name="ph_cc_id"  style="width: 28%%"  options="{'no_create': True,'no_open': True}"/>
+														<field name="phone_no" string="Landline No / Ext" widget="numeric" style="width: 72%%"/>
 													</div>
 												</div>
 											<field name="email" required="1"/>
@@ -271,7 +271,7 @@
 									<field name="active_rpt"/>
 								</group>
 								<group>
-									<field name="active" widget="boolean_toggle"/>
+									<field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
 									<field name="entry_mode"/>
 								</group>
 							</group>
@@ -344,11 +344,12 @@
                <search string="Search Master">
 		    <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
 		     
-		    <filter name="my_master" string="My Master" domain="[('user_id', '=', uid)]"/> 
+		    
 		    <filter name="Draft" domain="[('status', '=', 'draft')]"/>
 		    <filter name="Editable" domain="[('status', '=', 'editable')]"/>
 		    <filter name="Active" domain="[('status', '=', 'active')]"/>
 		    <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+		    <filter name="my_master" string="My Master" domain="[('user_id', '=', uid)]"/> 
 		    <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
 		    <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
 		    <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -357,8 +358,12 @@
 		    
 		    <group expand="0" string="Group By">
 			<filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
-			<filter string="Approved By" name="status" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
-			<filter string="Approved Date" name="status" domain="[]" context="{'group_by': 'ap_rej_date'}"/>			
+			<filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+			<filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
+			<filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+			<filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+			<filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+			<filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>			
 		    </group>
             </search>
             </field>

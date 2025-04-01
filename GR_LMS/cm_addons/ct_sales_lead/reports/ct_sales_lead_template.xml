@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_ct_sales_lead_document">
+            <head>
+                <title>
+
+                </title>
+            </head>
+
+            <!-- header -->
+            <div class="header" style="height: 20px;">
+                <t t-set="settings" t-value="request.env['res.config.settings'].sudo().search([], limit=1)"/>
+                <t t-if="settings and settings.draft_watermark">
+                    <style>
+                        @page {
+                        background: none;
+                        }
+                        .watermark {
+                        position: fixed;
+                        margin-top: 150px;
+                        transform: translate(-80%, -80%) ;
+                        width: 100%;
+                        opacity: 0.3;
+                        z-index: -2000;
+                        }
+                    </style>
+
+
+                    <!-- Watermark in the background -->
+                    <div class="watermark">
+                        <t t-if="o.status == 'draft' or o.status == 'wfa'">
+                            <img t-att-src="image_data_uri(settings.draft_watermark)"
+                                 style="width: 100%; object-fit: contain; mix-blend-mode: multiply;"/>
+                        </t>
+                    </div>
+                </t>
+                <div class="row">
+                    <div class="o_clean_header">
+                        <div class="row row_custom o_header_layout_custom">
+                            <div class="col-9">
+                                <h t-if="o.company_id.name" style="font-size: 25px; font-weight: bold;"><t t-out="o.company_id.name"/></h><br/><br/>
+                                <h t-if="o.company_id.partner_id.street"><t t-out="o.company_id.partner_id.street"/></h>
+                                <h t-if="o.company_id.partner_id.street2">, <t t-out="o.company_id.partner_id.street2"/></h>
+                                <h t-if="o.company_id.partner_id.city">, <t t-out="o.company_id.partner_id.city"/></h>
+                                <h t-if="o.company_id.partner_id.state_id">, <t t-out="o.company_id.partner_id.state_id.name"/></h>
+                                <h t-if="o.company_id.partner_id.country_id">, <t t-out="o.company_id.partner_id.country_id.name"/></h>
+                            <br/>
+                            
+                            <p style="margin:8px;"/>
+
+
+                            <tr>
+                                <td><b>Phone </b></td>
+                                <td> :</td>
+                                <td><t t-out="o.company_id.partner_id.phone"/></td>
+                            </tr>
+                            <br/>
+                            <p style="margin:8px;"/>
+                            <tr>
+                                <td><b>Email </b></td>
+                                <td> :</td>
+                                <td><t t-out="o.company_id.partner_id.email"/></td>
+                                <td><b>Website</b></td>
+                                <td>:</td>
+                                <td><t t-out="o.company_id.partner_id.website"/></td>
+                            </tr>
+                            <br/>
+                            <br/>
+                            </div>
+                            <div class="col-3 text-end">
+                                    <img t-if="o.company_id.logo" t-att-src="image_data_uri(o.company_id.logo)"
+                                         alt="Logo"
+                                         style="width: 200px; object-fit: cover; margin-left: auto;"/>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- header end -->
+            <div class="page">
+                <style>
+                    .space-colon{
+                    width:3%;
+                    }
+                    .lead-bg{
+                    background-color: #C88B4E;
+                    color:rgb(13, 13, 14);
+                    }
+                     tr {
+                        page-break-inside: avoid;
+                    }
+                    /* Ensure the table doesn't break across pages */
+                    table {
+                        page-break-after: auto;
+                        page-break-before: auto;
+                    }
+                </style>
+                <div class="row" style="margin-top:-20px;">
+                    <div style="display:flex;justify-content: center;align-items: center;height:100vh;position: relative;">
+                        <p style="font-size:20px;height:30px; text-align:center;">
+                            <b>Sales Visit Report</b>
+                        </p>
+                    </div>
+
+                    <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1; margin-top: -20px;">
+                        <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                    Lead No :
+                                    <span t-esc="o.name"/>
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                    Date :
+                                    <span t-field="o.entry_date"
+                                          t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Customer / Service Type :
+                                    <span t-field="o.customer_type"/>
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Appointment Type :
+                                    <span t-field="o.appointment_type"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px;">
+                    <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                        <table style="border-collapse: collapse;width:100%">
+                            <tr>
+                               <th class="lead-bg"
+                                    style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                    Customer Details:
+                                </th>
+                            </tr>
+                        </table>
+                        <table style="border-collapse: collapse;width:100%">
+                            <tr>
+                                <td style="width: 60%;font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Customer Name :
+                                    <span t-field="o.customer_name"/>
+                                </td>
+                                <td style="width: 40%;font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Email :
+                                    <span t-field="o.email"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Contact Person :
+                                    <span t-field="o.contact_person"/>
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-bottom:none;">
+                                     Address :
+                                    <span t-field="o.address"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-bottom:none;">
+                                    Designation :
+                                    <span t-field="o.designation"/>
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-bottom:none;">
+                                    Country :
+                                    <span t-field="o.country_id.name"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-bottom:none;">
+                                    Mobile No :
+                                    <span t-field="o.mobile_no"/>
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-bottom:none;">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                        <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%">
+                            <tr>
+                                <th class="lead-bg"
+                                    style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                    Lead Details:
+                                </th>
+                            </tr>
+                        </table>
+                        <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;">
+                            <tr>
+                                <td style="width: 60%;font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Customer Type :
+                                    <t t-if="o.customer_type_ids">
+                                        <t t-foreach="o.customer_type_ids" t-as="customer_type">
+                                            <span t-out="', '.join(o.customer_type_ids.mapped('name'))"/>
+                                        </t>
+                                    </t>
+                                </td>
+                                <td style="width: 40%;font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Secondary RM :
+                                    <span t-field="o.sec_sales_exec_user_id.name"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-top:none;">
+                                    Lead Source :
+                                    <span t-field="o.enq_source_id.name"/>
+
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-bottom:none;">
+                                      Last Follow Up Date :
+                                    <span t-field="o.last_followup_date"  t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-bottom:none;">
+                                    Business Verticals :
+<!--                                    <span t-field=""/>-->
+
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-bottom:none;">
+                                      Next Follow Up Date :
+                                    <span t-field="o.next_followup_date"  t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 60%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-bottom:none;">
+                                   Primary RM :
+                                    <span t-field="o.sales_exec_user_id.name"/>
+                                </td>
+                                <td style="width: 40%; font-size: 14px; height: 30px;padding: 5px;border: 1px solid rgb(10, 10, 10);text-align:left;border-bottom:none;">
+
+                                </td>
+                            </tr>
+                        </table>
+                     </div>
+                </div>
+
+                <div class="row" style="margin-top:20px;">
+                    <tr style="margin: 0; padding: 0;font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                        <h style="font-size: 14px; height: 30px;padding: 5px;text-align:left;margin: 0; padding: 0">
+                            <b>Customer Division :</b>
+                            <span t-field="o.customer_division"/>
+                        </h>
+                    </tr>
+                    <p style="margin-top:10px;"/>
+                    <tr style="margin: 0; padding: 0;font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                        <h style="font-size: 14px; height: 30px;padding: 5px;text-align:left;margin: 0; padding: 0">
+                            <b>Discussion Points :</b>
+                            <span t-field="o.visitor_summary"/>
+                        </h>
+
+                    </tr>
+                </div>
+
+                <div class="row">
+                    <div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                        <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse;width:100%;border-top:none;margin-top: 10px;">
+                            <tr>
+                                 <th class="lead-bg"
+                                        style="font-size: 14px; height: 30px;padding: 5px;font-weight: bold; border: 1px solid rgb(10, 10, 10);text-align:left;">
+                                        Service Details :
+                                    </th>
+
+                            </tr>
+                        </table>
+                        <table style="border: 1px solid rgb(10, 10, 10); border-collapse: collapse; border-top: none; width: 100%;">
+                            <thead>
+                                <tr>
+                                    <td style="font-size: 14px; height: 30px; padding: 5px; border: 1px solid rgb(10, 10, 10); text-align: center; background-color: #D7C87D; width: 2%;">
+                                        S.No
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px; padding: 5px; border: 1px solid rgb(10, 10, 10); text-align: center; background-color: #D7C87D;">
+                                        Service Name
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px; padding: 5px; border: 1px solid rgb(10, 10, 10); text-align: center; background-color: #D7C87D;">
+                                        Volume
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px; padding: 5px; border: 1px solid rgb(10, 10, 10); text-align: center; background-color: #D7C87D;">
+                                        Product
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px; padding: 5px; border: 1px solid rgb(10, 10, 10); text-align: center; background-color: #D7C87D;">
+                                        POL
+                                    </td>
+                                    <td style="font-size: 14px; height: 30px; padding: 5px; border: 1px solid rgb(10, 10, 10); text-align: center; background-color: #D7C87D; width: 5%;">
+                                        POD
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="s_no" t-value="1"/>
+                                <t t-foreach="o.line_ids_c" t-as="line">
+                                    <tr>
+                                        <td style="font-size: 14px; height: 30px; padding: 5px; border: 1px solid rgb(10, 10, 10); text-align: center; width: 2%; border-top: none;">
+                                            <span t-esc="s_no"/>
+                                        </td>
+                                        <td style="font-size: 14px; height: 30px; padding: 5px; border: 1px solid rgb(10, 10, 10); text-align: left; width: 35%; border-top: none;">
+                                            <span t-field="line.service_id.name"/>
+                                        </td>
+                                        <td style="font-size: 14px; height: 30px; padding: 5px; border: 1px solid rgb(10, 10, 10); text-align: right; border-top: none; width: 8%;">
+                                            <span t-field="line.tank_count"/>
+                                        </td>
+                                        <td style="font-size: 14px; height: 30px; padding: 5px; border: 1px solid rgb(10, 10, 10); text-align: left; border-top: none; width: 35%;">
+                                            <span t-field="line.product_name"/>
+                                        </td>
+                                        <td style="font-size: 14px; height: 30px; padding: 5px; border: 1px solid rgb(10, 10, 10); text-align: left; border-top: none; width: 10%;">
+                                            <span t-field="line.pol"/>
+                                        </td>
+                                        <td style="font-size: 14px; height: 30px; padding: 5px; border: 1px solid rgb(10, 10, 10); text-align: left; border-top: none; width: 10%;">
+                                            <span t-field="line.pod"/>
+                                        </td>
+                                    </tr>
+                                    <t t-set="s_no" t-value="s_no + 1"/>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:20px;">
+                    <tr style="margin: 0; padding: 0;font-family: Arial, sans-serif; font-size: 14px; line-height: 2;">
+                        <h style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border-bottom:none;margin: 0; padding: 0">
+                            <b>Conclusion / Opportunity :</b>
+                            <span t-field="o.con_opp"/>
+                        </h>
+                        <br/>
+                        <br/>
+                        <h style="font-size: 14px; height: 30px;padding: 5px;text-align:left;border:none;margin: 0; padding: 0">
+                            <b>Company Physically Verified :</b>
+                            <span t-field="o.company_physical"/>
+                        </h>
+                        <br/>
+                        <br/>
+                    </tr>
+                </div>
+                <div style="margin-top: 60px; display: flex; justify-content: space-between; align-items: center; width: 100%; font-family: Arial, sans-serif; font-size: 14px;">
+                    <div style="float:left; width:40%; text-align:left;">
+                        <b>Prepared By :</b>
+                        <span t-field="o.user_id.name"/>
+                    </div>
+                    <div style="float:right; width:40%; text-align:right;">
+                        <b>Prepared Date :</b>
+                        <span t-esc="time.strftime('%d/%m/%Y')"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer" style="height: 20px; position: absolute; bottom: -100px; width: 100%;">
+                <div class="text-center" style="border-top: 1px solid black;">
+                    <ul class="list-inline mb4">
+                        <div style="width: 65%;float: right;">
+                        </div>
+                        <div style="width: 35%;float: left;" t-if="report_type == 'pdf'">
+                            <span t-field="user.name"/>
+                            -
+                            <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M:%S')"/>
+                        </div>
+                    </ul>
+                    <div t-if="report_type == 'pdf'" style="width: 30%; float: left;">
+                        Page:
+                        <span class="page"/>
+                        of
+                        <span class="topage"/>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer Ends-->
+
+        </template>
+
+
+        <template id="report_ct_sales_lead">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="ct_sales_lead.report_ct_sales_lead_document"
+                       t-lang="o.company_id.partner_id.lang"/>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

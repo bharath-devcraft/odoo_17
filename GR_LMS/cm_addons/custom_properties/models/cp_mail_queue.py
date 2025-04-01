@@ -41,7 +41,7 @@ class CpMailQueue(models.Model):
     line_ids = fields.One2many('cp.mail.queue.line', 'header_id', string='Mail Queue Lines', copy=True)
 
     ### Entry Info ###
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", readonly=True, copy=False,
                                   tracking=True, default='manual')
     company_id = fields.Many2one('res.company', required=True, copy=False,

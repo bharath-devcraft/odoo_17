@@ -28,4 +28,4 @@ class CtSalesLeadProgressLogLine(models.Model):
     @api.onchange('next_followup_date')
     def onchange_next_followup_date(self):
         if self.next_followup_date and self.next_followup_date < fields.Date.today():
-            raise UserError(_("Next follow up Date should not be lesser than current date"))
+            raise UserError(_("Next follow up date should not be lesser than current date"))

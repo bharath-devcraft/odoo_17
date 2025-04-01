@@ -33,7 +33,7 @@ class CmGrHoliday(models.Model):
 	short_name = fields.Char(string="Short Name", copy=False, help="Maximum 4 char is allowed and will accept upper case only", size=4)
 	status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
 	inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-	remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+	remarks = fields.Text(string="Remarks", copy=False)
 	company_id = fields.Many2one('res.company', copy=False, ondelete='restrict', readonly=True, required=True)
 	
 	entry_type = fields.Selection(selection=TYPE, string="Type", copy=False, default="company")	
@@ -43,7 +43,7 @@ class CmGrHoliday(models.Model):
 	country_id = fields.Many2one('res.country', string="Country", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	year_id = fields.Many2one('cm.calendar.year', string="Year", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])	
 
-	active = fields.Boolean(string="Visible", default=True)
+	active = fields.Boolean(string="Visible in View", default=True)
 	active_rpt = fields.Boolean(string="Visible In Reports", default=True)
 	active_trans = fields.Boolean(string="Visible In Transactions", default=True)
 	entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -177,20 +177,7 @@ class CmGrHoliday(models.Model):
 	 
 	@api.model
 	def retrieve_dashboard(self):
-		result = {
-			'all_draft': 0,
-			'all_active': 0,
-			'all_inactive': 0,
-			'all_editable': 0,
-			'my_draft': 0,
-			'my_active': 0,
-			'my_inactive': 0,
-			'my_editable': 0,
-			'all_today_count': 0,
-			'all_today_value': 0,
-			'my_today_count': 0,
-			'my_today_value': 0,
-		}
+		result = {}
 		
 		cm_gr_holiday = self.env['cm.gr.holiday']
 		result['all_draft'] = cm_gr_holiday.search_count([('status', '=', 'draft')])

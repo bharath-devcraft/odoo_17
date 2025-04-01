@@ -16,7 +16,7 @@
                                 <text x="10" y="20" font-family="Verdana" style="color: green; font-size:20px;font-style: italic;font-weight: bolder;">Welcome to LMS</text>
                                 <t t-raw="0"/>
                                 <div class="text-center small mt-4 pt-3 border-top" t-if="not disable_footer">
-                                    <a href="https://www.goodrich.co" target="_blank">© Copyright 2024 - 2025 Powered by <span>Catalyst</span></a>
+                                    <a href="https://www.catalysts.com.sg/" target="_blank">© Copyright 2024 - 2025 Powered by <span>Catalyst</span></a>
                                 </div>
                             </div>
                         </div>

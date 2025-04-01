@@ -69,11 +69,11 @@
 
                                 <field name="status" column_invisible="1"/>
                                 <field name="header_id" column_invisible="1"/>
-                                <field name="product_id" required="1" force_save="1"/>
-                                <field name="description" readonly = "1" force_save="1"/>
+                                <field name="product_id"/>
+                                <field name="description"/>
                                 <field name="brand_id"/>
                                 <field name="uom_id"/>
-                                <field name="qty" required="1"/>
+                                <field name="qty"/>
                             </tree>
                             <form string="Details">
                                 <group>
@@ -97,7 +97,7 @@
                                             <tree editable="bottom">   
                                                 <field name="qty" sum="Total" required="1"/>  
                                                 <field name="serial_no" required="1"/>
-                                                <field name="expiry_date" required="1"/>
+                                                <field name="expiry_date" required="1" width="200px"/>
                                             </tree>
                                         </field>
                                     </page>
@@ -121,7 +121,7 @@
                     </page>
                     <page string="Approve / Reject Remarks">
                         <group>
-                            <field name="ap_rej_remark" nolabel="1" style="width:1000px;" readonly = "status in ('cancelled','rejected')"/>
+                            <field name="ap_rej_remark" nolabel="1" style="width:1000px;" readonly = "status in ('approved','cancelled','rejected')"/>
                         </group>
                     </page>
                     <page string="Cancel Remarks">
@@ -268,6 +268,7 @@
                     <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
                     <filter string="Confirmed By" name="confirm_user_id" domain="[]" context="{'group_by': 'confirm_user_id'}"/>
                     <filter string="Approved / Rejected By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                    <filter string="Cancelled By" name="cancel_user_id" domain="[]" context="{'group_by': 'cancel_user_id'}"/>
                     <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
                     <filter string="Entry Mode" name="entry_mode" domain="[]" context="{'group_by': 'entry_mode'}"/>
                 </group>
@@ -361,7 +362,7 @@
         <field name="context">{}</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
-            No record found. Let's create one!
+            No record found. Let's create one !
           </p><p>
             This is for base transaction.
           </p>

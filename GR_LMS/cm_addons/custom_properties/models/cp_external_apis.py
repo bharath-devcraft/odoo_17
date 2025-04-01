@@ -36,7 +36,7 @@ class CpExternalAPIs(models.Model):
     inactive_remark = fields.Text('Inactive Remark')
 
     ### Entry Info ###
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean('Visible in Report', default=True)
     active_trans = fields.Boolean('Visible in Transactions', default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", readonly=True, copy=False,

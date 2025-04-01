@@ -22,7 +22,7 @@ class CpIrSequenceGenerate(models.Model):
 
     ### Entry Info ###
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, tracking=True, default='manual')
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     user_id = fields.Many2one('res.users', string="Created By", readonly=True, copy=False,
                                     ondelete='restrict', default=lambda self: self.env.user.id)
     crt_date = fields.Datetime(string="Creation Date", readonly=True, copy=False, default=fields.Datetime.now)

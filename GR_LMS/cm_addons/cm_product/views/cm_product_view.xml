@@ -23,33 +23,43 @@
                             class="btn btn-danger"
                             icon="fa-thumbs-down" 
                             type="object" name="entry_inactive" 
-                            invisible = "status != 'active'" 
+                            invisible = "status not in ('active','reject')" 
+                            confirm="Are you sure to proceed ?"/>
+                        <button string="Reject"
+                            class="btn btn-danger"
+                            icon="fa-thumbs-down" 
+                            type="object" name="entry_reject" 
+                            invisible = "status != 'draft'" 
                             confirm="Are you sure to proceed ?"/>
                         <field name="status" widget="statusbar" style="width:700px;"/>                
                     </header>
                     
                     <sheet>                    
+                        <widget name="web_ribbon" title="Draft" bg_color="bg-info" invisible = "status != 'draft'"/>
+                        <widget name="web_ribbon" title="Editable" bg_color="bg-warning" invisible = "status != 'editable'"/>
                         <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+                        <widget name="web_ribbon" title="Inactive" bg_color="bg-danger" invisible = "status != 'inactive'"/>
                         <group>
                             <group >
                                 <label for="name" class="name-lable"/>
                                 <div>
-                                    <field name="name" string= "Product / Trade Name" class="name-value" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+                                    <field name="name" string= "Product / Trade Name" class="name-value" widget="auto_fill" required="1" readonly = "status not in ('draft','editable')"/>
                                 </div> 
                                 <field name="che_name" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="ship_name" required="1" force_save = "1" readonly = "1"/>
-                                <field name="hs_id" string="HS/SAC Code" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="hs_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                 <field name="bus_vert_id" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                 <field name="bus_vert_sub_type_id" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
-                                <field name="gra_den" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="bus_location" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="gra_den" readonly = "status not in ('draft','editable')"/>
                                 <field name="acceptability" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="spl_req" readonly = "status not in ('draft','editable')"/>
                                 
                                 
                             </group>
                             <group>
-                                <field name="dg_product" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="un_no" required="dg_product == 'yes'" invisible="dg_product != 'yes'" force_save="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="dg_product" required="1" style="width:90%%" readonly = "status not in ('draft','editable')"/>
+                                <field name="un_no" style="width:96%%" required="dg_product == 'yes'" invisible="dg_product != 'yes'" force_save="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="imo_class" widget="no_special_char" required="dg_product == 'yes'" invisible="dg_product != 'yes'" force_save="1"  readonly = "status not in ('draft','editable')"/>
                                 <field name="sub_class1" widget="no_special_char" invisible="dg_product != 'yes'" readonly = "status not in ('draft','editable')"/>
                                 <field name="sub_class2" widget="no_special_char" invisible="dg_product != 'yes'" readonly = "status not in ('draft','editable')"/>
@@ -57,11 +67,11 @@
                                 <field name="lpk_class" required="dg_product == 'yes'" invisible="dg_product != 'yes'" force_save="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="ems_class" required="dg_product == 'yes'" invisible="dg_product != 'yes'" force_save="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="pack_grp" required="dg_product == 'yes'" invisible="dg_product != 'yes'" force_save="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="tank_t_code" string = "Suitable Tank Type"  options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="tank_t_codes" style="width:95%%" required="1" force_save="1" widget="many2many_tags" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
                                 <field name="mar_poll" required="dg_product == 'yes'" invisible="dg_product != 'yes'" readonly = "status not in ('draft','editable')"/>
                                 <field name="fosfa" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="kosher" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="clean_cate_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="clean_cate_id" options="{'no_create': True}" force_save="1" readonly = "1"/>
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                         </group>
@@ -79,8 +89,11 @@
                                     </tree>
                                 </field>
                             </page>
-                            <page string="Inactive Remarks" invisible = "status not in ('active','inactive')">
-                                <field name="inactive_remark" readonly = "status != 'active'" nolabel="1"/>
+                            <page string="Approval/Rejection Notes">
+                                <field name="ap_rej_note" readonly = "status not in ('draft','editable')" nolabel="1"/>
+                            </page>
+                            <page string="Inactive Remarks" invisible = "status not in ('active','inactive','reject')">
+                                <field name="inactive_remark" readonly = "status not in ('active','reject')" nolabel="1"/>
                             </page>
                             <page string="Entry Info">
                                 <group>
@@ -90,26 +103,27 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
                                 <group>
                                     <group>
                                         <field name="user_id" widget="many2one_avatar_user" />
-                                        <field name="ap_rej_user_id" string="Approved By" widget="many2one_avatar_user" invisible = "status not in ('active','inactive')"/>
+                                        <field name="ap_rej_user_id" widget="many2one_avatar_user" invisible = "status not in ('active','inactive')"/>
                                         <field name="inactive_user_id" widget="many2one_avatar_user" invisible = "status != 'inactive'" />
                                         <field name="update_user_id" widget="many2one_avatar_user"/>
                                     </group>
                                     <group>
                                         <field name="crt_date"/>
-                                        <field name="ap_rej_date" string="Approved Date" invisible = "status not in ('active','inactive')"/>
+                                        <field name="ap_rej_date" invisible = "status not in ('active','inactive')"/>
                                         <field name="inactive_date" invisible = "status != 'inactive'"/>
                                         <field name="update_date"/>
                                     </group>
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -135,8 +149,7 @@
                     <field name="che_name"/>
                     <field name="hs_id"/>
                     <field name="dg_product"/>
-                    <field name="tank_t_code" string = "Suitable Tank Type" />
-                    <field name="clean_cate_id"/>
+                    <field name="tank_t_codes" widget="many2many_tags" string = "Suitable Tank Type" />
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -159,8 +172,7 @@
                     <field name="che_name"/>
                     <field name="hs_id"/>
                     <field name="dg_product"/>
-                    <field name="tank_t_code" string = "Suitable Tank Type" />
-                    <field name="clean_cate_id"/>
+                    <field name="tank_t_codes" widget="many2many_tags" string = "Suitable Tank Type" />
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -178,27 +190,31 @@
                     <field name="name" string="Product / Trade Name" filter_domain="[('name','ilike',self)]"/>
                     <field name="che_name" string="Chemical Name" filter_domain="[('che_name','ilike',self)]"/>
                     <field name="hs_id" filter_domain="[('hs_id','ilike',self)]"/>
-                    <field name="clean_cate_id" filter_domain="[('clean_cate_id','ilike',self)]"/>
                     
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="Rejected" domain="[('status', '=', 'reject')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
                     <filter name="My Inactive" string="My Inactive" domain="[('user_id', '=', uid),('status', '=', 'inactive')]"/>
+                    <filter name="My Rejected" string="My Rejected" domain="[('user_id', '=', uid),('status', '=', 'reject')]"/>
                     <filter name="Hidden" domain="[('active', '=', False)]"/>
                     
                     <group expand="0" string="Group By">
                         <filter string="HS/SAC Code" name="hs_id" domain="[]" context="{'group_by': 'hs_id'}"/>
                         <filter string="Dangerous Goods" name="dg_product" domain="[]" context="{'group_by': 'dg_product'}"/>
-                        <filter string="Suitable Tank Type" name="tank_t_code" domain="[]" context="{'group_by': 'tank_t_code'}"/>
-                        <filter string="Cleaning Category" name="clean_cate_id" domain="[]" context="{'group_by': 'clean_cate_id'}"/>
+                        <filter string="Suitable Tank Type" name="tank_t_codes" domain="[]" context="{'group_by': 'tank_t_codes'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
-                        <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
-                        <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
+                        <filter string="Approved / Rejected By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                        <filter string="Approved / Rejected Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -214,7 +230,7 @@
             <field name="search_view_id" ref="cm_product_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 

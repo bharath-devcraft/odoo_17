@@ -10,6 +10,7 @@ RES_USERS = 'res.users'
 TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
 RES_COMPANY = 'res.company'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 CUSTOM_STATUS = [
         ('draft', 'Draft'),
@@ -21,6 +22,7 @@ ENTRY_MODE =  [('manual','Manual'),
                ('auto', 'Auto')]
 
 LOCATION = [('pan_india', 'PAN India'), ('exim', 'Exim(Global)')]
+CATEGORY = [('main', 'Main'), ('additional', 'Additional')]
 
 
 class CmService(models.Model):
@@ -32,18 +34,17 @@ class CmService(models.Model):
 
     name = fields.Char(string="Name", index=True, copy=False)
     company_id = fields.Many2one('res.company', string="Eligible Companies", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    prim_cont_person_id = fields.Many2one('cm.employee', string="Primary Contact Person", copy=False, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    mobile_no = fields.Char(string="Contact No", copy=False, size=252)
     pri_chrg_head_id = fields.Many2one('cm.charges.heads', string="Primary Charge Head", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)]) 
-    bus_location = fields.Selection(selection=LOCATION, string="Location", copy=False)
+    bus_location = fields.Selection(selection=LOCATION, string="Business Location", copy=False)
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
     remarks = fields.Text(string="Remarks", copy=False)
     ser_pro_company_id = fields.Many2one(RES_COMPANY, string="Service Company",copy=False, ondelete='restrict', readonly=True)
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
-
-
-    active = fields.Boolean(string="Visible", default=True)
+    payment_term_id = fields.Many2one('cm.payment.term', string="Default Payment Term", copy=False, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    category = fields.Selection(selection=CATEGORY, string="Category", default="main", copy=False)
+	
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     sys_ref = fields.Char(string="System Ref", copy=False, size=252)
@@ -60,7 +61,6 @@ class CmService(models.Model):
     line_ids = fields.One2many('cm.service.line', 'header_id', string="Charge Details", copy=True, c_rule=True)
     line_ids_a = fields.One2many('cm.service.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
     line_ids_b = fields.One2many('cm.service.checklist.line', 'header_id', string="Checklist", copy=True, c_rule=True)
-    line_ids_c = fields.One2many('cm.service.terms.condition.line', 'header_id', string="Terms & Condition Details", copy=True, c_rule=True)
 
     
     @api.constrains('name')
@@ -153,28 +153,10 @@ class CmService(models.Model):
         vals.update({'update_date': time.strftime(TIME_FORMAT),
                      'update_user_id': self.env.user.id})
         return super(CmService, self).write(vals)
-
-    @api.onchange('prim_cont_person_id')
-    def onchange_prim_cont_person_id(self):
-        if self.prim_cont_person_id:
-            self.mobile_no = self.prim_cont_person_id.mobile_no
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_service = self.env[CM_SERVICE]
         result['all_draft'] = cm_service.search_count([('status', '=', 'draft')])

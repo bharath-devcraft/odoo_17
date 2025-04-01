@@ -33,11 +33,12 @@
                         <group>
                             <label for="name" class="name-lable"/>
                             <div>
-                                <field name="name" class="name-value" string="Service Name" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="name" class="name-value" string="Route Name" widget="auto_fill" required="1" readonly = "status not in ('draft','editable')"/>
                             </div> 
+                            <field name="vessel_service_providers" readonly = "status not in ('draft','editable')"/>
                         </group>
                         <group>
-                            <field name="short_name" string="Service ID" widget="upper_case" required="1" readonly = "status not in ('draft','editable')"/>
+                            <field name="short_name" widget="upper_case" required="1" readonly = "status not in ('draft','editable')"/>
                             <field name="status" readonly = "1" invisible="1"/>
                         </group>
                     </group>
@@ -45,15 +46,13 @@
                     <notebook>
                         <page string="Route Details" >
                             <field name="line_ids" nolabel="1" readonly = "status not in ('draft','editable')">
-                                <tree string="Route Details">
+                                <tree string="Route Details" editable="top">
                                     <field name="header_id" column_invisible="1"/>
-                                    <field name="entry_seq" width="200px"/>
-                                    <field name="port_id"/>
-                                    <field name="port_bound"/>
-                                    <field name="trans_days" width="200px" string="T/S Days"/> 
-                                    <field name="berthing_days" width="200px"/> 
-                                    <field name="avg_time" width="200px"/>                                                                                                             
-                                    <field name="dg_product" string="DG Allowed"/>                                                                                                             
+                                    <field name="entry_seq" width="200px" required="1"/>
+                                    <field name="port_id" required="1" options="{'no_create': True}"/>
+                                    <field name="is_ts_port" width="200px" required="1"/> 
+                                    <field name="avg_time" width="200px" required="1"/>
+                                    <field name="port_bound"/>                                                                                                            
                                     <field name="company_id" column_invisible="1"/>                           
                                 </tree>
                                 
@@ -63,17 +62,17 @@
                                             <field name="entry_seq" required="1"/>
                                             <field name="port_id" required="1" options="{'no_create': True}"/>
                                             <field name="port_bound"/>
-                                            <field name="trans_days" required="1"/>
-                                            <field name="berthing_days" required="1"/>
+                                            <field name="trans_days" invisible="1"/>
+                                            <field name="berthing_days" invisible="1"/>
                                             <field name="header_id" invisible="1"/>
                                             <field name="company_id" invisible="1"/>
                                         </group>  
                                         <group>
                                             <field name="avg_time" required="1"/>
-                                            <field name="dg_product" required="1" force_save="1"/>
-                                            <field name="service_availability" required="1"/>
+                                            <field name="dg_product" invisible="1" force_save="1"/>
+                                            <field name="service_availability" invisible="1"/>
                                             <field name="specific_days" invisible="service_availability != 'specific_days'" force_save="1"/>
-                                            <field name="vessel_service_providers"/>
+                                            <field name="is_ts_port" required="1"/>
                                         </group>
                                     </group>
                                 </form>                                    
@@ -112,7 +111,7 @@
                                     <field name="active_rpt"/>
                                 </group>
                                 <group>
-                                    <field name="active" widget="boolean_toggle"/>
+                                    <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                     <field name="entry_mode"/>
                                 </group>
                             </group>
@@ -132,6 +131,7 @@
                             </group>
                         </page>
                     </notebook>
+                    <br></br>
                     <group>
                         <field name="remarks"  placeholder="Write your remarks here."/>
                     </group>
@@ -153,8 +153,8 @@
                     decoration-success = "status == 'editable'"
                     decoration-bf = "status in ('active','draft')"
                     decoration-primary = "status == 'inactive'">
-                <field name="short_name" string="Service ID"/>
-                <field name="name" string="Service Name"/>
+                <field name="short_name"/>
+                <field name="name" string="Route Name"/>
                 <field name="status" widget="badge" decoration-info = "status == 'draft'"
                     decoration-success = "status == 'editable'"
                     decoration-bf = "status == 'active'"
@@ -175,8 +175,8 @@
                     decoration-success = "status == 'editable'"
                     decoration-bf = "status in ('active','draft')"
                     decoration-primary = "status == 'inactive'">
-                <field name="short_name" string="Service ID"/>
-                <field name="name" string="Service Name"/>
+                <field name="short_name"/>
+                <field name="name" string="Route Name"/>
                 <field name="status" widget="badge" decoration-info = "status == 'draft'"
                     decoration-success = "status == 'editable'"
                     decoration-bf = "status == 'active'"
@@ -193,8 +193,8 @@
         <field name="model">cm.vessel.service.route</field>
         <field name="arch" type="xml">
                 <search string="Vessel Service Route">
-                <field name="name" string="Service Name" filter_domain="[('name','ilike',self)]"/>
-                <field name="short_name" string="Service ID" filter_domain="[('short_name','ilike',self)]"/>
+                <field name="name" string="Route Name" filter_domain="[('name','ilike',self)]"/>
+                <field name="short_name" filter_domain="[('short_name','ilike',self)]"/>
                  
                 <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                 <filter name="Editable" domain="[('status', '=', 'editable')]"/>
@@ -209,8 +209,12 @@
                 
                 <group expand="0" string="Group By">
                     <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                    <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                     <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                     <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                    <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                    <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                 </group>
             </search>
         </field>
@@ -226,7 +230,7 @@
         <field name="search_view_id" ref="cm_vessel_service_route_search"/>
         <field name="context">{}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+            <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
         </field>
     </record>
 

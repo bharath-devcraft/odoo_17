@@ -1,0 +1,7 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_cm_shipper_instruction_admin","cm.shipper.instruction.admin","model_cm_shipper_instruction","custom_properties.group_master_admin",1,1,1,1
+"access_cm_shipper_instruction_attachment_line_admin","cm.shipper.instruction.attachment.line.admin","model_cm_shipper_instruction_attachment_line","custom_properties.group_master_admin",1,1,1,1
+"access_cm_shipper_ins_batch_inactive_admin","cm.shipper.instruction.batch.inactive.admin","model_cm_shipper_ins_batch_inactive","custom_properties.group_master_admin",1,1,1,1
+"access_cm_shipper_instruction_user","cm.shipper.instruction.user","model_cm_shipper_instruction","custom_properties.group_master_user",1,0,0,0
+"access_cm_shipper_instruction_attachment_line_user","cm.shipper.instruction.attachment.line.user","model_cm_shipper_instruction_attachment_line","custom_properties.group_master_user",1,0,0,0
+"access_cm_shipper_ins_batch_inactive_user","cm.shipper.instruction.batch.inactive.user","model_cm_shipper_ins_batch_inactive","custom_properties.group_master_user",1,0,0,0

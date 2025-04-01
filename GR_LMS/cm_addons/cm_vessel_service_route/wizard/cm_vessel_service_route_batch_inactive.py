@@ -13,4 +13,8 @@ class CmVesselServiceRouteBatchInactive(models.TransientModel):
         for rec in self.master_ids:
             rec.inactive_remark = self.inactive_remark
             rec.entry_inactive()
+        return {
+        'type': 'ir.actions.client',
+        'tag': 'reload',
+    }
 

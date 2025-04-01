@@ -11,13 +11,13 @@ CM_DRIVER_MASTER='cm.driver.master'
 CM_CITY = 'cm.city'
 TIME_FORMAT='%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 CUSTOM_STATUS = [
         ('draft', 'Draft'),
         ('editable', 'Editable'),
         ('active', 'Active'),
-        ('inactive', 'Inactive'),
-        ('restricted', 'Restricted')]
+        ('inactive', 'Inactive')]
 
 ENTRY_MODE =  [('manual','Manual'),
                ('auto', 'Auto')]
@@ -27,6 +27,10 @@ YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 LICENSE_TYPE = [('lmv_tr', 'LMV-TR'),
                 ('hmv_tr', 'HMV-TR'),
                 ('both', 'Both')]
+
+BLOOD_GROUP = [('A+', 'A+'),('A-', 'A-'),('B+', 'B+'),('B-', 'B-'),('AB+', 'AB+'),
+                ('AB-', 'AB-'),('O+', 'O+'),('O-', 'O-'),('A1+', 'A1+'),('A1-', 'A1-'),('A2+', 'A2+'),
+                ('A2-', 'A2-'),('A1B+', 'A1B+'),('A1B-', 'A1B-'),('A2B+', 'A2B+'),('A2B-', 'A2B-')]
 
 class CmDriverMaster(models.Model):
     _name = 'cm.driver.master'
@@ -38,9 +42,9 @@ class CmDriverMaster(models.Model):
     name = fields.Char(string="Name", index=True, copy=False)
     birth_date = fields.Date(string="Date Of Birth", copy=False)
     join_date = fields.Date(string="Joining Date", copy=False, tracking=True)
-    blood_group = fields.Char(string="Blood Group", size=252)
+    blood_group = fields.Selection(selection=BLOOD_GROUP, string="Blood Group", copy=False)
     mobile_no = fields.Char(string="Mobile No", size=15, copy=False)
-    whatsapp_no = fields.Char(string="Whats App No",copy=False, size=15)    
+    whatsapp_no = fields.Char(string="WhatsApp No",copy=False, size=15)    
     email = fields.Char(string="Email", copy=False, size=252)
     address_line_1 = fields.Char(string="Address Line 1", size=252)
     address_line_2 = fields.Char(string="Address Line 2", size=252)
@@ -48,15 +52,18 @@ class CmDriverMaster(models.Model):
     state_id = fields.Many2one('res.country.state', string="State", ondelete='restrict')
     pin_code = fields.Char(string="Zip Code", copy=False, size=10)
     country_id = fields.Many2one('res.country', string="Country", ondelete='restrict')
+    mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     payroll_company_id = fields.Many2one('res.partner', string="Payroll Company", index=True, ondelete='restrict', tracking=True)
     driving_experience = fields.Integer(string="Driving Experience(Yrs.)", copy=False)
     vehicle_type_id = fields.Many2one('cm.vehicle.type', string="Vehicle Type", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    dg_trained_drivers = fields.Selection(selection=YES_OR_NO, string="DG Trained Drivers", copy=False)
+    dg_trained_drivers = fields.Selection(selection=YES_OR_NO, string="DG Trained", copy=False)
     health_certificate = fields.Selection(selection=YES_OR_NO, string="Health Certificate", copy=False)
     health_insurance = fields.Selection(selection=YES_OR_NO, string="Health Insurance", copy=False)
     aadhaar_no = fields.Char(string="Aadhaar No", copy=False, size=12, tracking=True)
     monthly_salary = fields.Integer(string="Monthly Salary", copy=False)
-    
+    adv_outstanding = fields.Float(string="Advance Outstanding", copy=False)
+    same_as_mobile = fields.Boolean(string="Same as Mobile No", default=False, help="Click to apply same mobile number to whatsapp number")
     
     #License Details
     driver_lic_no = fields.Char(string="Driver License No", size=252)
@@ -66,11 +73,11 @@ class CmDriverMaster(models.Model):
        
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-    remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+    remarks = fields.Text(string="Remarks", copy=False)
     
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -84,7 +91,7 @@ class CmDriverMaster(models.Model):
     update_user_id = fields.Many2one(RES_USERS, string="Last Updated By", copy=False, ondelete='restrict', readonly=True)
 
 
-    line_ids = fields.One2many('cm.driver.master.line', 'header_id', string="Additional Contact Details", copy=True, c_rule=True)
+    line_ids = fields.One2many('cm.driver.master.line', 'header_id', string="Emergency Contact Details", copy=True, c_rule=True)
     line_ids_a = fields.One2many('cm.driver.master.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
     line_ids_b = fields.One2many('cm.driver.master.health.history.line', 'header_id', string="Driver's Health History", copy=True, c_rule=True)
     line_ids_c = fields.One2many('cm.driver.master.lang.details.line', 'header_id', string="Language Details", copy=True, c_rule=True)
@@ -124,6 +131,15 @@ class CmDriverMaster(models.Model):
             if not valid_mobile_no(self.mobile_no):
                 raise UserError(_("Mobile number is invalid. Please enter correct mobile number"))
 
+    @api.constrains('whatsapp_no')
+    def whatsapp_no_validation(self):
+        if self.whatsapp_no and self.country_id:
+            if self.country_id.code == 'IN':
+                if not(len(str(self.whatsapp_no)) == 10 and self.whatsapp_no.isdigit() == True):
+                    raise UserError(_("Whatsapp number(IN) is invalid. Please enter correct whatsapp no number"))
+            if not valid_mobile_no(self.whatsapp_no):
+                raise UserError(_("Whatsapp number is invalid. Please enter correct whatsapp no number"))
+
     @api.constrains('email')
     def email_validation(self):
         if self.email  and not valid_email(self.email):
@@ -154,6 +170,17 @@ class CmDriverMaster(models.Model):
             if len(emails) < (1 + len([item for item in self.line_ids if item.email])):
                 raise UserError(_("Duplicate emails are not allowed within the provided contact details"))
     
+    @api.onchange('country_id')
+    def onchange_country_id(self):
+        if self.country_id:
+            self.mb_cc_id = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1).id
+            self.wh_cc_id = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1).id
+        else:
+            self.city_id = False
+            self.state_id = False
+            self.mb_cc_id = False
+            self.wh_cc_id = False
+    
     @api.onchange('city_id')
     def onchange_city_id(self):
         if self.city_id:
@@ -162,11 +189,18 @@ class CmDriverMaster(models.Model):
         else:
             self.state_id = False
             self.country_id = False
+    
+    @api.onchange('same_as_mobile','mobile_no')
+    def onchange_same_as_mobile(self):
+        if self.same_as_mobile:
+            self.whatsapp_no = self.mobile_no
+        else:
+            self.whatsapp_no = False
 
     def validations(self):
         warning_msg = []
         if not self.line_ids:
-            warning_msg.append("System not allow to approve with empty additional contact details")
+            warning_msg.append("System not allow to approve with empty emergency contact details")
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
         if not is_mgmt:
             res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
@@ -235,20 +269,7 @@ class CmDriverMaster(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         
         cm_driver_master = self.env[CM_DRIVER_MASTER]

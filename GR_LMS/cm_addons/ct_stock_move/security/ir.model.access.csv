@@ -1,0 +1,4 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_ct_stock_move","ct.stock.move","model_ct_stock_move","custom_properties.group_erp_admin",1,1,1,1
+"access_ct_stock_lot","ct.stock.lot","model_ct_stock_lot","custom_properties.group_erp_admin",1,1,1,1
+"access_ct_stock_lot_attachment_line","ct.stock.lot.attachment.line","model_ct_stock_lot_attachment_line","custom_properties.group_erp_admin",1,1,1,1

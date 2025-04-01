@@ -22,7 +22,7 @@ ENTRY_MODE =  [('manual','Manual'),
 
 class CmHsnCode(models.Model):
     _name = 'cm.hsn.code'
-    _description = ' HS/SAC Code'
+    _description = 'HS/SAC Code'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'avatar.mixin']
     _order = 'name asc'
 
@@ -38,7 +38,7 @@ class CmHsnCode(models.Model):
     company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -57,14 +57,14 @@ class CmHsnCode(models.Model):
     def name_validation(self):
         if self.name:
             if is_special_char(self.env, self.name):
-                raise UserError(_("Special character is not allowed in HSN Code field"))
+                raise UserError(_("Special character is not allowed in HS/SAC Code field"))
 
             name = self.name.upper().replace(" ", "")
             self.env.cr.execute(""" select upper(name)
             from cm_hsn_code where upper(REPLACE(name, ' ', ''))  = '%s'
             and id != %s and company_id = %s""" %(name, self.id, self.company_id.id))
             if self.env.cr.fetchone():
-                raise UserError(_("HSN code must be unique"))
+                raise UserError(_("HS/SAC Code must be unique"))
 
     def validations(self):
         warning_msg = []
@@ -135,20 +135,7 @@ class CmHsnCode(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_hsn_code = self.env[CM_HSN_CODE]
         result['all_draft'] = cm_hsn_code.search_count([('status', '=', 'draft')])

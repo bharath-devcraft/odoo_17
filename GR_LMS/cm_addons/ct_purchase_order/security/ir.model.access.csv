@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_purchase_order,ct.purchase.order,model_ct_purchase_order,custom_properties.group_erp_admin,1,1,1,1
+access_ct_purchase_order_line,ct.purchase.order.line,model_ct_purchase_order_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_purchase_order_attachment_line,ct.purchase.order.attachment.line,model_ct_purchase_order_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_purchase_order_expenses_line,ct.purchase.order.expenses.line,model_ct_purchase_order_expenses_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_purchase_order_tax_line,ct.purchase.order.tax.line,model_ct_purchase_order_tax_line,custom_properties.group_erp_admin,1,1,1,1

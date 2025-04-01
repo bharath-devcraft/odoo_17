@@ -15,6 +15,7 @@
               <group  string = "Mail Schedulers">
                   <button type="object" name="auto_csm_template_action" string="Action" class="btn btn-primary"/><p><b>Auto Approved Transactions Mail</b></p>
                   <button type="object" name="auto_logger_mail" string="Action" class="btn btn-primary"/><p><b>Auto Logger Mail</b></p>
+                  <button type="object" name="auto_csm_qs_bc_pending_mail_action" string="Action" class="btn btn-primary"/><p><b>Auto Quotation BC Pending Mail</b></p>
               </group>
           </group>
         </form>

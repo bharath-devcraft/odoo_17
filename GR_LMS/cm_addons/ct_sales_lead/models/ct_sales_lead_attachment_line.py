@@ -6,7 +6,7 @@ import time
 class CtSalesLeadAttachmentLine(models.Model):
     _name = 'ct.sales.lead.attachment.line'
     _description = 'Attachments'
-    _order = 'id asc'
+    _order = 'attach_date desc'
 
     header_id = fields.Many2one('ct.sales.lead', string="Header Ref", index=True, required=True, ondelete='cascade', c_rule=True)
 

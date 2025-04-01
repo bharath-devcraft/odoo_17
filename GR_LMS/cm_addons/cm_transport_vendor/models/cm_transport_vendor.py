@@ -11,13 +11,14 @@ CM_TRANSPORT_VENDOR='cm.transport.vendor'
 CM_CITY = 'cm.city'
 TIME_FORMAT='%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 CUSTOM_STATUS = [
         ('draft', 'Draft'),
         ('editable', 'Editable'),
         ('active', 'Active'),
         ('temporarily_blocked', 'Temporarily Blocked'),
-        ('black_listed', 'Black Listed'),
+        ('black_listed', 'Blacklisted'),
         ('inactive', 'Inactive')]
 
 ENTRY_MODE =  [('manual','Manual'),
@@ -31,8 +32,8 @@ ENTRY_MODE_OPTIONS = [('new', 'New'), ('name_change', 'Name Change')]
 
 TYPE_OF_COMPANY_OPTION = [('private_Ltd', 'Private Ltd'),('public_ltd', 'Public Ltd')]
 
-CONTRACT_STATUS = [('applicable', 'Applicable'),
-                   ('not_applicable', 'Not Applicable')]
+VALIDITY_RANGE = [('perpetual', 'Perpetual/Life Time'), ('limited', 'Limited')]
+
 
 class CmTransportVendor(models.Model):
     _name = 'cm.transport.vendor'
@@ -42,13 +43,15 @@ class CmTransportVendor(models.Model):
 
     name = fields.Char(string="Name", index=True, copy=False)
     short_name = fields.Char(string="Short Name", copy=False, help="Maximum 4 char is allowed and will accept upper case only", size=4)
-    entry_type = fields.Selection(selection=ENTRY_MODE_OPTIONS,default="new", string="Entry Type", copy=False, tracking=True)
+    entry_type = fields.Selection(selection=ENTRY_MODE_OPTIONS,default="new", string="Entry Type", copy=False, tracking=True, help="* New means New master entry\n* Name change means has to use the same PAN, GST number, and name getting changed")
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-    remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+    remarks = fields.Text(string="Remarks", copy=False)
     
     #Company Information
+    parent_company_id = fields.Many2one('cm.transport.vendor', string="Parent Company", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)], tracking=True)
     type_of_company = fields.Selection(selection=TYPE_OF_COMPANY_OPTION, string="Type Of Company", copy=False)
+    is_registered_transport = fields.Selection(selection=YES_OR_NO, string="Is Registered Transport Vendor", copy=False)
     pan_no = fields.Char(string="PAN No", copy=False, size=10)
     gst_no = fields.Char(string="GST No", copy=False, size=15)
     msme_no = fields.Integer(string="MSME No", copy=False)
@@ -85,18 +88,24 @@ class CmTransportVendor(models.Model):
     state_id = fields.Many2one('res.country.state', string="State", ondelete='restrict')
     pin_code = fields.Char(string="Zip Code", copy=False, size=10)
     country_id = fields.Many2one('res.country', string="Country", ondelete='restrict')
+    mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    country_code = fields.Char(string="Country Code", copy=False, size=252)
     currency_id = fields.Many2one('res.currency', string="Currency", copy=False,  ondelete='restrict', readonly=True, tracking=True)    
-
+    same_as_mobile = fields.Boolean(string="Same as Mobile No", default=False, help="Click to apply same mobile number to whatsapp number")
+    
     #Business Information
-    contract = fields.Selection(selection=CONTRACT_STATUS, string="Contract / Agreement", copy=False)
-    validity_from_date = fields.Date(string="Validity From Date", copy=False)
-    validity_to_date = fields.Date(string="Validity To Date", copy=False)
+    contract_agree = fields.Selection(selection=YES_OR_NO, string="Contractual Agreements", copy=False)
+    validity_range = fields.Selection(selection=VALIDITY_RANGE, string="Validity Range", copy=False)
+    from_date = fields.Date(string="Validity From Date", copy=False)
+    to_date = fields.Date(string="Validity To Date", copy=False)
     
     same_as_bill_address = fields.Boolean(string="Same as Billing Address", default=False)
 
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -150,6 +159,15 @@ class CmTransportVendor(models.Model):
                     raise UserError(_("Mobile number(IN) is invalid. Please enter correct mobile number"))
             if not valid_mobile_no(self.mobile_no):
                 raise UserError(_("Mobile number is invalid. Please enter correct mobile number"))
+                
+    @api.constrains('whatsapp_no')
+    def whatsapp_no_validation(self):
+        if self.whatsapp_no and self.country_id:
+            if self.country_id.code == 'IN':
+                if not(len(str(self.whatsapp_no)) == 10 and self.whatsapp_no.isdigit() == True):
+                    raise UserError(_("Whatsapp number(IN) is invalid. Please enter correct whatsapp_no number"))
+            if not valid_mobile_no(self.whatsapp_no):
+                raise UserError(_("Whatsapp number is invalid. Please enter correct whatsapp_no number"))
 
     @api.constrains('email')
     def email_validation(self):
@@ -213,6 +231,36 @@ class CmTransportVendor(models.Model):
             if len(emails) < (1 + len([item for item in self.line_ids if item.email])):
                 raise UserError(_("Duplicate emails are not allowed within the provided contact details"))
     
+    @api.onchange('contract_agree')
+    def onchange_contract_agree(self):
+        if self.contract_agree != 'yes':
+            self.validity_range = False
+            self.from_date = False
+            self.to_date = False
+    
+    @api.onchange('validity_range')
+    def onchange_validity_range(self):
+        if self.validity_range:
+            self.from_date = False
+            self.to_date = False
+    
+    @api.onchange('country_id')
+    def onchange_country_id(self):
+        if self.country_id:
+            self.country_code = self.country_id.code
+            self.pin_code = False
+            self.mb_cc_id = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1).id
+            self.wh_cc_id = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1).id
+            self.ph_cc_id = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1).id            
+        else:
+            self.country_code = False
+            self.city_id = False
+            self.state_id = False
+            self.mb_cc_id = False
+            self.wh_cc_id = False
+            self.ph_cc_id = False
+            self.pin_code = False
+    
     @api.onchange('city_id')
     def onchange_city_id(self):
         if self.city_id:
@@ -243,6 +291,13 @@ class CmTransportVendor(models.Model):
             self.line_ids_b = billing_lines
         else:
             self.line_ids_b = [(5, 0, 0)]
+            
+    @api.onchange('same_as_mobile','mobile_no')
+    def onchange_same_as_mobile(self):
+        if self.same_as_mobile:
+            self.whatsapp_no = self.mobile_no
+        else:
+            self.whatsapp_no = False
 
     def validations(self):
         warning_msg = []
@@ -314,20 +369,7 @@ class CmTransportVendor(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         
         cm_transport_vendor = self.env[CM_TRANSPORT_VENDOR]

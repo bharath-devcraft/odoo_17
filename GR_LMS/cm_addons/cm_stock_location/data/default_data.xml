@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <record id="data_insert_01" model="cm.stock.location">
+		<field name="name">Vendor Location</field>
+		<field name="short_name">VL</field>
+		<field name="entry_mode">auto</field>
+		<field name="usage_location">vendor</field>
+		<field name="location_type">main</field>
+		<field name="ap_rej_user_id" ref="base.user_admin"/>
+        <field name="ap_rej_date" eval="(datetime.now().date())"/>
+		<field name="status">active</field>
+    </record>
+	<record id="data_insert_02" model="cm.stock.location">
+		<field name="name">Main Store</field>
+		<field name="short_name">MS</field>
+		<field name="entry_mode">auto</field>
+		<field name="usage_location">internal</field>
+		<field name="location_type">main</field>
+		<field name="ap_rej_user_id" ref="base.user_admin"/>
+        <field name="ap_rej_date" eval="(datetime.now().date())"/>
+		<field name="status">active</field>
+    </record>
+	<record id="data_insert_03" model="cm.stock.location">
+		<field name="name">Sub Store</field>
+		<field name="short_name">SS</field>
+		<field name="entry_mode">auto</field>
+		<field name="usage_location">internal</field>
+		<field name="location_type">sub</field>
+		<field name="ap_rej_user_id" ref="base.user_admin"/>
+        <field name="ap_rej_date" eval="(datetime.now().date())"/>
+		<field name="status">active</field>
+    </record>
+</odoo>
+

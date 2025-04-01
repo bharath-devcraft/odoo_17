@@ -9,7 +9,7 @@ RES_COMPANY = 'res.company'
 class CmMasterAttachmentLine(models.Model):
     _name = 'cm.master.attachment.line'
     _description = 'Attachments'
-    _order = 'id asc'
+    _order = 'attach_date desc'
 
     header_id = fields.Many2one('cm.master', string="Header Ref",index=True, required=True, ondelete='cascade', c_rule=True)
     attach_desc = fields.Char(string="Description", size=252)
@@ -22,9 +22,9 @@ class CmMasterAttachmentLine(models.Model):
     @api.constrains('attach_desc')
     def attach_desc_validation(self):
         for line in self:
-            desc = self.attach_desc.strip() if self.attach_desc else None
+            desc = line.attach_desc.strip() if line.attach_desc else None
             if len(desc) < 3:
-                raise UserError(_(f"Minimum 3 characters are required for description field in attachments tab, Ref : {line.attach_desc}"))    
+                raise UserError(_(f"Description field must contain at least 3 characters in the attachments tab. Ref: {line.attach_desc}"))    
     
 
     @api.onchange('attachment_ids')

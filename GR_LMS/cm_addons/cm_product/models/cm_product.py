@@ -15,8 +15,6 @@ CUSTOM_STATUS = [
         ('draft', 'Draft'),
         ('editable', 'Editable'),
         ('active', 'Active'),
-        ('restricted', 'Restricted'),
-        ('spl_req', 'Special Requirement'),
         ('inactive', 'Inactive'),]
 
 ENTRY_MODE =  [('manual','Manual'),
@@ -26,11 +24,11 @@ ACCEPTABILITY = [('acceptable','Acceptable'),('not_acceptable', 'Not Acceptable'
 
 YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 
-PACK_GRP = [('1', 'I'), ('2', 'II'), ('3', 'III')]
+DG_NON_DG = [('yes', 'DG'), ('no', 'Non DG')]
 
-TANK_T_CODE = [('t1','T1'),('t2','T2'),('t3','T3'),('t4','T4'),('t5','T5'),('t6','T6'),('t7','T7'),('t8','T8'),('t9','T9'),('t10','T10'),
-               ('t11', 'T11'),('t12', 'T12'),('t13', 'T13'),('t14', 'T14'),('t15', 'T16'),('t17', 'T17'),('t18', 'T18'),('t19', 'T19'),('t20', 'T20'),
-               ('t21', 'T21'),('t22', 'T22'),('t23', 'T23'),('t50', 'T50'),('t75', 'T75')]
+PACK_GRP = [('1', 'I'), ('2', 'II'), ('3', 'III'), ('not_available', ' Not Available')]
+
+BUS_LOCATION = [('pan_india', 'PAN India'), ('exim', 'Exim(Global)'), ('both', 'Both')]
 
 class CmProduct(models.Model):
     _name = 'cm.product'
@@ -42,24 +40,23 @@ class CmProduct(models.Model):
     name = fields.Char(string="Name", index=True, copy=False)
     che_name = fields.Char(string="Chemical Name", index=True, copy=False)
     ship_name = fields.Char(string="Proper Shipping Name", index=True, copy=False)
-    hs_id = fields.Many2one('cm.hsn.code', string="HSN/SAC Code", copy=False, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    hs_id = fields.Many2one('cm.hsn.code', string="HS Code", copy=False, domain=[('status', '=', 'active'),('active_trans', '=', True)])
     bus_vert_id = fields.Many2one('cm.business.vertical', string="Business Vertical", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    bus_vert_sub_type_id = fields.Many2one('cm.business.vertical.sub.type', string="Business Vertical Sub type", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    bus_vert_sub_type_id = fields.Many2one('cm.business.vertical.sub.type', string="Business Vertical Sub Type", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     gra_den = fields.Char(string="Specific Gravity/Density", copy=False)
     acceptability = status = fields.Selection(selection=ACCEPTABILITY, string="Acceptability")
     spl_req = fields.Char(string="Special Requirements", copy=False)
-    dg_product = fields.Selection(selection=YES_OR_NO, string="Dangerous Goods")
+    dg_product = fields.Selection(selection=DG_NON_DG, string="Product Type" ,copy=False)
     un_no = fields.Char( string="UN Number", copy=False)
     imo_class = fields.Char(string="IMO Class (Range 1 - 9)", size=10)
     sub_class1 = fields.Char(string="Sub Class I", size=10)
     sub_class2 = fields.Char(string="Sub Class II", size=10)
-    psa_class = fields.Char(string="PSA Class")
-    lpk_class = fields.Char(string="LPK Class")
+    psa_class = fields.Char(string="PSA Group")
+    lpk_class = fields.Char(string="LPK Group")
     ems_class = fields.Char(string="EMS Code")
     pack_grp = fields.Selection(selection=PACK_GRP, string="Packing Group")
     mar_poll = fields.Selection(selection=YES_OR_NO, string="Marine Pollutant")
-    # tank_id = fields.Many2one('cm.tank.master', string="Suitable Tank Type", copy=False, domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    tank_t_code = fields.Selection(selection=TANK_T_CODE, string="Tank T Code")
+    tank_t_codes = fields.Many2many('cm.tank.tcode', ondelete='restrict',  string = "Suitable Tank Type", domain=[('status', '=', 'active'),('active_trans', '=', True)])
     fosfa = fields.Selection(selection=YES_OR_NO, string="FOSFA Approved")
     kosher = fields.Selection(selection=YES_OR_NO, string="Kosher Certified")
     clean_cate_id = fields.Many2one('cm.cleaning.category', string="Cleaning Category", domain=[('status', '=', 'active'),('active_trans', '=', True)])
@@ -68,9 +65,11 @@ class CmProduct(models.Model):
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
     remarks = fields.Text(string="Remarks", copy=False)
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
+    bus_location = fields.Selection(selection=BUS_LOCATION, string="Eligible Location")
 
+    ap_rej_note = fields.Text(string="Approval/Rejection Notes", copy=False)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -135,6 +134,27 @@ class CmProduct(models.Model):
                         'ap_rej_user_id': self.env.user.id,
                         'ap_rej_date': time.strftime(TIME_FORMAT)
                         })
+            prod_check = self.env['cm.depot.product.cleaning'].search([('product_id', '=', self.id),
+            ('status', 'in', ['draft', 'editable', 'active'])])
+            if not prod_check:
+                self.env['cm.depot.product.cleaning'].create({'name':self.name,'product_id':self.id,'entry_mode':'auto'})
+
+        return True
+
+    @validation
+    def entry_reject(self):
+        if self.status == 'draft':
+            remark = self.ap_rej_note.strip() if self.ap_rej_note else None
+
+            if not remark:
+                raise UserError(_("Approval/Rejection notes is required. Please enter the notes in the Approval/Rejection Notes field"))
+            min_char = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.min_char_length')
+            if len(remark) < int(min_char):
+                raise UserError(_(f"Minimum {min_char} characters are required for Approval/Rejection Notes"))
+            self.write({'status': 'reject',
+                        'ap_rej_user_id': self.env.user.id,
+                        'ap_rej_date': time.strftime(TIME_FORMAT)
+                        })
         return True
 
     def entry_draft(self):
@@ -145,8 +165,8 @@ class CmProduct(models.Model):
         return True
 
     def entry_inactive(self):
-        if self.status != 'active':
-            raise UserError(_("Unable to inactive other than active entry"))
+        if self.status not in ('active','reject'):
+            raise UserError(_("Unable to inactive other than active and rejected entry"))
 
         remark = self.inactive_remark.strip() if self.inactive_remark else None
 
@@ -183,20 +203,7 @@ class CmProduct(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_product = self.env[CM_PRODUCT]
         result['all_draft'] = cm_product.search_count([('status', '=', 'draft')])

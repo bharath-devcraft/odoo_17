@@ -27,21 +27,22 @@ class CmTransportTariff(models.Model):
     _order = 'name asc'
 
 
-    name = fields.Char(string="Name", index=True, copy=False)
+    name = fields.Char(string="Name", index=True)
     eff_from_date = fields.Date(string="Effective From Date")    
     fuel_id = fields.Many2one('product.template', string="Fuel Name", ondelete='restrict')
-    fuel_avg_cost = fields.Integer(string="Fuel Avg Cost (Per Ltr)", copy=False)
-    vehicle_avg_mileage_empty = fields.Integer(string="Vehicle Avg Mileage (Empty) ", copy=False)
-    vehicle_avg_mileage_laden = fields.Integer(string="Vehicle Avg Mileage (Laden)", copy=False)
-    avg_mileage = fields.Integer(string="Avg Mileage", copy=False)
-    per_day_trip_margin = fields.Integer(string="Per Day Vehicle Rental(INR)", copy=False)
-    status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
-    inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-    remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+    fuel_avg_cost = fields.Integer(string="Fuel Avg Cost (Per Ltr)")
+    vehicle_avg_mileage_empty = fields.Float(string="Vehicle Avg Mileage (Empty) ")
+    vehicle_avg_mileage_laden = fields.Float(string="Vehicle Avg Mileage (Laden)")
+    avg_mileage = fields.Float(string="Avg Mileage")
+    per_day_trip_margin = fields.Integer(string="Per Day Vehicle Rental(INR)")
+    status = fields.Selection(selection=CUSTOM_STATUS, string="Status",copy=False, default="draft", readonly=True, store=True, tracking=True)
+    inactive_remark = fields.Text(string="Inactive Remarks",copy=False)
+    remarks = fields.Text(string="Remarks")
+    tot_amt = fields.Float(string="Total Amount", store=True, compute='_compute_all_line')
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -60,12 +61,17 @@ class CmTransportTariff(models.Model):
     line_ids_c = fields.One2many('cm.transport.tariff.charges.line', 'header_id', string="Charges Details", copy=True, c_rule=True)
 
 
+    @api.depends('line_ids_c')
+    def _compute_all_line(self):
+        for rec in self:
+            rec.tot_amt =  sum(rec.line_ids_c.mapped('value'))
+    
     @api.onchange('fuel_id')
     def onchange_fuel_id(self):
         if self.fuel_id:
             self.name = self.fuel_id.name
     
-    @api.constrains('name')
+
     def name_validation(self):
         if self.name:
             if is_special_char(self.env, self.name):
@@ -80,6 +86,7 @@ class CmTransportTariff(models.Model):
 
     def validations(self):
         warning_msg = []
+        self.name_validation()
         if not self.line_ids:
             warning_msg.append("System not allow to approve with empty line details")
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
@@ -150,20 +157,7 @@ class CmTransportTariff(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_transport_tariff = self.env[CM_TRANSPORT_TARIFF]
         result['all_draft'] = cm_transport_tariff.search_count([('status', '=', 'draft')])

@@ -13,7 +13,7 @@ class CmTransportVendorBillingAddressLine(models.Model):
 
 
     header_id = fields.Many2one('cm.transport.vendor', string="Header Ref", index=True, required=True, ondelete='cascade', c_rule=True)
-    eff_from_date = fields.Date(string="Effect From Date")
+    eff_from_date = fields.Date(string="Effective From Date")
     street = fields.Char(string="Address Line 1", size=252)
     street1 = fields.Char(string="Address Line 2", size=252)
     city_id = fields.Many2one(CM_CITY, string="City", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])

@@ -18,9 +18,15 @@
 				<sheet>
 				<group>
 					<group>
-						<field name="name" readonly = "status in ('active','inactive')"/>
+						<label for="name" class="name-lable"/>
+						<div>
+							<field name="name" class="name-value" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+						</div>
 						<field name="status" readonly = "1" invisible="1"/>
-					</group>					
+					</group>
+					<group>
+						<field name="country_id" options="{'no_create': True,'no_open': True}" required="1" readonly = "status not in ('draft','editable')" domain="[('status', '=', 'active'), ('active_trans', '=', True)]"/>							
+					</group>
 				</group>
 				<notebook>
                     <page string="Attachments" >
@@ -46,7 +52,7 @@
                                 <field name="active_rpt"/>
                             </group>
                             <group>
-                                <field name="active" widget="boolean_toggle"/>
+                                <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                 <field name="entry_mode"/>
                             </group>
                         </group>
@@ -66,6 +72,7 @@
                         </group>
                     </page>
                 </notebook>
+                <br></br>
 		    <group>
 			<field name="note"  placeholder="Write your notes here."/>
 		    </group>
@@ -96,6 +103,7 @@
 				decoration-bf = "status in ('active','draft')"
 				decoration-primary = "status == 'inactive'">
 		    <field name="name" string="Name"/>
+		    <field name="country_id"/>
             <field name="status" widget="badge" decoration-info = "status == 'draft'"
 				decoration-success = "status == 'editable'"
 				decoration-bf = "status == 'active'"
@@ -114,13 +122,13 @@
             <field name="model">account.tax.group</field>
             <field name="arch" type="xml">
                <search string="Account Tax Group Master">
-		    <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
-		     
-		    <filter name="my_master" string="My Master" domain="[('user_id', '=', uid)]"/> 
+		    <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>		     
+		    <field name="country_id" string="Country" filter_domain="[('country_id','ilike',self)]"/>			    
 		    <filter name="Draft" domain="[('status', '=', 'draft')]"/>
 		    <filter name="Editable" domain="[('status', '=', 'editable')]"/>
 		    <filter name="Active" domain="[('status', '=', 'active')]"/>
 		    <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+		    <filter name="my_master" string="My Master" domain="[('user_id', '=', uid)]"/> 
 		    <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
 		    <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
 		    <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -128,9 +136,14 @@
 		    <filter name="Inactive List" domain="[('active', '=', False)]"/>
 		    
 		    <group expand="0" string="Group By">
+			<filter string="Country" name="country_id" domain="[]" context="{'group_by': 'country_id'}"/>
 			<filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
-			<filter string="Approved By" name="status" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
-			<filter string="Approved Date" name="status" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+			<filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+			<filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
+			<filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+			<filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+			<filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+			<filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
 			<filter string="Company" name="company" domain="[]" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
 		    </group>
             </search>

@@ -110,8 +110,14 @@ patch(Record.prototype, {
     return custom_required
   },
 
-    async save(options) {
-        await this.model._askChanges()
-        return this.model.mutex.exec(() => this._save(options)) && this.CustomCheckValidity({ displayNotification: true })
-    }	
+
+  async save(options) {
+    await this.model._askChanges();
+    const saveResult = await this.model.mutex.exec(() => this._save(options));
+    
+    const validityResult = await this.CustomCheckValidity({ displayNotification: true });
+    return saveResult && validityResult;
+
+  }
+
 });

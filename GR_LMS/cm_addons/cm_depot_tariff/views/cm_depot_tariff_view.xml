@@ -29,7 +29,10 @@
                     </header>
                     
                     <sheet>                    
+                        <widget name="web_ribbon" title="Draft" bg_color="bg-info" invisible = "status != 'draft'"/>
+                        <widget name="web_ribbon" title="Editable" bg_color="bg-warning" invisible = "status != 'editable'"/>
                         <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+                        <widget name="web_ribbon" title="Inactive" bg_color="bg-danger" invisible = "status != 'inactive'"/>
                         <group>
                             <group >
                                 <label for="eff_from_date" class="name-lable"/>
@@ -47,12 +50,12 @@
                             <group>
                                 <field name="short_name" widget="upper_case" invisible="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="status" readonly = "1" invisible="1"/>
-                                <field name="tank_t_code" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="sub_type2" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="tank_tcode_id" style="width: 91%%" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="sub_type2" style="width: 95%%" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="clean_cate_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="package_deal" readonly="1" force_save="1"/>
-                                <!-- <field name="package_deal_ref_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/> -->
-                                <field name="rental_per_day" readonly = "status not in ('draft','editable')"/>
+                                <field name="tot_amt" force_save="1" readonly = "1"/>
+                                <field name="package_deal" invisible="1" readonly="1" force_save="1"/>
+                                <field name="rental_per_day" invisible="1" readonly = "status not in ('draft','editable')"/>
                             </group>
                         </group>
                         
@@ -64,9 +67,9 @@
                                         <field name="charges_id" required="1" options="{'no_create': True}"/>
                                         <field name="mandatory" required="1"/>
                                         <field name="currency_id" required="1" options="{'no_create': True}"/>
-                                        <field name="tax_ids" widget="many2many_tags" options="{'no_create': True}" readonly="1" force_save="1"/>
+                                        <field name="costing_type" required="1" width="110px"/>
                                         <field name="actual_cost" required="1" width="110px"/>
-                                        <field name="gr_cost" required="1"/>
+                                        <field name="gr_cost" required="1" width="130px"/>
                                         <field name="company_id" column_invisible="1"/>                           
                                     </tree>
                                 </field>
@@ -95,7 +98,9 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="price_owner" readonly = "1"/>
+                                        <field name="tot_amt" readonly = "1" invisible="1"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -124,12 +129,13 @@
                                         <field name="maximum_days" required="1" width="150px"/>
                                         <field name="currency_id" required="1" options="{'no_create': True}"/>
                                         <field name="actual_cost" required="1" width="110px"/>
-                                        <field name="gr_cost" required="1"/>
+                                        <field name="gr_cost" column_invisible="1" width="130px"/>
                                         <field name="company_id" column_invisible="1"/>                           
                                     </tree>
                                 </field>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -156,9 +162,34 @@
                     <field name="depot_vendor_id"/>
                     <field name="state_id"/>
                     <field name="country_id"/>
-                    <field name="tank_t_code"/>
+                    <field name="tank_tcode_id"/>
                     <field name="clean_cate_id"/>
-                    <field name="package_deal"/>
+                    <field name="tot_amt"/>
+                    <field name="status" widget="badge" decoration-info = "status == 'draft'"
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status == 'active'"
+                        decoration-primary = "status == 'inactive'"/>
+                </tree>
+            </field>
+        </record>
+        <record id="cm_op_depot_tariff_tree_js" model="ir.ui.view">
+            <field name="name">Dashboard View</field>
+            <field name="model">cm.depot.tariff</field>
+            <field name="priority" eval="10"/>
+            <field name="arch" type="xml">
+                <tree string="Depot Tariff" js_class="cm_op_depot_tariff_list"
+                        decoration-info="status == 'draft'" 
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status in ('active','draft')"
+                        decoration-primary = "status == 'inactive'">
+                    <field name="eff_from_date"/>
+                    <field name="depot_id"/>
+                    <field name="depot_vendor_id"/>
+                    <field name="state_id"/>
+                    <field name="country_id"/>
+                    <field name="tank_tcode_id"/>
+                    <field name="clean_cate_id"/>
+                    <field name="tot_amt"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -182,9 +213,9 @@
                     <field name="depot_vendor_id"/>
                     <field name="state_id"/>
                     <field name="country_id"/>
-                    <field name="tank_t_code"/>
+                    <field name="tank_tcode_id"/>
                     <field name="clean_cate_id"/>
-                    <field name="package_deal"/>
+                    <field name="tot_amt"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -200,14 +231,14 @@
             <field name="arch" type="xml">
                 <search string="Depot Tariff">
                     <field name="depot_id" string="Depot Location Name" filter_domain="[('depot_id','ilike',self)]"/>
-                    <field name="depot_vendor_id" string="Deport Vendor Name" filter_domain="[('depot_vendor_id','ilike',self)]"/>
+                    <field name="depot_vendor_id" string="Depot Vendor Name" filter_domain="[('depot_vendor_id','ilike',self)]"/>
                     <field name="clean_cate_id" string="Cleaning Category" filter_domain="[('clean_cate_id','ilike',self)]"/>
                     
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -216,15 +247,19 @@
                     
                     <group expand="0" string="Group By">
                         <filter string="Depot Location Name" name="depot_id" domain="[]" context="{'group_by': 'depot_id'}"/>
-                        <filter string="Deport Vendor Name" name="depot_vendor_id" domain="[]" context="{'group_by': 'depot_vendor_id'}"/>
-                        <filter string="Tank T Code" name="tank_t_code" domain="[]" context="{'group_by': 'tank_t_code'}"/>
+                        <filter string="Depot Vendor Name" name="depot_vendor_id" domain="[]" context="{'group_by': 'depot_vendor_id'}"/>
+                        <filter string="Tank T Code" name="tank_tcode_id" domain="[]" context="{'group_by': 'tank_tcode_id'}"/>
                         <filter string="Cleaning Category" name="clean_cate_id" domain="[]" context="{'group_by': 'clean_cate_id'}"/>
                         <filter string="City" name="city_id" domain="[]" context="{'group_by': 'city_id'}"/>
                         <filter string="State" name="state_id" domain="[]" context="{'group_by': 'state_id'}"/>
                         <filter string="Country" name="country_id" domain="[]" context="{'group_by': 'country_id'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -235,16 +270,40 @@
             <field name="name">Depot Tariff</field>
             <field name="res_model">cm.depot.tariff</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[]</field>
+            <field name="domain">[('price_owner','=','agent')]</field>
             <field name="view_id" ref="cm_depot_tariff_tree_js"/>
             <field name="search_view_id" ref="cm_depot_tariff_search"/>
-            <field name="context">{}</field>
+            <field name="context">{'default_price_owner':'agent'}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                                  (0, 0, {'view_mode': 'tree', 'view_id': ref('cm_depot_tariff_tree_js')}),
+                                  (0, 0, {'view_mode': 'form', 'view_id': ref('cm_depot_tariff_form')})
+                                 ]"/>
+        </record>
+
+
+        <record id="cm_op_depot_tariff_win_action" model="ir.actions.act_window">
+            <field name="name">Depot Tariff</field>
+            <field name="res_model">cm.depot.tariff</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('price_owner','=','operator')]</field>
+            <field name="view_id" ref="cm_op_depot_tariff_tree_js"/>
+            <field name="search_view_id" ref="cm_depot_tariff_search"/>
+            <field name="context">{'default_price_owner':'operator'}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
+            </field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                                  (0, 0, {'view_mode': 'tree', 'view_id': ref('cm_op_depot_tariff_tree_js')}),
+                                  (0, 0, {'view_mode': 'form', 'view_id': ref('cm_depot_tariff_form')})
+                                 ]"/>
         </record>
 
         <menuitem name="Depot Tariff" id="cm_depot_tariff_act_menu" parent="cm_master.cm_tariff_master_m_parent" action="cm_depot_tariff_win_action" sequence="8"/>
+        
+        <menuitem name="Depot Tariff" id="cm_op_depot_tariff_act_menu" parent="cm_master.cm_op_tariff_master_m_parent" action="cm_op_depot_tariff_win_action" sequence="8"/>
 
     </data>
         

@@ -9,6 +9,7 @@ RES_USERS='res.users'
 CM_AGENT='cm.agent'
 TIME_FORMAT='%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 CUSTOM_STATUS = [
 		('draft', 'Draft'),
@@ -24,9 +25,9 @@ ENTRY_TYPE =  [('new','New'),
 			   
 YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 			   
-AGENT_CATEGORY = [('external', 'External'), ('internal', 'Internal')]
+AGENT_CATEGORY = [('external', 'External'), ('internal', 'Internal'), ('booking_agent', 'Booking Agent')]
 
-VALIDITY_RANGE = [('perpetual', 'Perpetual'), ('limited', 'Limited')]
+VALIDITY_RANGE = [('perpetual', 'Perpetual/Life Time'), ('limited', 'Limited')]
 
 PROVIDING_SERVICES =  [('transportation','Transportation'),
 			   ('warehousing', 'Warehousing'),
@@ -43,11 +44,11 @@ class CmAgent(models.Model):
 	short_name = fields.Char(string="Short Name", copy=False, help="Maximum 15 char is allowed and will accept upper case only", size=15)
 	status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
 	inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-	remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+	remarks = fields.Text(string="Remarks", copy=False)
 
 	contact_person = fields.Char(string="Contact Person", size=50)
 	mobile_no = fields.Char(string="Mobile No", size=15, copy=False)
-	phone_no = fields.Char(string="Phone No", size=12, copy=False)
+	phone_no = fields.Char(string="Landline No / Ext", size=12, copy=False)
 	email = fields.Char(string="Email", copy=False, size=252)
 	fax = fields.Char(string="Fax", copy=False, size=12)    
 	street = fields.Char(string="Street", size=252)
@@ -56,23 +57,23 @@ class CmAgent(models.Model):
 	city_id = fields.Many2one('cm.city', string="City", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('country_id', '=', country_id)]")
 	state_id = fields.Many2one('res.country.state', string="State", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	country_id = fields.Many2one('res.country', string="Country", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-	mb_cc_id = fields.Many2one('cm.country.code', string="Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-	wh_cc_id = fields.Many2one('cm.country.code', string="Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-	ph_cc_id = fields.Many2one('cm.country.code', string="Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	country_code = fields.Char(string="Country Code", copy=False, size=252)
 	currency_id = fields.Many2one('res.currency', string="Currency", copy=False, default=lambda self: self.env.company.currency_id.id, ondelete='restrict', readonly=True, tracking=True)
+	same_as_mobile = fields.Boolean(string="Same as Mobile No", default=False, help="Click to apply same mobile number to whatsapp number")
 	
 	pan_no = fields.Char(string="PAN No", copy=False, size=10)
 	aadhaar_no = fields.Char(string="Aadhaar No", copy=False, size=12, tracking=True)    
 	gst_no = fields.Char(string="GST No", copy=False, size=15)
 	
 	### New Fields Added
-	entry_type = fields.Selection(selection=ENTRY_TYPE, string="Entry Type", copy=False, default="new", tracking=True)	
+	entry_type = fields.Selection(selection=ENTRY_TYPE, string="Entry Type", copy=False, default="new", tracking=True, help="* New means New master entry\n* Name change means has to use the same PAN, GST number, and name getting changed")	
 	is_registered = fields.Selection(selection=YES_OR_NO, string="Is Registered Company", default="yes", copy=False)
 	cin_no = fields.Char(string="Company Reg No", copy=False, size=21)
 	usci_no = fields.Char(string="USCI No", size=20)
 	tax_reg_no = fields.Char(string="Tax Reg No(TRC)", size=20)
-	gst_category = fields.Selection(selection=YES_OR_NO, string="GST Applicable", copy=False)	
 	vat_no = fields.Char(string="VAT No", size=20)
 	fmc_no = fields.Char(string="FMC No", size=20)	
 	designation = fields.Char(string="Designation", size=50)
@@ -88,9 +89,10 @@ class CmAgent(models.Model):
 	to_date = fields.Date(string="To Date", copy=False)	
 	past_legal_action = fields.Selection(selection=YES_OR_NO, string="Past Legal Actions", copy=False)
 	legal_details = fields.Text(string="Legal Details", copy=False)
+	parent_agent_id = fields.Many2one(CM_AGENT, string="Parent Company", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
 	company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
-	active = fields.Boolean(string="Visible", default=True)
+	active = fields.Boolean(string="Visible in View", default=True)
 	active_rpt = fields.Boolean(string="Visible In Reports", default=True)
 	active_trans = fields.Boolean(string="Visible In Transactions", default=True)
 	entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -147,6 +149,15 @@ class CmAgent(models.Model):
 					raise UserError(_("Mobile number(IN) is invalid. Please enter correct mobile number"))
 			if not valid_mobile_no(self.mobile_no):
 				raise UserError(_("Mobile number is invalid. Please enter correct mobile number"))
+				
+	@api.constrains('whatsapp_no')
+	def whatsapp_no_validation(self):
+		if self.whatsapp_no and self.country_id:
+			if self.country_id.code == 'IN':
+				if not(len(str(self.whatsapp_no)) == 10 and self.whatsapp_no.isdigit() == True):
+					raise UserError(_("Whatsapp number(IN) is invalid. Please enter correct whatsapp_no number"))
+			if not valid_mobile_no(self.whatsapp_no):
+				raise UserError(_("Whatsapp number is invalid. Please enter correct whatsapp_no number"))
 
 	@api.constrains('email')
 	def email_validation(self):
@@ -176,8 +187,6 @@ class CmAgent(models.Model):
 				if is_special_char(self.env,self.pin_code):
 					raise UserError(_("Special character is not allowed in pin code field"))
 
-
-
 	@api.constrains('pan_no')
 	def pan_no_validation(self):
 		if self.pan_no:
@@ -204,7 +213,6 @@ class CmAgent(models.Model):
 			existing_gst = self.env[CM_AGENT].search_count([('gst_no', '=', self.gst_no), ('id', '!=', self.id), ('company_id', '=', self.company_id.id)])
 			if existing_gst > 0:
 				raise UserError(_("GST number must be unique"))
-
 
 	@api.constrains('line_ids','email','mobile_no')
 	def contact_details_validations(self):
@@ -240,7 +248,6 @@ class CmAgent(models.Model):
 		if self.past_legal_action:
 			self.legal_details = ''
 	
-	
 	@api.onchange('country_id')
 	def onchange_country_id(self):
 		if self.country_id:
@@ -250,6 +257,7 @@ class CmAgent(models.Model):
 			self.ph_cc_id = self.env['cm.country.code'].search([('country_id', '=', self.country_id.id)], limit=1).id
 			self.city_id = False
 			self.state_id = False
+			self.pin_code = False
 		else:
 			self.country_code = False
 			self.city_id = False
@@ -257,6 +265,7 @@ class CmAgent(models.Model):
 			self.mb_cc_id = False
 			self.wh_cc_id = False
 			self.ph_cc_id = False
+			self.pin_code = False
 	
 	@api.onchange('agent_category')
 	def onchange_agent_category(self):
@@ -306,6 +315,13 @@ class CmAgent(models.Model):
 			self.line_ids_d = delivery_lines
 		else:
 			self.line_ids_d = [(5, 0, 0)]
+	
+	@api.onchange('same_as_mobile','mobile_no')
+	def onchange_same_as_mobile(self):
+		if self.same_as_mobile:
+			self.whatsapp_no = self.mobile_no
+		else:
+			self.whatsapp_no = False
 
 	def validations(self):
 		warning_msg = []
@@ -337,6 +353,8 @@ class CmAgent(models.Model):
 		if self.status == 'active':
 			if not(self.env[RES_USERS].has_group('custom_properties.group_set_to_draft')):
 				raise UserError(_("You can't draft this entry. Draft Admin have the rights"))
+			if self.short_name == 'NPC':
+				raise UserError(_("You can't draft this entry. Its auto creation"))
 			self.write({'status': 'editable'})
 		return True
 
@@ -379,22 +397,8 @@ class CmAgent(models.Model):
 	 
 	@api.model
 	def retrieve_dashboard(self):
-		result = {
-			'all_draft': 0,
-			'all_active': 0,
-			'all_inactive': 0,
-			'all_editable': 0,
-			'my_draft': 0,
-			'my_active': 0,
-			'my_inactive': 0,
-			'my_editable': 0,
-			'all_today_count': 0,
-			'all_today_value': 0,
-			'my_today_count': 0,
-			'my_today_value': 0,
-		}
-		
-		
+		result = {}
+
 		cm_agent = self.env[CM_AGENT]
 		result['all_draft'] = cm_agent.search_count([('status', '=', 'draft')])
 		result['all_active'] = cm_agent.search_count([('status', '=', 'active')])

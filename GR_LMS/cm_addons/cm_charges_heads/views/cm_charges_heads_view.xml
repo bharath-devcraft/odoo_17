@@ -34,18 +34,17 @@
                             <group>
                                 <label for="name" class="name-lable"/>
                                 <div>
-                                    <field name="name" class="name-value" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+                                    <field name="name" class="name-value" widget="auto_fill" required="1" readonly = "status not in ('draft','editable')"/>
                                 </div> 
                                 <field name="uom_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="service_provider" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="detail_desc" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="service_provider" invisible="1" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="detail_desc" readonly = "status not in ('draft','editable')"/>
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                             <group>
                                 <field name="short_name" widget="upper_case" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="hs_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="tax_ids" widget="many2many_tags" options="{'no_create': True}" readonly="1" force_save="1"/>
-                                <field name="charges_purpose" required="1" readonly = "1"/>
+                                <field name="charges_purpose" invisible="1" readonly = "1"/>
+                                <field name="costing_type" required="1" readonly = "status not in ('draft','editable')"/>
                             </group>
                         </group>
                         
@@ -73,7 +72,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -93,6 +92,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -117,8 +117,7 @@
                     <field name="short_name"/>
                     <field name="name"/>
                     <field name="uom_id"/>
-                    <field name="service_provider"/>
-                    <field name="hs_id"/>
+                    <field name="costing_type"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -140,8 +139,7 @@
                     <field name="short_name"/>
                     <field name="name"/>
                     <field name="uom_id"/>
-                    <field name="service_provider"/>
-                    <field name="hs_id"/>
+                    <field name="costing_type"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -172,11 +170,14 @@
                     
                     <group expand="0" string="Group By">
                         <filter string="UOM" name="uom_id" domain="[]" context="{'group_by': 'uom_id'}"/>
-                        <filter string="Service Provider" name="service_provider" domain="[]" context="{'group_by': 'service_provider'}"/>
-                        <filter string=" HS/SAC Code Code" name="hs_id" domain="[]" context="{'group_by': 'hs_id'}"/>
+                        <filter string="Costing Type" name="costing_type" domain="[]" context="{'group_by': 'costing_type'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -192,7 +193,7 @@
             <field name="search_view_id" ref="cm_charges_heads_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 

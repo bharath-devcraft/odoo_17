@@ -9,7 +9,6 @@ class CtQuotationsAccessoriesDetailsLine(models.Model):
 
     header_id = fields.Many2one('ct.quotations.flexi.bag.pricing.line', string="Header Ref", index=True, required=True, ondelete='cascade', c_rule=True)
 
-    is_select = fields.Boolean(string="Select", default=True)
     accessories_id = fields.Many2one('product.template', string="Accessories Name", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True),('custom_type', '=', 'flexi_accessories')])
     uom_id = fields.Many2one('uom.uom', string="UOM", ondelete='restrict')
     qty = fields.Float(string="Quantity", digits=(2, 3))	

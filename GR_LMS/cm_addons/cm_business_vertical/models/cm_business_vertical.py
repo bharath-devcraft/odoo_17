@@ -35,7 +35,7 @@ class CmBusinessVertical(models.Model):
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
     employee_id = fields.Many2one('cm.employee', string="Vertical Head", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -48,8 +48,7 @@ class CmBusinessVertical(models.Model):
     update_date = fields.Datetime(string="Last Updated Date", copy=False, readonly=True)
     update_user_id = fields.Many2one(RES_USERS, string="Last Updated By", copy=False, ondelete='restrict', readonly=True)
 
-    line_ids = fields.One2many('cm.business.vertical.line', 'header_id', string="Restricted Services", copy=True, c_rule=True)
-    line_ids_a = fields.One2many('cm.business.vertical.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
+    line_ids = fields.One2many('cm.business.vertical.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
     
     @api.constrains('name')
     def name_validation(self):
@@ -146,20 +145,7 @@ class CmBusinessVertical(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_business_vertical = self.env[CM_BUSINESS_VERTICAL]
         result['all_draft'] = cm_business_vertical.search_count([('status', '=', 'draft')])

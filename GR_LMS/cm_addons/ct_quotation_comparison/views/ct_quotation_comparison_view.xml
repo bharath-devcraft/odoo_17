@@ -1,0 +1,753 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <record model="ir.ui.view" id="ct_quotation_comparison_form">
+      <field name="name">Form View</field>
+      <field name="model">ct.quotation.comparison</field>
+      <field name="arch" type="xml">
+        <form string="Quotation Comparison">
+            <header>
+
+                <button string="Confirm"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_confirm" invisible = "status != 'draft'"
+                    confirm="Are you sure to proceed ?"/>
+                <button string="Approve"
+                    icon="fa-thumbs-up"
+                    class="btn btn-success"
+                    type="object"
+                    name="entry_approve" invisible = "status != 'wfa'"
+                    confirm="Are you sure to proceed ?"/>
+                <button string="Reject"
+                    icon="fa-thumbs-down"
+                    class="btn btn-danger"
+                    type="object"
+                    name="entry_reject" invisible = "status != 'wfa'"
+                    confirm="Are you sure to proceed ?"/>
+                <button string="Cancel"
+                    class="btn btn-primary"
+                    type="object"
+                    name="entry_cancel" invisible = "status != 'approved'"
+                    confirm="Are you sure to proceed ?"/>
+
+                <field name="status" widget="statusbar" style="width:700px;"/>                
+
+            </header>
+            <sheet>
+                <widget name="web_ribbon" title="Approved" bg_color="bg-success" invisible = "status != 'approved'"/>
+                <group>
+                    <group>
+                        <field name="name" readonly = "1" force_save="1" class="animate-charcter" widget="CopyClipboardChar"/>
+                        <field name="rfq_id" required = "1" options="{'no_create': True}" readonly = "status not in ('draft','wfa')"/>
+                        <field name="rfq_name" readonly = "1" force_save="1"/>
+                    </group>
+                    <group>
+                        <field name="entry_date" required = "1" readonly = "status not in ('draft','wfa')"/>
+                        <field name="warranty_remarks" readonly = "status not in ('draft','wfa')"/>
+                    </group>
+                </group>
+                <group>
+                    <group>
+                    </group>
+                    <group>
+                        <field name="status" readonly = "1" force_save="1" invisible="1"/>
+                    </group>
+                </group>
+
+                <button string="Load Details"
+                    class="btn btn-primary"
+                    type="object"
+                    invisible = "status not in ('draft', 'wfa')"
+                    name="qs_load_details"/>
+                <notebook>
+                    <page string="Submission Details">    
+                        <field name="qs_details" widget="many2many" options="{'no_create': True}" 
+                            readonly="status not in ('draft','wfa')"
+                            context = "{'form_view_ref':'ct_quotation_submit.ct_quotation_submit_form'}" >	
+                            <tree string="Quotation Submit" create="0">
+                                <field name="name" string="Submission No"/>
+                                <field name="entry_date" string="Submission Date"/>
+                                <field name="vendor_name"/>
+                                <field name="quotation_ref_no"/>
+                                <field name="quotation_ref_date"/>
+                                <field name="line_total"/>						
+                                <field name="status" column_invisible="1"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+
+                <notebook>
+                    <page string="Product Details">
+                        <field name="line_ids" readonly="1" colspan="4" nolabel="1" context="{'tree_view_ref': 'ct_quotation_comparison.ct_quotation_comparison_line_tree'}"/>
+                    </page>
+                </notebook>
+                <separator />
+                <button string="Compare"
+                    class="btn btn-primary"
+                    type="object"
+                    invisible = "status not in ('draft', 'wfa')"
+                    name="qs_compare"/>
+                <notebook>
+                    <page string="Comparison Details">
+                        <group>
+                            <group>
+                                <field name="vendor_1_name" style="width:500px;text-align:center;color:blue;font-weight:bold" readonly = "1" nolabel="1" force_save="1"/>
+                                <field name="line_ids_a" readonly="status not in ('draft','wfa')" colspan="2" nolabel="1" context="{'tree_view_ref': 'ct_quotation_comparison.ct_quotation_comparison_line_tree_1'}"/>
+                            </group>
+                            <group>
+                                <field name="vendor_2_name" style="width:500px;text-align:center;color:blue;font-weight:bold" readonly = "1" nolabel="1" force_save="1"/>
+                                <field name="line_ids_b" readonly="status not in ('draft','wfa')" colspan="2" nolabel="1" context="{'tree_view_ref': 'ct_quotation_comparison.ct_quotation_comparison_line_tree_2'}"/>
+                            </group>
+                            <group>
+                                <field name="vendor_3_name" style="width:500px;text-align:center;color:blue;font-weight:bold" readonly = "1" nolabel="1" force_save="1"/>
+                                <field name="line_ids_c" readonly="status not in ('draft','wfa')" colspan="2" nolabel="1" context="{'tree_view_ref': 'ct_quotation_comparison.ct_quotation_comparison_line_tree_3'}"/>
+                            </group>
+                            <group>
+                                <field name="vendor_4_name" style="width:500px;text-align:center;color:blue;font-weight:bold" readonly = "1" nolabel="1" force_save="1"/>
+                                <field name="line_ids_d" readonly="status not in ('draft','wfa')" colspan="2" nolabel="1" context="{'tree_view_ref': 'ct_quotation_comparison.ct_quotation_comparison_line_tree_4'}"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+
+
+                <separator string="Terms &amp; Conditions" colspan="12"/>
+                <group col="4">
+                    <group>
+                        <field name="specification_terms_vendor_1" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="price_terms_vendor_1" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <!-- <field name="delivery_terms_vendor_1" colspan="2" nolabel="1" readonly="1" force_save="1"/> -->
+                        <field name="payment_terms_vendor_1" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="freight_type_vendor_1" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="warranty_vendor_1" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="quotation_ref_no_vendor_1" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="quotation_ref_date_vendor_1" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="remarks_vendor_1" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                    </group>
+                    <group>
+                        <field name="specification_terms_vendor_2" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="price_terms_vendor_2" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <!-- <field name="delivery_terms_vendor_2" colspan="2" nolabel="1" readonly="1" force_save="1"/> -->
+                        <field name="payment_terms_vendor_2" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="freight_type_vendor_2" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="warranty_vendor_2" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="quotation_ref_no_vendor_2" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="quotation_ref_date_vendor_2" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="remarks_vendor_2" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                    </group>
+                    <group>
+                        <field name="specification_terms_vendor_3" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="price_terms_vendor_3" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <!-- <field name="delivery_terms_vendor_3" colspan="2" nolabel="1" readonly="1" force_save="1"/> -->
+                        <field name="payment_terms_vendor_3" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="freight_type_vendor_3" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="warranty_vendor_3" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="quotation_ref_no_vendor_3" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="quotation_ref_date_vendor_3" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="remarks_vendor_3" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                    </group>
+                    <group>
+                        <field name="specification_terms_vendor_4" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="price_terms_vendor_4" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <!-- <field name="delivery_terms_vendor_4" colspan="2" nolabel="1" readonly="1" force_save="1"/> -->
+                        <field name="payment_terms_vendor_4" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="freight_type_vendor_4" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="warranty_vendor_4" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="quotation_ref_no_vendor_4" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="quotation_ref_date_vendor_4" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                        <field name="remarks_vendor_4" colspan="2" nolabel="1" readonly="1" force_save="1"/>
+                    </group>
+                </group>
+                
+                <group string="Less Supplier Remarks" invisible="1">
+                    <group>
+                        <field name="created_user_remarks" readonly = "status in ('cancelled','rejected')"/>
+                    </group>
+                    <group>
+                        <field name="verified_user_remarks" readonly = "status in ('cancelled','rejected')"/>
+                    </group>
+                </group>
+                <separator />
+                <group>
+                    <field name="more_lp_remark" placeholder="More LP Remarks" readonly = "status in ('cancelled','rejected')"/>
+                </group>
+
+
+                <separator string="Specification" colspan="12" invisible="1"/>
+                <group col="4" invisible="1">
+                    <group>
+                        <field name="specification_1" colspan="2" nolabel="1" readonly="vendor_1_name == False or (status not in ('draft','wfa'))" context="{'tree_view_ref' : 'ct_quotation_comparison.ct_quotation_comparison_specification_line_tree_1'}"/>
+                    </group>
+                    <group>
+                        <field name="specification_2" colspan="2" nolabel="1" readonly="vendor_2_name == False or (status not in ('draft','wfa'))" context="{'tree_view_ref' : 'ct_quotation_comparison.ct_quotation_comparison_specification_line_tree_2'}" />
+                    </group>
+                    <group>
+                        <field name="specification_3" colspan="2" nolabel="1" readonly="vendor_3_name == False or (status not in ('draft','wfa'))" context="{'tree_view_ref' : 'ct_quotation_comparison.ct_quotation_comparison_specification_line_tree_3'}" />
+                    </group>
+                    <group>
+                        <field name="specification_4" colspan="2" nolabel="1" readonly="vendor_4_name == False or (status not in ('draft','wfa'))" context="{'tree_view_ref' : 'ct_quotation_comparison.ct_quotation_comparison_specification_line_tree_4'}" />
+                    </group>
+                </group>
+
+                <separator string="Other Charges" colspan="12"/>
+                <group>
+                    <group>
+                        <field name="line_expense_ids_a" colspan="2" nolabel="1" readonly ="1" context="{'tree_view_ref' : 'ct_quotation_comparison.ct_quotation_comparison_expenses_line_tree_1'}"/>
+                    </group>
+                    <group>
+                        <field name="line_expense_ids_b" colspan="2" nolabel="1" readonly ="1" context="{'tree_view_ref' : 'ct_quotation_comparison.ct_quotation_comparison_expenses_line_tree_2'}"/>
+                    </group>
+                    <group>
+                        <field name="line_expense_ids_c" colspan="2" nolabel="1" readonly ="1" context="{'tree_view_ref' : 'ct_quotation_comparison.ct_quotation_comparison_expenses_line_tree_3'}"/>
+                    </group>
+                    <group>
+                        <field name="line_expense_ids_d" colspan="2" nolabel="1" readonly ="1" context="{'tree_view_ref' : 'ct_quotation_comparison.ct_quotation_comparison_expenses_line_tree_4'}"/>
+                    </group>
+                </group>
+
+                <separator/>
+                <group col="4">
+                    <group nolabel="1" readonly="1">
+                        <field name="vendor_1_name" nolabel="1" colspan="2" readonly="1" style="color:blue;font-weight:bold"/>
+                        <field name="vendor_1_total_amt" widget="monetary" readonly="1" options="{'currency_field': 'vendor_1_currency_partner_mapping'}"/>
+                        <field name="vendor_1_other_amt" style="margin-bottom: 10px" readonly="1" widget="monetary" options="{'currency_field': 'vendor_1_currency_partner_mapping'}"/>
+                        <field name="vendor_1_discount_amt" style="margin-bottom: 10px" readonly="1" widget="monetary"  options="{'currency_field': 'vendor_1_currency_partner_mapping'}" class="oe_footer_separator"/>
+                        <field name="vendor_1_taxable_amt" widget="monetary" readonly="1" options="{'currency_field': 'vendor_1_currency_partner_mapping'}"/>
+                        <field name="vendor_1_tax_amt" style="margin-bottom: 10px" readonly="1" widget="monetary" options="{'currency_field': 'vendor_1_currency_partner_mapping'}"/>
+                        <field name="vendor_1_round_off_amt" widget="monetary" readonly = "status not in ('draft','wfa')" options="{'currency_field': 'vendor_1_currency_partner_mapping'}"/>
+                        <field name="vendor_1_net_amt" widget="monetary" readonly="1" options="{'currency_field': 'vendor_1_currency_partner_mapping'}" class="oe_subtotal_footer_separator" />
+                    </group>
+                    <group nolabel="1" readonly="1">
+                        <field name="vendor_2_name" nolabel="1" colspan="2" readonly="1" style="color:blue;font-weight:bold"/>
+                        <field name="vendor_2_total_amt" readonly="1" widget="monetary" options="{'currency_field': 'vendor_2_currency_partner_mapping'}"/>
+                        <field name="vendor_2_other_amt" readonly="1" style="margin-bottom: 10px" widget="monetary" options="{'currency_field': 'vendor_2_currency_partner_mapping'}"/>
+                        <field name="vendor_2_discount_amt" readonly="1" style="margin-bottom: 10px" widget="monetary"  options="{'currency_field': 'vendor_2_currency_partner_mapping'}" class="oe_footer_separator"/>
+                        <field name="vendor_2_taxable_amt" readonly="1" widget="monetary" options="{'currency_field': 'vendor_2_currency_partner_mapping'}"/>
+                        <field name="vendor_2_tax_amt" readonly="1" style="margin-bottom: 10px" widget="monetary" options="{'currency_field': 'vendor_2_currency_partner_mapping'}"/>
+                        <field name="vendor_2_round_off_amt" readonly = "status not in ('draft','wfa')" widget="monetary" options="{'currency_field': 'vendor_2_currency_partner_mapping'}"/>
+                        <field name="vendor_2_net_amt" readonly="1" widget="monetary" options="{'currency_field': 'vendor_2_currency_partner_mapping'}" class="oe_subtotal_footer_separator" />
+                    </group>
+                    <group nolabel="1" readonly="1">
+                        <field name="vendor_3_name" nolabel="1" colspan="2" readonly="1" style="color:blue;font-weight:bold"/>
+                        <field name="vendor_3_total_amt" readonly="1" widget="monetary" options="{'currency_field': 'vendor_3_currency_partner_mapping'}"/>
+                        <field name="vendor_3_other_amt" readonly="1" style="margin-bottom: 10px" widget="monetary" options="{'currency_field': 'vendor_3_currency_partner_mapping'}"/>
+                        <field name="vendor_3_discount_amt" readonly="1" style="margin-bottom: 10px" widget="monetary"  options="{'currency_field': 'vendor_3_currency_partner_mapping'}" class="oe_footer_separator"/>
+                        <field name="vendor_3_taxable_amt" readonly="1" widget="monetary" options="{'currency_field': 'vendor_3_currency_partner_mapping'}"/>
+                        <field name="vendor_3_tax_amt" readonly="1" style="margin-bottom: 10px" widget="monetary" options="{'currency_field': 'vendor_3_currency_partner_mapping'}"/>
+                        <field name="vendor_3_round_off_amt" readonly = "status not in ('draft','wfa')" widget="monetary" options="{'currency_field': 'vendor_3_currency_partner_mapping'}"/>
+                        <field name="vendor_3_net_amt" readonly="1" widget="monetary" options="{'currency_field': 'vendor_3_currency_partner_mapping'}" class="oe_subtotal_footer_separator" />
+                    </group>
+                    <group nolabel="1" readonly="1">
+                        <field name="vendor_4_name" nolabel="1" colspan="2" readonly="1" style="color:blue;font-weight:bold"/>
+                        <field name="vendor_4_total_amt" readonly="1" widget="monetary" options="{'currency_field': 'vendor_4_currency_partner_mapping'}"/>
+                        <field name="vendor_4_other_amt" readonly="1" style="margin-bottom: 10px" widget="monetary" options="{'currency_field': 'vendor_4_currency_partner_mapping'}"/>
+                        <field name="vendor_4_discount_amt" readonly="1" style="margin-bottom: 10px" widget="monetary"  options="{'currency_field': 'vendor_4_currency_partner_mapping'}" class="oe_footer_separator"/>
+                        <field name="vendor_4_taxable_amt" readonly="1" widget="monetary" options="{'currency_field': 'vendor_4_currency_partner_mapping'}"/>
+                        <field name="vendor_4_tax_amt" readonly="1" style="margin-bottom: 10px" widget="monetary" options="{'currency_field': 'vendor_4_currency_partner_mapping'}"/>
+                        <field name="vendor_4_round_off_amt" readonly = "status not in ('draft','wfa')" widget="monetary" options="{'currency_field': 'vendor_4_currency_partner_mapping'}"/>
+                        <field name="vendor_4_net_amt" readonly="1" widget="monetary" options="{'currency_field': 'vendor_4_currency_partner_mapping'}" class="oe_subtotal_footer_separator" />
+                    </group>
+                </group>
+
+                <group>
+                   <group>
+                     <field name="round_off_remark" readonly="status not in ('draft','wfa')" 
+                        required="vendor_1_round_off_amt &gt;= 1 or vendor_1_round_off_amt &lt; -0.99 or 
+                                vendor_2_round_off_amt &gt;= 1 or vendor_2_round_off_amt &lt; -0.99 or 
+                                vendor_3_round_off_amt &gt;= 1 or vendor_3_round_off_amt &lt; -0.99 or 
+                                vendor_4_round_off_amt &gt;= 1 or vendor_4_round_off_amt &lt; -0.99"/>
+                   </group>
+                   <group>
+                      <button string="Update" 
+                            type="object" 
+                            class="oe_highlight"
+                            invisible = "status not in ('draft', 'wfa')"
+                            name="update_record"/>
+                   </group>
+                </group>
+                <separator />
+                <notebook>
+                    <page string="Attachments">
+                        <field name="line_ids_f" string="Attachments" colspan="4" nolabel="1" readonly = "status not in ('draft','wfa')">
+                            <tree string="Attachments" editable="bottom">
+
+                                <field name="status" column_invisible="1"/>
+                                <field name="header_id" column_invisible="1"/>
+                                <field name="company_id" column_invisible="1"/>
+                                <field name="attach_desc" required="1"/>
+                                <field name="attachment_ids" required="1" widget="single_file_binary" options="{'no_create_edit': True}"/>
+                                <field name="attach_user_id" readonly = "1" force_save="1"/>
+                                <field name="attach_date" readonly = "1" force_save="1"/>
+                            </tree>
+                        </field>
+                    </page>
+                    <page string="Approve / Reject Remarks">
+                        <group>
+                            <field name="ap_rej_remark" nolabel="1" style="width:1000px;" readonly = "status in ('approved','cancelled','rejected')"/>
+                        </group>
+                    </page>
+                    <page string="Cancel Remarks">
+                        <group>
+                            <field name="cancel_remark" nolabel="1" style="width:1000px;" readonly = "status in ('cancelled','rejected')"/>
+                        </group>
+                    </page>
+                    <page string="Entry Info">
+                        <group>
+                            <group>
+                                <field name="company_id" force_save="1"/> 
+                                <field name="fy_control_date" readonly = "1" force_save="1"/>
+                                <field name="active_rpt"/>
+                            </group>
+                            <group>
+                                <field name="active" widget="boolean_toggle"/>
+                                <field name="entry_mode" force_save="1"/>
+                                <field name="active_trans"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="user_id" widget="many2one_avatar_user" />
+                                <field name="confirm_user_id" invisible="status == 'draft'" widget="many2one_avatar_user" />
+                                <field name="ap_rej_user_id" invisible="status in ('draft','wfa')" widget="many2one_avatar_user" />
+                                <field name="cancel_user_id" invisible="status != 'cancelled'" widget="many2one_avatar_user" />
+                                <field name="update_user_id" widget="many2one_avatar_user" />
+                            </group>
+                            <group>
+                                <field name="crt_date" />
+                                <field name="confirm_date" invisible="status == 'draft'" />
+                                <field name="ap_rej_date" invisible="status in ('draft','wfa')" />
+                                <field name="cancel_date" invisible="status != 'cancelled'" />
+                                <field name="update_date" />
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+                <group>
+                    <field name="remarks"/>
+                </group>
+                
+                <div class="oe_chatter">
+                    <field name="message_ids"/>
+                </div>  
+            </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="ct_quotation_comparison_line_tree" model="ir.ui.view">
+        <field name="name">Quotation Comparison Line</field>
+        <field name="model">ct.quotation.comparison.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison Line" editable="bottom" create="0">
+                <field name="header_id" column_invisible="1"/>
+                <field name="company_id" column_invisible="1"/>
+                <field name="product_id" readonly="1" column_invisible="1"/>
+                <field name="description" readonly="1"/>
+                <field name="uom_id" readonly="1"/>
+                <field name="brand_id"  readonly="1" column_invisible="1"/>
+                <field name="brand_desc"  readonly="1"/>
+                <field name="qty" width="150px" readonly="1"/>
+            </tree>     
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_line_tree_1" model="ir.ui.view">
+        <field name="name">Quotation Comparison Line 1</field>
+        <field name="model">ct.quotation.comparison.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison Line" editable="bottom" decoration-info="vendor_1_select == True" create="0" delete="0">
+                <field name="vendor_1_select" width="40px" options='{"bg_color": "#99ff99: vendor_1_select == True","fg_color": "black:vendor_1_select == True"}'/>
+                <field name="vendor_1_price" width="80px" readonly="1" options='{"bg_color": "#99ff99: vendor_1_select == True","fg_color": "black:vendor_1_select == True"}'/>
+                <field name="vendor_1_discount" width="70px" readonly="1" options='{"bg_color": "#99ff99: vendor_1_select == True","fg_color": "black:vendor_1_select == True"}'/>
+                <field name="vendor_1_discount_amt" readonly="1" column_invisible="1"/>
+                <field name="vendor_1_tax_ids" width="60px" widget="many2many_tags" readonly="1" options='{"bg_color": "#99ff99: vendor_1_select == True","fg_color": "black:vendor_1_select == True","no_create": 1}'/>
+                <field name="vendor_1_tax_amt" width="80px" readonly="1" options='{"bg_color": "#99ff99: vendor_1_select == True","fg_color": "black:vendor_1_select == True"}'/>
+                <field name="vendor_1_warranty_period" width="80px" readonly="1" options='{"bg_color": "#99ff99: vendor_1_select == True","fg_color": "black:vendor_1_select == True"}'/>
+                <field name="vendor_1_warranty_from" column_invisible='1' force_save='1'/>
+                <field name="vendor_1_value" width="100px" sum="total" readonly="1" options='{"bg_color": "#99ff99: vendor_1_select == True","fg_color": "black:vendor_1_select == True"}'/>
+            </tree>     
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_line_tree_2" model="ir.ui.view">
+        <field name="name">Quotation Comparison Line 2</field>
+        <field name="model">ct.quotation.comparison.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison Line" editable="bottom" decoration-info="vendor_2_select == True" create="0" delete="0">
+                <field name="vendor_2_select" width="40px" options='{"bg_color": "#99ff99: vendor_2_select == True","fg_color": "black:vendor_2_select == True"}'/>
+                <field name="vendor_2_price" width="80px" readonly="1" options='{"bg_color": "#99ff99: vendor_2_select == True","fg_color": "black:vendor_2_select == True"}'/>
+                <field name="vendor_2_discount" width="70px" readonly="1" options='{"bg_color": "#99ff99: vendor_2_select == True","fg_color": "black:vendor_2_select == True"}'/>
+                <field name="vendor_2_discount_amt" readonly="1" column_invisible="1"/>
+                <field name="vendor_2_tax_ids" width="60px" widget="many2many_tags" readonly="1" options='{"bg_color": "#99ff99: vendor_2_select == True","fg_color": "black:vendor_2_select == True","no_create": 1}'/>
+                <field name="vendor_2_tax_amt" width="80px" readonly="1" options='{"bg_color": "#99ff99: vendor_2_select == True","fg_color": "black:vendor_2_select == True"}'/>
+                <field name="vendor_2_warranty_period" width="80px" readonly="1" options='{"bg_color": "#99ff99: vendor_2_select == True","fg_color": "black:vendor_2_select == True"}'/>
+                <field name="vendor_2_warranty_from" column_invisible='1' force_save='1'/>
+                <field name="vendor_2_value" width="100px" sum="total" readonly="1" options='{"bg_color": "#99ff99: vendor_2_select == True","fg_color": "black:vendor_2_select == True"}'/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_line_tree_3" model="ir.ui.view">
+        <field name="name">Quotation Comparison Line 3</field>
+        <field name="model">ct.quotation.comparison.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison Line" editable="bottom" decoration-info="vendor_3_select == True" create="0" delete="0">
+                <field name="vendor_3_select" width="40px" options='{"bg_color": "#99ff99: vendor_3_select == True","fg_color": "black:vendor_3_select == True"}'/>
+                <field name="vendor_3_price" width="80px" readonly="1" options='{"bg_color": "#99ff99: vendor_3_select == True","fg_color": "black:vendor_3_select == True"}'/>
+                <field name="vendor_3_discount" width="70px" readonly="1" options='{"bg_color": "#99ff99: vendor_3_select == True","fg_color": "black:vendor_3_select == True"}'/>
+                <field name="vendor_3_discount_amt" readonly="1" column_invisible="1"/>
+                <field name="vendor_3_tax_ids" width="60px" widget="many2many_tags" readonly="1" options='{"bg_color": "#99ff99: vendor_3_select == True","fg_color": "black:vendor_3_select == True","no_create": 1}'/>
+                <field name="vendor_3_tax_amt" width="80px" readonly="1" options='{"bg_color": "#99ff99: vendor_3_select == True","fg_color": "black:vendor_3_select == True"}'/>
+                <field name="vendor_3_warranty_period" width="80px" readonly="1" options='{"bg_color": "#99ff99: vendor_3_select == True","fg_color": "black:vendor_3_select == True"}'/>
+                <field name="vendor_3_warranty_from" column_invisible='1' force_save='1'/>
+                <field name="vendor_3_value" width="100px" sum="total" readonly="1" options='{"bg_color": "#99ff99: vendor_3_select == True","fg_color": "black:vendor_3_select == True"}'/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_line_tree_4" model="ir.ui.view">
+        <field name="name">Quotation Comparison Line 4</field>
+        <field name="model">ct.quotation.comparison.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison Line" editable="bottom" decoration-info="vendor_4_select == True" create="0" delete="0">
+                <field name="vendor_4_select" width="40px" options='{"bg_color": "#99ff99: vendor_4_select == True","fg_color": "black:vendor_4_select == True"}'/>
+                <field name="vendor_4_price" width="80px" readonly="1" options='{"bg_color": "#99ff99: vendor_4_select == True","fg_color": "black:vendor_4_select == True"}'/>
+                <field name="vendor_4_discount" width="70px" readonly="1" options='{"bg_color": "#99ff99: vendor_4_select == True","fg_color": "black:vendor_4_select == True"}'/>
+                <field name="vendor_4_discount_amt" readonly="1" column_invisible="1"/>
+                <field name="vendor_4_tax_ids" width="60px" widget="many2many_tags" readonly="1" options='{"bg_color": "#99ff99: vendor_4_select == True","fg_color": "black:vendor_4_select == True","no_create": 1}'/>
+                <field name="vendor_4_tax_amt" width="80px" readonly="1" options='{"bg_color": "#99ff99: vendor_4_select == True","fg_color": "black:vendor_4_select == True"}'/>
+                <field name="vendor_4_warranty_period" width="80px" readonly="1" options='{"bg_color": "#99ff99: vendor_4_select == True","fg_color": "black:vendor_4_select == True"}'/>
+                <field name="vendor_4_warranty_from" column_invisible='1' force_save='1'/>
+                <field name="vendor_4_value" width="100px" sum="total" readonly="1" options='{"bg_color": "#99ff99: vendor_4_select == True","fg_color": "black:vendor_4_select == True"}'/>
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="ct_quotation_comparison_specification_line_tree_1" model="ir.ui.view">
+        <field name="name">Specification Line 1</field>
+        <field name="model">ct.quotation.comparison.specification.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison Specification" editable="bottom" >
+                <field name="header_id_1" column_invisible="1"/>
+                <field name="sequence_no" column_invisible="1" string="Sequence No"/>
+                <field name="title" required="1" string="Title"/>
+                <field name="description" required="1" string="Description"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_specification_line_tree_2" model="ir.ui.view">
+        <field name="name">Specification Line 2</field>
+        <field name="model">ct.quotation.comparison.specification.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison Specification" editable="bottom" >
+                <field name="header_id_2" column_invisible="1"/>
+                <field name="sequence_no" column_invisible="1" string="Sequence No"/>
+                <field name="description" required="1" string="Description"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_specification_line_tree_3" model="ir.ui.view">
+        <field name="name">Specification Line 3</field>
+        <field name="model">ct.quotation.comparison.specification.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison Specification" editable="bottom" >
+                <field name="header_id_3" column_invisible="1"/>
+                <field name="sequence_no" column_invisible="1" string="Sequence No"/>
+                <field name="description" required="1" string="Description"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_specification_line_tree_4" model="ir.ui.view">
+        <field name="name">Specification Line 4</field>
+        <field name="model">ct.quotation.comparison.specification.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison Specification" editable="bottom" >
+                <field name="header_id_4" column_invisible="1"/>
+                <field name="sequence_no" column_invisible="1" string="Sequence No"/>
+                <field name="description" required="1" string="Description"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_expenses_line_tree_1" model="ir.ui.view">
+        <field name="name">Expenses Line 1</field>
+        <field name="model">ct.quotation.comparison.expenses.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison Expenses" editable="bottom" >
+                <field name="header_id" column_invisible="1"/>
+                <field name="company_id" column_invisible="1"/>
+                <field name="vendor_1_expense_id" options="{'no_create': 1}" column_invisible="1"/>
+                <field name="vendor_1_description" width="150px" string="Expense"/>
+                <field name="vendor_1_amt" width="150px" string="Expense Amt"/>
+                <field name="vendor_1_disc_amt" string="Dis Amt"/>
+                <field name="vendor_1_tax_ids" options="{'no_create': 1}" widget="many2many_tags"/>
+                <field name="vendor_1_line_tot_amt" string="Total" sum="total"/>
+            </tree>     
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_expenses_line_tree_2" model="ir.ui.view">
+        <field name="name">Expenses Line 2</field>
+        <field name="model">ct.quotation.comparison.expenses.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison Expenses" editable="bottom" >
+                <field name="header_id" column_invisible="1"/>
+                <field name="company_id" column_invisible="1"/>
+                <field name="vendor_2_expense_id" options="{'no_create': 1}" column_invisible="1"/>
+                <field name="vendor_2_description" string="Expense"/>
+                <field name="vendor_2_amt" width="150px" string="Expense Amt"/>
+                <field name="vendor_2_disc_amt" string="Dis Amt"/>
+                <field name="vendor_2_tax_ids" options="{'no_create': 1}" widget="many2many_tags"/>
+                <field name="vendor_2_line_tot_amt" string="Total" sum="total"/>
+            </tree>     
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_expenses_line_tree_3" model="ir.ui.view">
+        <field name="name">Expenses Line 3</field>
+        <field name="model">ct.quotation.comparison.expenses.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison Expenses" editable="bottom" >
+                <field name="header_id" column_invisible="1"/>
+                <field name="company_id" column_invisible="1"/>
+                <field name="vendor_3_expense_id" options="{'no_create': 1}" column_invisible="1"/>
+                <field name="vendor_3_description" string="Expense"/>
+                <field name="vendor_3_amt" width="150px" string="Expense Amt"/>
+                <field name="vendor_3_disc_amt" string="Dis Amt"/>
+                <field name="vendor_3_tax_ids" options="{'no_create': 1}" widget="many2many_tags"/>
+                <field name="vendor_3_line_tot_amt" string="Total" sum="total"/>
+            </tree>     
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_expenses_line_tree_4" model="ir.ui.view">
+        <field name="name">Expenses Line 4</field>
+        <field name="model">ct.quotation.comparison.expenses.line</field>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison Expenses" editable="bottom" >
+                <field name="header_id" column_invisible="1"/>
+                <field name="company_id" column_invisible="1"/>
+                <field name="vendor_4_expense_id" options="{'no_create': 1}" column_invisible="1"/>
+                <field name="vendor_4_description" string="Expense"/>
+                <field name="vendor_4_amt" width="150px" string="Expense Amt"/>
+                <field name="vendor_4_disc_amt" string="Dis Amt"/>
+                <field name="vendor_4_tax_ids" options="{'no_create': 1}" widget="many2many_tags"/>
+                <field name="vendor_4_line_tot_amt" string="Total" sum="total"/>
+            </tree>     
+        </field>
+    </record>
+
+
+    <record id="ct_quotation_comparison_tree_js" model="ir.ui.view">
+        <field name="name">List Dashboard View</field>
+        <field name="model">ct.quotation.comparison</field>
+        <field name="priority" eval="10"/>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison" js_class="ct_quotation_comparison_list"
+                sample="1"
+                decoration-info = "status == 'draft'"
+                decoration-success = "status == 'wfa'"
+                decoration-bf = "status in ('approved','draft')"
+                decoration-warning = "status == 'rejected'"
+                decoration-primary = "status == 'cancelled'">
+
+                <field name="name" decoration-bf="1"/>
+                <field name="entry_date"/>
+                <field name="rfq_id"/>
+                <field name="rfq_name"/>
+                <field name="status" widget="badge" 
+                    decoration-info = "status == 'draft'"
+                    decoration-success = "status == 'wfa'"
+                    decoration-bf = "status == 'approved'"
+                    decoration-warning = "status == 'rejected'"
+                    decoration-primary = "status == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_tree" model="ir.ui.view">
+        <field name="name">List View</field>
+        <field name="model">ct.quotation.comparison</field>
+        <field name="priority" eval="1"/>
+        <field name="arch" type="xml">
+            <tree string="Quotation Comparison"
+                sample="1"
+                decoration-info = "status == 'draft'"
+                decoration-success = "status == 'wfa'"
+                decoration-bf = "status in ('approved','draft')"
+                decoration-warning = "status == 'rejected'"
+                decoration-primary = "status == 'cancelled'">
+
+                <field name="name" decoration-bf="1"/>
+                <field name="entry_date"/>
+                <field name="rfq_id"/>
+                <field name="rfq_name"/>
+                <field name="status" widget="badge" 
+                    decoration-info = "status == 'draft'"
+                    decoration-success = "status == 'wfa'"
+                    decoration-bf = "status == 'approved'"
+                    decoration-warning = "status == 'rejected'"
+                    decoration-primary = "status == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_search" model="ir.ui.view">
+        <field name="name">Search View</field>
+        <field name="model">ct.quotation.comparison</field>
+        <field name="arch" type="xml">
+            <search string="Quotation Comparison">
+                <field name="name"/>
+                <field name="rfq_id"/>
+                <field name="rfq_name"/>
+                <field name="remarks"/>
+
+                <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+                <filter name="WFA" domain="[('status', '=', 'wfa')]"/>
+                <filter name="Approved" domain="[('status', '=', 'approved')]"/>
+                <filter name="Cancelled" domain="[('status', '=', 'cancelled')]"/>
+                <filter name="Rejected" domain="[('status', '=', 'rejected')]"/>
+                <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/>
+                <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
+                <filter name="My WFA" string="My WFA" domain="[('user_id', '=', uid),('status', '=', 'wfa')]"/>
+                <filter name="My Approved" string="My Approved" domain="[('user_id', '=', uid),('status', '=', 'approved')]"/>
+                <filter name="My Cancelled" string="My Cancelled" domain="[('user_id', '=', uid),('status', '=', 'cancelled')]"/>
+                <filter name="My Rejected" string="My Rejected" domain="[('user_id', '=', uid),('status', '=', 'rejected')]"/>
+                <filter name="Hidden" domain="[('active', '=', False)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="RFQ No" name="rfq_id" domain="[]" context="{'group_by': 'rfq_id'}"/>
+                    <filter string="RFQ Name" name="rfq_name" domain="[]" context="{'group_by': 'rfq_name'}"/>
+                    <filter string="Comparison Date" name="entry_date" domain="[]" context="{'group_by': 'entry_date'}"/>
+                    <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter string="Confirmed By" name="confirm_user_id" domain="[]" context="{'group_by': 'confirm_user_id'}"/>
+                    <filter string="Approved / Rejected By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                    <filter string="Cancelled By" name="cancel_user_id" domain="[]" context="{'group_by': 'cancel_user_id'}"/>
+                    <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                    <filter string="Entry Mode" name="entry_mode" domain="[]" context="{'group_by': 'entry_mode'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_kanban" model="ir.ui.view">
+        <field name="name">Kanban View</field>
+        <field name="model">ct.quotation.comparison</field>
+        <field name="arch" type="xml">
+            <kanban string="Quotation Comparison" class="o_kanban_mobile" sample="1" quick_create="false">
+                <field name="name"/>
+                <field name="entry_date"/>
+                <field name="ap_rej_user_id"/>
+                <field name="status"/>
+                <progressbar field="status"
+                    colors='{"draft": "info", "wfa": "success", "approved": "bf","cancelled": "primary","rejected": "warning"}'/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="kanban-card"> 
+                            <div class="kanban-table">
+                                <div class="kanban-row">
+                                    <div class="kanban-cell" t-att-title="'Order Name'">
+                                        <field style="color: #4d4d4d; font-weight: bold; font-size: 18px;" name="name"/>
+                                    </div>
+                                    <div class="kanban-cell" t-att-title="'Order Date'">
+                                        <field style="color: #808080; font-weight: bold; font-size: 14px;" name="entry_date"/>
+                                    </div>
+                                </div>
+                                <div class="kanban-row">
+                                    <div class="kanban-cell" t-att-title="'Division'">
+                                        <i class="fa fa-building" style="color: #E91E63;" title="Building Icon"></i> <field name="name"/>
+                                    </div>
+                                    <div class="kanban-cell" t-att-title="'Partner Name'">
+                                        <i class="fa fa-user" style="color: #4CAF50;" title="Supplier Icon"></i> <field name="name"/>
+                                    </div>
+                                </div>
+                                <div class="kanban-row">
+                                    <div class="kanban-cell" t-att-title="'Department'">
+                                        <i class="fa fa-sitemap" style="color: #2196F3;" title="Department Icon"></i> <field name="name"/>
+                                    </div>
+                                    <div class="kanban-cell" t-att-title="'Department'">
+                                        <field name="name" style="color: blue;"/>
+                                    </div>
+                                </div>
+                                <div class="kanban-row">
+                                    <div class="kanban-cell" t-att-title="'Approved/Reject By'">
+                                        <i class="fa fa-user" style="color: #4CAF50;" title="Supplier Icon"></i> <field name="ap_rej_user_id"/>
+                                    </div>
+                                    <div class="kanban-cell" t-att-title="'Status'">
+                                        <field name="status" widget="label_selection" options="{'classes': {'draft': 'info', 'wfa': 'success', 'approved': 'default', 'cancelled': 'primary', 'rejected': 'warning'}}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_graph" model="ir.ui.view">
+       <field name="name">Graph View</field>
+       <field name="model">ct.quotation.comparison</field>
+       <field name="arch" type="xml">
+            <graph string="Quotation Comparison" sample="1" disable_linking="True" stacked="0" type="pie">
+                <field name="status"/>
+                <field name="id" string="Count" type="measure" operator="count"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="ct_quotation_comparison_win_action" model="ir.actions.act_window" >
+      <field name="name">Quotation Comparison</field>
+      <field name="res_model">ct.quotation.comparison</field>
+      <field name="view_mode">tree,form,kanban,graph</field>
+        <field name="domain">[]</field>
+        <field name="view_id" ref="ct_quotation_comparison_tree_js"/>
+        <field name="search_view_id" ref="ct_quotation_comparison_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No record found. Let's create one !
+          </p><p>
+            This is for base transaction.
+          </p>
+        </field>
+    </record>
+
+    <record id="ct_view_quotation_comparison_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="ct_quotation_comparison.ct_quotation_comparison_tree_js"/>
+        <field name="act_window_id" ref="ct_quotation_comparison_win_action"/>
+    </record>
+
+    <record id="ct_view_quotation_comparison_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="ct_quotation_comparison.ct_quotation_comparison_form"/>
+        <field name="act_window_id" ref="ct_quotation_comparison_win_action"/>
+    </record>
+
+    <record id="ct_view_quotation_comparison_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3"/>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="ct_quotation_comparison.ct_quotation_comparison_kanban"/>
+        <field name="act_window_id" ref="ct_quotation_comparison_win_action"/>
+    </record>
+
+    <record id="ct_view_quotation_comparison_graph" model="ir.actions.act_window.view">
+        <field name="sequence" eval="4"/>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="ct_quotation_comparison.ct_quotation_comparison_graph"/>
+        <field name="act_window_id" ref="ct_quotation_comparison_win_action"/>
+    </record>
+
+    <menuitem name="Quotation Comparison" id="ct_quotation_comparison_act_menu" parent="ct_purchase_request.ct_purchase_m_parent"
+              action="ct_quotation_comparison_win_action" sequence="10"/>
+  </data>
+</odoo>

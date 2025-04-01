@@ -34,27 +34,27 @@
                             <group >
                                 <label for="name" class="name-lable"/>
                                 <div>
-                                    <field name="name" class="name-value" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
-                                </div> 
-                                <field name="prim_cont_person_id" required="1" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
+                                    <field name="name" class="name-value" widget="auto_fill" required="1" readonly = "status not in ('draft','editable')"/>
+                                </div>
                                 <field name="pri_chrg_head_id" required="1" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
+                                <field name="payment_term_id" required="1" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
                             </group>
                             <group>
                                 <field name="ser_pro_company_id" force_save="1" readonly = "1" options="{'no_create': True}"/>
-                                <field name="mobile_no" required="1" readonly = "status not in ('draft','editable')"/> 
                                 <field name="bus_location" required="1" readonly = "status not in ('draft','editable')"/>                            
+                                <field name="category" required="1" readonly = "status not in ('draft','editable')"/>                            
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                         </group>
                         
                         <notebook>
-                            <page string="Charge Details" >
+                            <page string="Charges Details" >
                                 <field name="line_ids" nolabel="1" readonly = "status not in ('draft','editable')">
                                     <tree string="Details" editable="bottom">
                                         <field name="header_id" column_invisible="1"/>
                                         <field name="name" required="1" options="{'no_create': True}"/>
                                         <field name="mandatory" required="1"/>
-                                        <field name="visible_doc" required="1"/>
+                                        <field name="visible_doc" column_invisible="1"/>
                                         <field name="company_id" column_invisible="1"/>                           
                                     </tree>
                                 </field>
@@ -68,17 +68,7 @@
                                         <field name="company_id" column_invisible="1"/>                           
                                     </tree>
                                 </field>
-                            </page>
-                            <page string="Terms &amp; Conditions">
-                                <field name="line_ids_c" nolabel="1" readonly = "status not in ('draft','editable')">
-                                    <tree string="Terms &amp; Condition" editable="bottom">
-                                        <field name="header_id" column_invisible="1"/>
-                                        <field name="term_name" required="1"/>
-                                        <field name="description" required="1"/>
-                                        <field name="company_id" column_invisible="1"/>                           
-                                    </tree>
-                                </field>
-                            </page>
+                            </page>                            
                             <page string="Attachments" >
                                 <field name="line_ids_a" nolabel="1" readonly = "status not in ('draft','editable')">
                                     <tree string="Attachments" editable="bottom">
@@ -102,7 +92,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                         <field name="sys_ref"/>
                                     </group>
@@ -123,6 +113,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -145,8 +136,8 @@
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
                     <field name="name"/>
-                    <field name="prim_cont_person_id"/>
-                    <field name="mobile_no"/>                    
+                    <field name="payment_term_id"/>                    
+                    <field name="category"/>                    
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -168,8 +159,8 @@
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
                     <field name="name"/>
-                    <field name="prim_cont_person_id"/>
-                    <field name="mobile_no"/>
+                    <field name="payment_term_id"/>                    
+                    <field name="category"/> 
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -187,13 +178,12 @@
             <field name="arch" type="xml">
                 <search string="Service">
                     <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
-                    <field name="prim_cont_person_id" string="Primary Contact Person" filter_domain="[('prim_cont_person_id','ilike',self)]"/>
-                    <field name="mobile_no" filter_domain="[('mobile_no','ilike',self)]"/>
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
+                    <field name="payment_term_id" string="Default Payment Term" filter_domain="[('payment_term_id','ilike',self)]"/>
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -201,9 +191,15 @@
                     <filter name="Hidden" domain="[('active', '=', False)]"/>
                     
                     <group expand="0" string="Group By">
+                        <filter string="Default Payment Term" name="payment_term_id" domain="[]" context="{'group_by': 'payment_term_id'}"/>
+                        <filter string="Category" name="category" domain="[]" context="{'group_by': 'category'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -219,7 +215,7 @@
             <field name="search_view_id" ref="cm_service_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 

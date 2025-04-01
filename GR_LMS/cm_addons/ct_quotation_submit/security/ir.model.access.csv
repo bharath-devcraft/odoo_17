@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_quotation_submit,ct.quotation.submit,model_ct_quotation_submit,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotation_submit_line,ct.quotation.submit.line,model_ct_quotation_submit_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotation_submit_attachment_line,ct.quotation.submit.attachment.line,model_ct_quotation_submit_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotation_submit_batch_cancel,ct.quotation.submit.batch.cancel,model_ct_quotation_submit_batch_cancel,custom_properties.group_erp_admin,1,1,1,1
+access_ct_quotation_submit_expenses_line,ct.quotation.submit.expenses.line,model_ct_quotation_submit_expenses_line,custom_properties.group_erp_admin,1,1,1,1

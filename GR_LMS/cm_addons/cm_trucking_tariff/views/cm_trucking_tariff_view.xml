@@ -32,23 +32,37 @@
                         <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
                         <group>
                             <group >
-                                <label for="eff_from_date" class="name-lable"/>
+                                <label for="valid_from_date" class="name-lable"/>
                                 <div>
-                                    <field name="eff_from_date" class="name-value" required="1" readonly = "status not in ('draft','editable')"/>
+                                    <field name="valid_from_date" class="name-value" required="1" readonly = "status not in ('draft','editable')"/>
                                     
                                 </div> 
                                 
-                                <field name="country_id" string="POL Country" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="validity_period" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="valid_to_date" readonly="1" force_save = "1"/>
+                                <field name="dg_product" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="un_no" required="dg_product == 'yes'" invisible="dg_product != 'yes'" force_save="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="country_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                 <field name="port_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
-                                <field name="street" string="Destination Address" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="address" string="From Address" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="pin_code" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="port_pro_grp_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                             </group>
                             <group>
-                                
+                                <field name="short_name" readonly = "1" force_save="1"/>
+                                <field name="container_category" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="name" string="Service Provider Name" widget="no_special_char" readonly = "status not in ('draft','editable')"/>
-                                <field name="currency_id" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="actual_cost" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="gr_cost" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="interim_halt" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="halt_address" required="interim_halt == 'applicable'" invisible="interim_halt != 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="del_address" string="To Address" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="to_pin_code" required="1" readonly = "status not in ('draft','editable')"/>
+                                <label for= "actual_cost"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="actual_cost" style="width: 35%%"  required="1" readonly = "status not in ('draft','editable')"/>
+                                        <field name="currency_id" style="width: 20%%" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                         </group>
@@ -77,7 +91,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -97,6 +111,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -118,7 +133,8 @@
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
-                    <field name="eff_from_date"/>
+                    <field name="short_name"/>
+                    <field name="valid_from_date"/>
                     <field name="country_id"/>
                     <field name="port_id"/>
                     <field name="currency_id"/>
@@ -142,7 +158,8 @@
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
-                    <field name="eff_from_date"/>
+                    <field name="short_name"/>
+                    <field name="valid_from_date"/>
                     <field name="country_id"/>
                     <field name="port_id"/>
                     <field name="currency_id"/>
@@ -163,14 +180,15 @@
             <field name="arch" type="xml">
                 <search string="Trucking Tariff">
                     <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
+                    <field name="short_name" filter_domain="[('name','ilike',self)]"/>
                     <field name="country_id" filter_domain="[('country_id','ilike',self)]"/>
                     <field name="port_id" filter_domain="[('port_id','ilike',self)]"/>
                     
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -179,11 +197,15 @@
                     
                     <group expand="0" string="Group By">
                         <filter string="Country" name="country_id" domain="[]" context="{'group_by': 'country_id'}"/>
-                        <filter string="POL" name="port_id" domain="[]" context="{'group_by': 'port_id'}"/>
+                        <filter string="Entry / Exit Port?" name="port_id" domain="[]" context="{'group_by': 'port_id'}"/>
                         <filter string="Currency" name="currency_id" domain="[]" context="{'group_by': 'currency_id'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -199,11 +221,12 @@
             <field name="search_view_id" ref="cm_trucking_tariff_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 
         <menuitem name="Trucking Tariff" id="cm_trucking_tariff_act_menu" parent="cm_master.cm_tariff_master_m_parent" action="cm_trucking_tariff_win_action" sequence="28"/>
+        <menuitem name="Trucking Tariff" id="cm_op_trucking_tariff_act_menu" parent="cm_master.cm_op_tariff_master_m_parent" action="cm_trucking_tariff_win_action" sequence="32"/>
 
     </data>
         

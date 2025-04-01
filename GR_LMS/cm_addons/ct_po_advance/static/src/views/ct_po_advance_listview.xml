@@ -1,0 +1,7 @@
+<templates>
+    <t t-name="ct_po_advance.CtPoAdvanceListView" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_list_renderer')]" position="before">
+            <CtPoAdvanceDashBoard />
+        </xpath>
+    </t>
+</templates>

@@ -21,6 +21,7 @@ class CmCompanyLine(models.Model):
 	mb_cc_id = fields.Many2one('cm.country.code', string="Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	wh_cc_id = fields.Many2one('cm.country.code', string="Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
 	ph_cc_id = fields.Many2one('cm.country.code', string="Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	same_as_mobile = fields.Boolean(string="Same as Mobile No", default=False, help="Click to apply same mobile number to whatsapp number")
 	email = fields.Char(string="Email", copy=False, size=252)
 	skype = fields.Char(string="Skype ID", size=50)
 	note = fields.Html(string="Notes", copy=False, sanitize=False)
@@ -47,3 +48,13 @@ class CmCompanyLine(models.Model):
 		for line in self:
 			if line.phone_no and not valid_phone_no(line.phone_no):
 				raise UserError(_(f"Phone number is invalid. Please enter the correct phone number with SDD code in additional contact details tab, Ref : {line.phone_no}"))
+
+	@api.onchange('same_as_mobile','mobile_no','mb_cc_id')
+	def onchange_same_as_mobile(self):
+		for rec in self:
+			if rec.same_as_mobile:
+				rec.whatsapp_no = rec.mobile_no
+				rec.wh_cc_id = rec.mb_cc_id
+			else:
+				rec.whatsapp_no = False
+				rec.wh_cc_id = False

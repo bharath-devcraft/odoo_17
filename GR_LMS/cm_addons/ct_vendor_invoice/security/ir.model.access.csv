@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_vendor_invoice,ct.vendor.invoice,model_ct_vendor_invoice,custom_properties.group_erp_admin,1,1,1,1
+access_ct_vendor_invoice_attachment_line,ct.vendor.invoice.attachment.line,model_ct_vendor_invoice_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_vendor_invoice_pri_details_line,ct.vendor.invoice.pri.details.line,model_ct_vendor_invoice_pri_details_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_vendor_invoice_tax_line,ct.vendor.invoice.tax.line,model_ct_vendor_invoice_tax_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_vendor_invoice_advance_line,ct.vendor.invoice.advance.line,model_ct_vendor_invoice_advance_line,custom_properties.group_erp_admin,1,1,1,1

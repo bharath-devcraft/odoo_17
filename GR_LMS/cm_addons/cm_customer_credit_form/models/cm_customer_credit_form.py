@@ -13,13 +13,13 @@ TIME_FORMAT='%Y-%m-%d %H:%M:%S'
 IR_CONFIG_PARAMETER = 'ir.config_parameter'
 CM_CUSTOMER = 'cm.customer'
 RES_CURRENCY = 'res.currency'
+CM_COUNTRY_CODE = 'cm.country.code'
 
 CUSTOM_STATUS = [
         ('draft', 'Draft'),
         ('editable', 'Editable'),
         ('active', 'Active'),
-        ('inactive', 'Inactive'),
-        ('revised', 'Revised')]
+        ('inactive', 'Inactive')]
 
 ENTRY_MODE =  [('manual','Manual'),
                ('auto', 'Auto')]
@@ -41,7 +41,6 @@ class CmCustomerCreditForm(models.Model):
     _order = 'name asc'
 
     name = fields.Char(string="Name", index=True, copy=False)
-    # short_name = fields.Char(string="Short Name", copy=False, help="Maximum 4 char is allowed and will accept upper case only", size=4)
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
     remarks = fields.Text(string="Remarks", copy=False)
@@ -51,6 +50,9 @@ class CmCustomerCreditForm(models.Model):
     mobile_no = fields.Char(string="Mobile No", size=15, copy=False)
     whatsapp_no = fields.Char(string="WhatsApp No",copy=False, size=15)
     phone_no = fields.Char(string="Landline No / Ext", size=12, copy=False)
+    mb_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Mobile Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    wh_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Whatsapp Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    ph_cc_id = fields.Many2one(CM_COUNTRY_CODE, string="Phone Country Code", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     email = fields.Char(string="Email", copy=False, size=252)
     fax = fields.Char(string="Fax", copy=False, size=12)
     street = fields.Char(string="Address Line 1", size=252)
@@ -68,26 +70,27 @@ class CmCustomerCreditForm(models.Model):
     customer_id = fields.Many2one(CM_CUSTOMER, string="Customer Name", domain=[('status', '=', 'active'),('active_trans', '=', True)])
     year_id = fields.Many2one('cm.calendar.year', string="Year Established", domain=[('status', '=', 'active'),('active_trans', '=', True)])
     parent_company_id = fields.Many2one(CM_CUSTOMER, string="Parent Company", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    customer_type_id = fields.Many2one('cm.customer.type', string="Customer Type", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    customer_type_ids = fields.Many2many('cm.customer.type', string="Customer Type", ondelete='restrict')
     customer_bus_act_id = fields.Many2many('cm.customer.business.activity', string="Customer's Business Activity", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
-
+    
     is_registered = fields.Selection(selection=YES_OR_NO, string="Is Registered Company", copy=False)
     pdc_waived = fields.Selection(selection=YES_OR_NO, string="PDC To Be Waived / Obtained", copy=False)
     security_chk_obt = fields.Selection(selection=YES_OR_NO, string="Security Cheque To Be Obtained / Waived", copy=False)
     cheque_bounced = fields.Selection(selection=YES_OR_NO, string="Has Party Cheque Bounced in Last 6 Months?", copy=False)
     paid_up_capital = fields.Float(string="Paid-up Capital", copy=False)
-    proj_bus_volume = fields.Float(string="Projected Volume of Business", copy=False)
+    proj_bus_volume = fields.Float(string="Projected Volume of Business(TEUS)", copy=False)
     
 
     credit_days = fields.Integer(string="Credit Days", copy=False)
     interest = fields.Integer(string="Interest(%)", default = 18)
-    credit_limit = fields.Float(string="Number", copy=False)
+    credit_limit = fields.Float(string="Credit Limit", copy=False)
     credit_agreement = fields.Selection(selection=APPLICABLE_OPTION, string="Credit Agreement", copy=False)
     credit_currency_id = fields.Many2one(RES_CURRENCY, string="Currency", copy=False, tracking=True)
     interest_cal_date = fields.Selection(selection=INTEREST_CAL, string="Interest Calculation Date", copy=False)
     auto_draft_inv = fields.Selection(selection=YES_OR_NO, string="Automate Draft Invoice", copy=False)
     overdue_currency_id = fields.Many2one(RES_CURRENCY, string="Currency", copy=False, tracking=True)
-
+    attachment_ids = fields.Many2many('ir.attachment', string="Credit Form", ondelete='restrict', check_company=True)
+    
     cin_no = fields.Char(string="CIN No", copy=False, size=21)
     tax_reg_no = fields.Char(string="Tax Reg No(TRC)", copy=False, size=20)
     company_type = fields.Selection(selection=COMPANY_TYPE_OPTIONS, string="Company Type", copy=False)
@@ -95,7 +98,7 @@ class CmCustomerCreditForm(models.Model):
 
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -181,8 +184,6 @@ class CmCustomerCreditForm(models.Model):
     def onchange_country_id(self):
         if self.country_id:
             self.country_code = self.country_id.code
-            self.city_id = False
-            self.state_id = False
         else:
             self.country_code = False
             self.city_id = False
@@ -202,7 +203,7 @@ class CmCustomerCreditForm(models.Model):
             self.year_id = self.customer_id.year_id
             self.parent_company_id = self.customer_id.parent_company_id
             self.company_type = self.customer_id.company_type
-            self.customer_type_id = self.customer_id.customer_type_id
+            self.customer_type_ids = self.customer_id.customer_type_ids
             self.is_registered = self.customer_id.is_registered
             self.cin_no = self.customer_id.cin_no
             self.tax_reg_no = self.customer_id.tax_reg_no
@@ -213,6 +214,9 @@ class CmCustomerCreditForm(models.Model):
             self.mobile_no = self.customer_id.mobile_no
             self.whatsapp_no = self.customer_id.whatsapp_no
             self.phone_no = self.customer_id.phone_no
+            self.mb_cc_id = self.customer_id.mb_cc_id
+            self.wh_cc_id = self.customer_id.wh_cc_id
+            self.ph_cc_id = self.customer_id.ph_cc_id
             self.email = self.customer_id.email
             self.skype = self.customer_id.skype
             self.fax = self.customer_id.fax
@@ -221,12 +225,13 @@ class CmCustomerCreditForm(models.Model):
             self.city_id = self.customer_id.city_id
             self.state_id = self.customer_id.state_id
             self.country_id = self.customer_id.country_id
+            self.country_code = self.customer_id.country_code
             self.pin_code = self.customer_id.pin_code
         else:
             self.name = False
             self.year_id = False
             self.parent_company_id = False
-            self.customer_type_id = False
+            self.customer_type_ids = False
             self.company_type = False
             self.is_registered = False
             self.cin_no = False
@@ -246,11 +251,23 @@ class CmCustomerCreditForm(models.Model):
             self.city_id = False
             self.state_id = False
             self.country_id = False
+            self.country_code = False
             self.pin_code = False
-
 
     def validations(self):
         warning_msg = []
+        if not self.line_ids:
+            warning_msg.append("System not allow to approve with empty line director details")
+        
+        if not self.credit_days:
+            warning_msg.append("Credit Days value should be greater than zero.")
+        
+        if not self.credit_limit:
+            warning_msg.append("Credit Limit value should be greater than zero.")
+        
+        if not self.proj_bus_volume:
+            warning_msg.append("Projected volume of business(TEUS) value should be greater than zero.")
+
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
         if not is_mgmt:
             res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
@@ -317,20 +334,7 @@ class CmCustomerCreditForm(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         
         cm_customer_credit_form = self.env[CM_CUSTOMER_CREDIT_FORM]

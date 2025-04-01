@@ -30,13 +30,14 @@ class CmExchangeRate(models.Model):
 	name = fields.Char(string="Source", index=True, copy=False, c_rule=True)
 	status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
 	inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-	remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+	remarks = fields.Text(string="Remarks", copy=False)
 	company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 	
 	entry_date = fields.Date(string="Date", copy=False)
-	currency_id = fields.Many2one('res.currency', string="Base Currency", copy=False, default=lambda self: self.env.ref('base.INR').id if self.env.ref('base.INR', raise_if_not_found=False) else self.env.company.currency_id.id, ondelete='restrict', readonly=True, tracking=True)
+	country_id = fields.Many2one('res.country', string="Country", ondelete='restrict',default=lambda self: self.env.ref('base.in', raise_if_not_found=False).id if self.env.ref('base.in', raise_if_not_found=False) else False, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	currency_id = fields.Many2one('res.currency', string="Base Currency", copy=False, ondelete='restrict', readonly=True, tracking=True)
 
-	active = fields.Boolean(string="Visible", default=True)
+	active = fields.Boolean(string="Visible in View", default=True)
 	active_rpt = fields.Boolean(string="Visible In Reports", default=True)
 	active_trans = fields.Boolean(string="Visible In Transactions", default=True)
 	entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -79,6 +80,13 @@ class CmExchangeRate(models.Model):
 			raise UserError(_(formatted_messages))
 		
 		return True
+
+	@api.onchange('country_id')
+	def onchange_country_id(self):
+		if self.country_id:
+			self.currency_id = self.country_id.currency_id.id
+		else:
+			self.currency_id = False
 
 	@validation
 	def entry_approve(self):
@@ -133,23 +141,48 @@ class CmExchangeRate(models.Model):
 		vals.update({'update_date': time.strftime(TIME_FORMAT),
 					 'update_user_id': self.env.user.id})
 		return super(CmExchangeRate, self).write(vals)
-	 
+
+	def convert_to_base_currency(self, base_currency_code, convert_currency_code, convert_value):
+		base_currency = self.env['res.currency'].search([
+			('name', '=', base_currency_code),
+			('status', '=', 'active'),
+			('active_trans', '=', True)
+		], limit=1)
+		
+		if not base_currency:
+			raise UserError(_(f"Base currency({base_currency_code}) not found in the system."))
+
+		convert_currency = self.env['res.currency'].search([
+			('name', '=', convert_currency_code),
+			('status', '=', 'active'),
+			('active_trans', '=', True)
+		], limit=1)
+		
+		if not convert_currency:
+			raise UserError(_(f"Convert currency({convert_currency_code}) not found in the system."))
+
+		convert_currency_rec = self.env['cm.exchange.rate'].search([
+			('status', '=', 'active'),
+			('active_trans', '=', True),
+			('currency_id', '=', base_currency.id)
+		], order='entry_date desc', limit=1)
+
+		if not convert_currency_rec:
+			raise UserError(_(f"No entry found for the base currency({base_currency_code}) in the exchange rate master."))
+
+		convert_exchange_line = convert_currency_rec.line_ids.filtered_domain([('currency_id', '=', convert_currency.id)])
+		convert_exchange_rate = convert_exchange_line.exchange_rate if convert_exchange_line else None
+
+		if convert_exchange_rate is None:
+			raise UserError(_(f"Exchange rate value not found for convert currency({convert_currency_code})."))
+
+		converted_value = convert_value * convert_exchange_rate
+
+		return {'exchange_rate':convert_exchange_rate, 'converted_value': round(converted_value, 2)}
+
 	@api.model
 	def retrieve_dashboard(self):
-		result = {
-			'all_draft': 0,
-			'all_active': 0,
-			'all_inactive': 0,
-			'all_editable': 0,
-			'my_draft': 0,
-			'my_active': 0,
-			'my_inactive': 0,
-			'my_editable': 0,
-			'all_today_count': 0,
-			'all_today_value': 0,
-			'my_today_count': 0,
-			'my_today_value': 0,
-		}
+		result = {}
 		
 		cm_exchange_rate = self.env[CM_EXCHANGE_RATE]
 		result['all_draft'] = cm_exchange_rate.search_count([('status', '=', 'draft')])

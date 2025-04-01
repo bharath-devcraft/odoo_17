@@ -7,7 +7,7 @@
             Collection of the fields with the business logic and validation.
     """,
     'author': "Hari",
-    'website': "https://www.goodrich.co",
+    'website': "https://catalystsolutions.sg",
     'category': 'Custom Modules/custom_modules',
     'application' : True,
     'depends': ['base','product','uom', 'account','cm_master'],

@@ -18,6 +18,10 @@ CUSTOM_STATUS = [
 ENTRY_MODE =  [('manual','Manual'),
 			   ('auto', 'Auto')]
 
+PRICE_OWNER = [('agent', 'Agent'),('operator', 'Operator')]
+
+CONTAINER_CATEGORY = [('laden','Laden'), ('empty', 'Empty')]
+
 class CmDoorTariff(models.Model):
 	_name = 'cm.door.tariff'
 	_description = 'Door Tariff'
@@ -25,18 +29,23 @@ class CmDoorTariff(models.Model):
 	_order = 'name asc'
 
 
-	name = fields.Char(string="Name", index=True, copy=False)
+	name = fields.Char(string="Name", index=True)
 	status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
 	inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-	remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+	remarks = fields.Text(string="Remarks")
 	company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 	
 	eff_from_date = fields.Date(string="Effective From Date")
 	country_id = fields.Many2one('res.country', string="Country", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)], tracking=True)
-	port_id = fields.Many2one('cm.port', string="Port", ondelete='restrict', domain="[('country_id', '=', country_id), ('status', '=', 'active'), ('active_trans', '=', True)]", tracking=True)
+	port_id = fields.Many2one('cm.port', string="Port Name", ondelete='restrict', domain="[('country_id', '=', country_id), ('status', '=', 'active'), ('active_trans', '=', True)]", tracking=True)
 	ship_term_id = fields.Many2one('cm.shipment.term', string="Shipment Term", domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	terminal_id = fields.Many2one('cm.port.terminal', string="Terminal Name", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('port_id', '=', port_id)]")
+	service_id= fields.Many2one('cm.service', string="Service Name", domain=[('status', '=', 'active'),('active_trans', '=', True)])
+	price_owner = fields.Selection(selection=PRICE_OWNER, string="Price Owner")
+	tot_amt = fields.Float(string="Total Amount", store=True, compute='_compute_all_line')
+	container_category = fields.Selection(selection=CONTAINER_CATEGORY, string="Empty / Laden", default="laden")
 	
-	active = fields.Boolean(string="Visible", default=True)
+	active = fields.Boolean(string="Visible in View", default=True)
 	active_rpt = fields.Boolean(string="Visible In Reports", default=True)
 	active_trans = fields.Boolean(string="Visible In Transactions", default=True)
 	entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -53,27 +62,44 @@ class CmDoorTariff(models.Model):
 	line_ids_a = fields.One2many('cm.door.tariff.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
 	
 	
-	@api.constrains('port_id')
-	def name_validation(self):
-		for record in self:
-			if record.port_id:
-				existing_count = self.search_count([
-					('port_id', '=', record.port_id.id),
-					('id', '!=', record.id),
-					('company_id', '=', record.company_id.id)
-				])
-				if existing_count > 0:
-					raise UserError(_("Door Tariff Port must be unique"))
+	@api.depends('line_ids')
+	def _compute_all_line(self):
+		for rec in self:
+			rec.tot_amt =  sum(rec.line_ids.mapped('gr_cost'))
+	
+	def duplicate_validation(self):
+		if (self.port_id and self.terminal_id and self.ship_term_id 
+			and self.price_owner):
+			self.env.cr.execute(""" select id
+			from cm_door_tariff where port_id  = %s
+			and terminal_id = %s and ship_term_id = '%s'            
+			and price_owner = '%s'
+			and id != %s and company_id = %s""" %(self.port_id.id,self.terminal_id.id,
+												self.ship_term_id.id,self.price_owner,self.id,
+												self.company_id.id))
+			if self.env.cr.fetchone():
+				raise UserError(_("Duplicate entry are not allowed"))
+	
 
 	@api.onchange('port_id')
 	def onchange_port(self):
 		if self.port_id:
 			self.name = self.port_id.name
+			terminal_recs = self.env['cm.port.terminal'].search([
+				('port_id', '=', self.port_id.id),
+				('company_id', '=', self.company_id.id)
+			])
+			if len(terminal_recs) == 1:  
+				self.terminal_id = terminal_recs.id
+			else:
+				self.terminal_id = False
 		else:
+			self.terminal_id = False
 			self.name = ""
 				
 	def validations(self):
 		warning_msg = []
+		self.duplicate_validation()
 		if not self.line_ids:
 			warning_msg.append("System not allow to approve with empty line details")
 		is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
@@ -143,34 +169,42 @@ class CmDoorTariff(models.Model):
 	 
 	@api.model
 	def retrieve_dashboard(self):
-		result = {
-			'all_draft': 0,
-			'all_active': 0,
-			'all_inactive': 0,
-			'all_editable': 0,
-			'my_draft': 0,
-			'my_active': 0,
-			'my_inactive': 0,
-			'my_editable': 0,
-			'all_today_count': 0,
-			'all_today_value': 0,
-			'my_today_count': 0,
-			'my_today_value': 0,
-		}
+		result = {}
 		
 		cm_door_tariff = self.env['cm.door.tariff']
-		result['all_draft'] = cm_door_tariff.search_count([('status', '=', 'draft')])
-		result['all_active'] = cm_door_tariff.search_count([('status', '=', 'active')])
-		result['all_inactive'] = cm_door_tariff.search_count([('status', '=', 'inactive')])
-		result['all_editable'] = cm_door_tariff.search_count([('status', '=', 'editable')])
-		result['my_draft'] = cm_door_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid)])
-		result['my_active'] = cm_door_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid)])
-		result['my_inactive'] = cm_door_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid)])
-		result['my_editable'] = cm_door_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid)])
+		result['all_draft'] = cm_door_tariff.search_count([('status', '=', 'draft'), ('price_owner', '=', 'agent')])
+		result['all_active'] = cm_door_tariff.search_count([('status', '=', 'active'), ('price_owner', '=', 'agent')])
+		result['all_inactive'] = cm_door_tariff.search_count([('status', '=', 'inactive'), ('price_owner', '=', 'agent')])
+		result['all_editable'] = cm_door_tariff.search_count([('status', '=', 'editable'), ('price_owner', '=', 'agent')])
+		result['my_draft'] = cm_door_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
+		result['my_active'] = cm_door_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
+		result['my_inactive'] = cm_door_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
+		result['my_editable'] = cm_door_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
 			  
-		result['all_today_count'] = cm_door_tariff.search_count([('crt_date', '>=', fields.Date.today())])
-		result['all_month_count'] = cm_door_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1))])
-		result['my_today_count'] = cm_door_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today())])
-		result['my_month_count'] = cm_door_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1))])
+		result['all_today_count'] = cm_door_tariff.search_count([('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'agent')])
+		result['all_month_count'] = cm_door_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1)), ('price_owner', '=', 'agent')])
+		result['my_today_count'] = cm_door_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'agent')])
+		result['my_month_count'] = cm_door_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1)), ('price_owner', '=', 'agent')])
+
+		return result
+
+	@api.model
+	def retrieve_op_dashboard(self):
+		result = {}
+		
+		cm_door_tariff = self.env['cm.door.tariff']
+		result['all_draft'] = cm_door_tariff.search_count([('status', '=', 'draft'), ('price_owner', '=', 'operator')])
+		result['all_active'] = cm_door_tariff.search_count([('status', '=', 'active'), ('price_owner', '=', 'operator')])
+		result['all_inactive'] = cm_door_tariff.search_count([('status', '=', 'inactive'), ('price_owner', '=', 'operator')])
+		result['all_editable'] = cm_door_tariff.search_count([('status', '=', 'editable'), ('price_owner', '=', 'operator')])
+		result['my_draft'] = cm_door_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+		result['my_active'] = cm_door_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+		result['my_inactive'] = cm_door_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+		result['my_editable'] = cm_door_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+			  
+		result['all_today_count'] = cm_door_tariff.search_count([('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'operator')])
+		result['all_month_count'] = cm_door_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1)), ('price_owner', '=', 'operator')])
+		result['my_today_count'] = cm_door_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'operator')])
+		result['my_month_count'] = cm_door_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1)), ('price_owner', '=', 'operator')])
 
 		return result

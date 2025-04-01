@@ -33,21 +33,38 @@
                     </header>
                     
                     <sheet>
+                        <widget name="web_ribbon" title="Draft" bg_color="bg-info" invisible = "status != 'draft'"/>
+                        <widget name="web_ribbon" title="Editable" bg_color="bg-warning" invisible = "status != 'editable'"/>
                         <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
+                        <widget name="web_ribbon" title="Inactive" bg_color="bg-danger" invisible = "status != 'inactive'"/>
                         <group>
                             <group>
                                 <label for="name" class="name-lable"/>
                                 <div>
-                                    <field name="name" string='Depot / Location Name' class ="name-value" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+                                    <field name="name" string='Depot / Location Name' class ="name-value" widget="auto_fill" required="1" readonly = "status not in ('draft','editable')"/>
                                 </div>
+                                <field name="depot_vendor_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                             </group>
                             <group>
-                                <field name="short_name" widget="upper_case" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="short_name" style="width: 92%%" widget="upper_case" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                         </group>
+                        <group string = "Depot Address">
+                            <group>
+                                <field name="street" string="Address Line 1" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="street1" string="Address Line 2" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                            <group>
+                                <field name="country_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
+                                <field name="country_code" required="1" invisible="1"/>
+                                <field name="city_id" required="country_code == 'IN'" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
+                                <field name="state_id" force_save="1" readonly = "1" options="{'no_create': True}"/> 
+                                <field name="pin_code" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+                            </group>
+                        </group>
 
-                        <group string = "Depot Location Information"> 
+                        <group string = "Depot Information"> 
                             <label for ='mon' string="Week Off Days"/>
                             <div class="o_weekday_checkbox_container">
                                 
@@ -81,17 +98,20 @@
                                 <field name="total_area" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="container_type" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="container_size" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="cargo_category" string="Cargo Nature" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="product_ids" options="{'no_create': True}" widget="many2many_tags" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="internal_ins"  required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="paver_blocked" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="package_deal" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="surveillance_systems" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="pub_transport_avl" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="other_facility" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="other_facility" readonly = "status not in ('draft','editable')"/>
                             </group>
                             <group>
                                 <field name="inv_track_sys" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="eva_procedure" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="etp" required="1" readonly = "status not in ('draft','editable')"/>    
                                 <field name="waste_disp_procedure" required="1" readonly = "status not in ('draft','editable')"/>
+                                
                                 <field name="steam_heat_fac" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="laden_storage_fac" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="degas_fac" required="1" readonly = "status not in ('draft','editable')"/>
@@ -99,40 +119,55 @@
                                 <field name="kosher_wash" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="emergency_plan" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="compt_cert" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="etp" required="1" readonly = "status not in ('draft','editable')"/>
+                                
+                                
                             </group>
                         </group>
 
                         <group string = "Contact Information">
                             <group>
                                 <field name="contact_person" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="designation" required="1"/>
-                                <field name="mobile_no" widget="numeric" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="whatsapp_no" widget="numeric" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="phone_no" widget="numeric"/>
+                                <field name="designation" required="1" readonly = "status not in ('draft','editable')"/>
+                                <label for= "mobile_no"/>
+                                <div>
+                                    <div class="o_address_format" style="display: flex; align-items: flex-start;">
+                                        <field name="mb_cc_id"  invisible="country_id == False or mb_cc_id == False" style="width: 15%%"  options="{'no_create': True,'no_open': True}" force_save="1" readonly = "1"/>
+										<field name="mobile_no" widget="numeric" style="width: 85%%" required="1" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                <field name="same_as_mobile" readonly = "status not in ('draft','editable')"/>
+                                <label for= "whatsapp_no"/>
+                                <div>
+                                    <div class="o_address_format" style="display: flex; align-items: flex-start;">
+                                        <field name="wh_cc_id"  invisible="country_id == False or wh_cc_id == False" style="width: 15%%"  options="{'no_create': True,'no_open': True}" force_save="1" readonly = "1"/>
+										<field name="whatsapp_no" widget="numeric" style="width: 85%%" required="1" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                
+                                <label for= "phone_no"/>
+                                <div>
+                                    <div class="o_address_format" style="display: flex; align-items: flex-start;">
+                                        <field name="ph_cc_id"  invisible="country_id == False or ph_cc_id == False" style="width: 15%%"  options="{'no_create': True,'no_open': True}" force_save="1" readonly = "1"/>
+										<field name="phone_no" widget="numeric" style="width: 85%%" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+                                
+                            </group>
+                            <group>
                                 <field name="email" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="skype" readonly = "status not in ('draft','editable')"/>
                                 <field name="fax" widget="numeric" readonly = "status not in ('draft','editable')"/>
-                            </group>
-                            <group>
-                                <field name="street" string="Address Line 1" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="street1" string="Address Line 2" readonly = "status not in ('draft','editable')"/>
-                                <field name="country_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
-                                <field name="country_code" required="1" invisible="1"/>
-                                <field name="city_id" required="country_code == 'IN'" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
-                                <field name="state_id" force_save="1" readonly = "1" options="{'no_create': True}"/> 
-                                <field name="pin_code" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
                             </group>
                         </group>
                         
                         <group string = "Business Information">
                             <group>
                                 <field name="contract_type"  string="Depot Usage Type" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="lease_duration" required="contract_type == 'lease'" invisible="contract_type != 'lease'" readonly = "status not in ('draft','editable')"/>
-                                <field name="ls_valid_from_date" required="contract_type == 'lease'" invisible="contract_type != 'lease'" readonly = "status not in ('draft','editable')"/>
-                                <field name="ls_valid_to_date" required="contract_type == 'lease'"  invisible="contract_type != 'lease'" readonly = "status not in ('draft','editable')"/>
-                                <field name="rental_type" required="contract_type == 'rent'" invisible="contract_type != 'rent'" readonly = "status not in ('draft','editable')"/>
-                                <field name="rental_value" required="contract_type == 'rent'" invisible="contract_type != 'rent'" readonly = "status not in ('draft','editable')"/>
+                                <field name="ls_valid_from_date" invisible="contract_type != 'lease'" readonly = "1"/>
+                                <field name="lease_duration" invisible="contract_type != 'lease'" readonly = "1"/>
+                                <field name="ls_valid_to_date" invisible="contract_type != 'lease'" readonly = "1"/>
+                                <field name="rental_type" invisible="contract_type != 'rent'" readonly = "1"/>
+                                <field name="rental_value" invisible="contract_type != 'rent'" readonly = "1"/>
                             </group>
                             <group>
                                 <field name="contract_agree" required="1" readonly = "status not in ('draft','editable')"/>
@@ -145,9 +180,9 @@
                         <group string = "Audit Details">
                             <group>
                                 <field name="periodic_audit" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="interval" required="periodic_audit == 'applicable'"  invisible="periodic_audit != 'applicable'" readonly = "status not in ('draft','editable')"/>
                                 <field name="last_audit_date" required="periodic_audit == 'applicable'" invisible="periodic_audit != 'applicable'" readonly = "status not in ('draft','editable')"/>
-                                 <field name="next_audit_date" required="periodic_audit == 'applicable'" invisible="periodic_audit != 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="interval" required="periodic_audit == 'applicable'"  invisible="periodic_audit != 'applicable'" readonly = "status not in ('draft','editable')"/>
+                                <field name="next_audit_date" required="periodic_audit == 'applicable'" invisible="periodic_audit != 'applicable'" readonly = "1" force_save="1"/>
                             </group>
                             <group>
                                 <field name="escalation_days" readonly = "status not in ('draft','editable')"/>
@@ -176,9 +211,29 @@
                                                 <field name="company_id" invisible="1"/>
                                             </group>  
                                             <group>
-                                                <field name="mobile_no" widget="numeric" required="1"/>
-                                                <field name="whatsapp_no" widget="numeric" required="1"/>
-                                                <field name="phone_no" widget="numeric"/>
+                                                <label for= "mobile_no"/>
+												<div>
+													<div class="o_address_format" style="display: flex; align-items: flex-start;">
+														<field name="mb_cc_id"  style="width: 28%%"  options="{'no_create': True,'no_open': True}" required="1"/>
+														<field name="mobile_no" widget="numeric" style="width: 72%%" required="1"/>
+													</div>
+												</div>
+												<field name="same_as_mobile"/>
+												<label for= "whatsapp_no"/>
+												<div>
+													<div class="o_address_format" style="display: flex; align-items: flex-start;">
+														<field name="wh_cc_id"  style="width: 28%%"  options="{'no_create': True,'no_open': True}" required="1"/>
+														<field name="whatsapp_no" widget="numeric" style="width: 72%%" required="1" />
+													</div>
+												</div>
+												
+												<label for= "phone_no"/>
+												<div>
+													<div class="o_address_format" style="display: flex; align-items: flex-start;">
+														<field name="ph_cc_id"  style="width: 28%%"  options="{'no_create': True,'no_open': True}"/>
+														<field name="phone_no" widget="numeric" style="width: 72%%"/>
+													</div>
+												</div>
                                                 <field name="email" required="1"/>
                                                 <field name="skype"/>
                                             </group>
@@ -238,7 +293,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -258,6 +313,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -284,7 +340,6 @@
                     <field name="contract_type" string="Usage Type"/>
                     <field name="container_type" />
                     <field name="container_size"/>
-                    <field name="cargo_category" string="Cargo Nature"/>
                     <field name="paver_blocked"/>
                     <field name="package_deal"/>
                     <field name="halal_wash"/>
@@ -313,7 +368,6 @@
                     <field name="contract_type" string="Depot Usage Type"/>
                     <field name="container_type" />
                     <field name="container_size"/>
-                    <field name="cargo_category" string="Cargo Nature"/>
                     <field name="paver_blocked"/>
                     <field name="package_deal"/>
                     <field name="halal_wash"/>
@@ -340,12 +394,13 @@
                     <field name="mobile_no" string="Mobile No" filter_domain="[('mobile_no','ilike',self)]"/>
                     <field name="whatsapp_no" string="Whatsapp No" filter_domain="[('whatsapp_no','ilike',self)]"/>
                     <field name="email" string="Email" filter_domain="[('email','ilike',self)]"/>
+                    <field name="pin_code" filter_domain="[('pin_code','ilike',self)]"/>
 
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/>
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/>
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -356,7 +411,6 @@
                         <filter string="Depot Usage Type" name="contract_type" domain="[]" context="{'group_by': 'contract_type'}"/>
                         <filter string="Depot Usage Type" name="container_type" domain="[]" context="{'group_by': 'container_type'}"/>
                         <filter string="Container Size" name="container_size" domain="[]" context="{'group_by': 'container_size'}"/>
-                        <filter string="Cargo Nature" name="cargo_category" domain="[]" context="{'group_by': 'cargo_category'}"/>
                         <filter string="Paver Blocked" name="paver_blocked" domain="[]" context="{'group_by': 'paver_blocked'}"/>
                         <filter string="Package Deal" name="package_deal" domain="[]" context="{'group_by': 'package_deal'}"/>
                         <filter string="Halal Wash" name="halal_wash" domain="[]" context="{'group_by': 'halal_wash'}"/>
@@ -365,8 +419,12 @@
                         <filter string="State" name="state_id" domain="[]" context="{'group_by': 'state_id'}"/>
                         <filter string="Country" name="country_id" domain="[]" context="{'group_by': 'country_id'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -381,11 +439,11 @@
             <field name="search_view_id" ref="cm_depot_location_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 
-        <menuitem name="Depot Location" id="cm_depot_location_act_menu" parent="cm_master.cm_crm_master_m_parent" action="cm_depot_location_win_action" sequence="59"/>
+        <menuitem name="Depot Location" id="cm_depot_location_act_menu" parent="cm_master.cm_depot_master_m_parent" action="cm_depot_location_win_action" sequence="5"/>
 
     </data>
         

@@ -7,7 +7,7 @@
     'description': """Scope of this module to fulfill the necessary features related to port master.""",
 
     'author': "Bharath",
-    'website': "https://www.goodrich.co",
+    'website': "https://catalystsolutions.sg",
     'category': 'Custom Modules/custom_modules',
     'application' : True,
     'version': '0.1',

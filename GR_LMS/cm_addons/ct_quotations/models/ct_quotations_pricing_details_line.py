@@ -5,6 +5,8 @@ from odoo.exceptions import UserError
 APPLICABLE_OPTION = [('applicable', 'Applicable'),
                    ('not_applicable', 'Not Applicable')]
 
+GROUPING_OPTION = [('g1', 'G1'),('g2', 'G2'),('g3', 'G3'),('g4', 'G4'),('g5', 'G5'),('g6', 'G6'),('g7', 'G7'),('g8', 'G8'),('g9', 'G9'),('g10', 'G10')]
+
 ACCOUNT_TAX = 'account.tax'
 
 class CtQuotationsPricingDetailsLine(models.Model):
@@ -15,7 +17,7 @@ class CtQuotationsPricingDetailsLine(models.Model):
     header_id = fields.Many2one('ct.quotations', string="Header Ref", index=True, required=True, ondelete='cascade', c_rule=True)
 
     entry_seq = fields.Integer(string="Sequence")
-    chrg_head_id = fields.Many2one('cm.charges.heads', string="Charges Head", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)]) #TODO
+    chrg_head_id = fields.Many2one('cm.charges.heads', string="Charge Head", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)]) #TODO
     uom_id = fields.Many2one('uom.uom', string="UOM", ondelete='restrict')
     qty = fields.Float(string="Quantity", digits=(2, 3))	
     unit_price = fields.Float(string="Unit Price")
@@ -25,20 +27,25 @@ class CtQuotationsPricingDetailsLine(models.Model):
     disc_amt = fields.Float(string="Discount Amount(-)", store=True, compute='_compute_all_line')
     unitprice_wt = fields.Float(string="Unit Price(WT)", help="Unit price with Taxes", store=True, compute='_compute_all_line')
     markup_value = fields.Float(string="Markup Value")	
-    tot_amt = fields.Float(string="Total Value", store=True, compute='_compute_all_line')
-    tax_amt = fields.Float(string="Tax Value", store=True, compute='_compute_all_line')
+    taxable_amt = fields.Float(string="Taxable Value", store=True, compute='_compute_all_line')  
+    conversion_rate = fields.Float(string="Conversion Rate", store=True, compute='_compute_conversion_rate')
+    converted_cost_price = fields.Float(string="Converted Cost", store=True, compute='_compute_converted_cost_price')          
+    tot_amt = fields.Float(string="Total Recovery", store=True, compute='_compute_tot_amt')
+    tax_amt = fields.Float(string="Tax Value", store=True)
+    quotation_currency_id = fields.Many2one('res.currency', string=" ", related='header_id.quotation_currency_id')    
     line_tot_amt = fields.Float(string="Line Total", store=True, compute='_compute_all_line')    
     line_applicable = fields.Selection(selection=APPLICABLE_OPTION, string="#", copy=False, tracking=True)
+    grouping = fields.Selection(selection=GROUPING_OPTION, string="Grouping", copy=False, default='g1')
     entry_mode = fields.Selection(related='header_id.entry_mode', string="Entry Mode", default="manual", readonly=True, tracking=True)
     status = fields.Selection(related='header_id.status', store=True, c_rule=True)
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
     
     
     
-    @api.depends('qty', 'unit_price', 'tax_ids', 'disc_per')
+    @api.depends('qty', 'unit_price', 'tax_ids', 'disc_per', 'taxable_amt', 'markup_value')
     def _compute_all_line(self):
         for line in self:
-            line.disc_amt = (line.qty * (line.unit_price + line.markup_value) * line.disc_per) / 100
+            line.disc_amt = (line.qty * line.markup_value * line.disc_per) / 100
             amount_tax = 0
             if line.tax_ids and line.unit_price > 0:
                 tax_results = self.env[ACCOUNT_TAX]._compute_taxes([line._convert_to_tax_base_line_dict()])
@@ -46,22 +53,55 @@ class CtQuotationsPricingDetailsLine(models.Model):
                 amount_tax = totals['amount_tax']
 
             line.tax_amt = amount_tax
-            line.unitprice_wt = (line.tax_amt / line.qty) + (line.unit_price + line.markup_value) if line.qty else 0.00
-            line.tot_amt = line.qty * (line.unit_price + line.markup_value) 
-            line.line_tot_amt = (line.tot_amt + line.tax_amt) - line.disc_amt
+            line.unitprice_wt = (line.tax_amt / line.qty) + line.markup_value if line.qty else 0.00
+            line.taxable_amt = line.qty * line.markup_value
+            # line.tot_amt =  line.taxable_amt + line.tax_amt 
+            # line.line_tot_amt = (line.tot_amt) - line.disc_amt
     
     
     def _convert_to_tax_base_line_dict(self):
         self.ensure_one()
         return self.env[ACCOUNT_TAX]._convert_to_tax_base_line_dict(
             self,
-            partner= False,#self.header_id.partner_id,
+            partner= False,
             currency= self.currency_id,
-            product= False,#self.product_id,
+            product= False,
             taxes=self.tax_ids,
             price_unit=self.unit_price + self.markup_value,
             quantity=self.qty,
             discount=self.disc_per,
             price_subtotal=self.tot_amt,
         )
+               
+    @api.depends('qty', 'markup_value', 'currency_id')
+    def _compute_tot_amt(self):
+        for line in self:
+            if line.header_id.quotation_currency_id and line.currency_id.name:
+                if line.header_id.quotation_currency_id.name == line.currency_id.name:
+                    line.tot_amt = line.markup_value * line.qty
+                else:
+                    exchange_rate = self.env['cm.exchange.rate']
+                    line.tot_amt = exchange_rate.convert_to_base_currency(line.header_id.quotation_currency_id.name, line.currency_id.name,  (line.markup_value * line.qty))['converted_value']    
+                
+    @api.depends('qty', 'unit_price', 'currency_id')
+    def _compute_converted_cost_price(self):
+        for line in self:
+            if line.header_id.quotation_currency_id and line.currency_id.name:
+                if line.header_id.quotation_currency_id.name == line.currency_id.name:
+                    line.converted_cost_price = line.unit_price * line.qty                            
+                else:
+                    exchange_rate = self.env['cm.exchange.rate']
+                    line.converted_cost_price = exchange_rate.convert_to_base_currency(line.header_id.quotation_currency_id.name, line.currency_id.name,  (line.unit_price * line.qty))['converted_value'] 
+                      
+    @api.depends('qty', 'markup_value', 'currency_id')                              
+    def _compute_conversion_rate(self):
+        for line in self:
+            if line.header_id.quotation_currency_id and line.currency_id.name:            
+                if line.header_id.quotation_currency_id.name == line.currency_id.name:
+                    line.conversion_rate = 1
+                else:
+                    exchange_rate = self.env['cm.exchange.rate']
+                    line.conversion_rate = exchange_rate.convert_to_base_currency(line.header_id.quotation_currency_id.name, line.currency_id.name, (line.markup_value * line.qty))['exchange_rate']
+                
+                        
     

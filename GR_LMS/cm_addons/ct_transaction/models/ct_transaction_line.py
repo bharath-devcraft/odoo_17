@@ -30,7 +30,7 @@ class CtTransactionLine(models.Model):
     status = fields.Selection(related='header_id.status', store=True, c_rule=True)
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 
-    line_ids = fields.One2many('ct.transaction.serialno.line', 'header_id', string='S/N Details', copy=True, c_rule=True)
+    line_ids = fields.One2many('ct.transaction.serialno.line', 'header_id', string='Serial Number', copy=True, c_rule=True)
 
     @api.depends('qty', 'unit_price', 'tax_ids', 'disc_per')
     def _compute_all_line(self):
@@ -43,7 +43,8 @@ class CtTransactionLine(models.Model):
                 amount_tax = totals['amount_tax']
 
             line.tax_amt = amount_tax
-            line.unitprice_wt = (line.tax_amt / line.qty) + line.unit_price if line.qty else 0.00
+            discounted_price = line.unit_price - (line.unit_price * (line.disc_per or 0) / 100)
+            line.unitprice_wt = (line.tax_amt / line.qty) + discounted_price if line.qty else 0.00
             line.tot_amt = line.qty * line.unit_price
             line.line_tot_amt = (line.tot_amt + line.tax_amt) - line.disc_amt
     

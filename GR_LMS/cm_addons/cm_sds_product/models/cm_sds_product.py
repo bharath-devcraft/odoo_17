@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import time
 from odoo.addons.custom_properties.decorators import validation,is_special_char
-from datetime import datetime
+from datetime import datetime, timezone
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 from dateutil.relativedelta import relativedelta
+from pytz import timezone
 
 CM_SDS_PRODUCT = 'cm.sds.product'
 RES_USERS = 'res.users'
@@ -24,11 +25,13 @@ ENTRY_MODE =  [('manual','Manual'),
 
 YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 
-PACK_GRP = [('1', 'I'), ('2', 'II'), ('3', 'III')]
+DG_NON_DG = [('yes', 'DG'), ('no', 'Non DG')]
+
+PACK_GRP = [('1', 'I'), ('2', 'II'), ('3', 'III'), ('not_available', ' Not Available')]
 
 class CmSdsProduct(models.Model):
     _name = 'cm.sds.product'
-    _description = 'SDS Product'
+    _description = 'Product SDS'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'avatar.mixin']
     _order = 'name asc'
 
@@ -41,25 +44,26 @@ class CmSdsProduct(models.Model):
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
     
     product_id = fields.Many2one('cm.product', string="Product Name", copy=False, domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    vendor_id = fields.Many2one('cm.vendor.master', string="Manufacturer Name", copy=False, domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    issue_date = fields.Date(string="Issue Date", copy=False)
-    validity_period = fields.Integer(string="Validity Period(Months)", copy=False)
-    valid_to_date = fields.Date(string="Validity End Date", copy=False)
+    mfg_id = fields.Many2one('cm.product.manufacturer', string="Manufacturer Name", copy=False, domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    issue_date = fields.Date(string="SDS Issue Date", copy=False)
+    validity_period = fields.Integer(string="Validity Period(Months)", copy=False,default=36)
+    valid_to_date = fields.Date(string="Validity To Date", copy=False)
     
     che_name = fields.Char(string="Chemical Name", index=True, copy=False)
     ship_name = fields.Char(string="Proper Shipping Name", index=True, copy=False)
-    dg_product = fields.Selection(selection=YES_OR_NO, string="Dangerous Goods")
+    dg_product = fields.Selection(selection=DG_NON_DG, string="Product Type", copy=False)
     un_no = fields.Char( string="UN Number")
     imo_class = fields.Char(string="IMO Class (Range 1 - 9)")
     sub_class1 = fields.Char(string="Sub Class I", size =5)
     sub_class2 = fields.Char(string="Sub Class II", size =5)
-    psa_class = fields.Char(string="PSA Class")
-    lpk_class = fields.Char(string="LPK Class")
+    psa_class = fields.Char(string="PSA Group")
+    lpk_class = fields.Char(string="LPK Group")
     ems_class = fields.Char(string="EMS Code")
     pack_grp = fields.Selection(selection=PACK_GRP, string="Packing Group")
     mar_poll = fields.Selection(selection=YES_OR_NO, string="Marine Pollutant")
+    attachment_ids = fields.Many2many('ir.attachment', string="SDS Document", ondelete='restrict', check_company=True)
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -74,18 +78,27 @@ class CmSdsProduct(models.Model):
 
     line_ids = fields.One2many('cm.sds.product.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
     
-    @api.constrains('name')
+    @api.constrains('name','mfg_id')
     def name_validation(self):
-        if self.name:
+        if self.name and self.mfg_id:
             if is_special_char(self.env, self.name):
                 raise UserError(_("Special character is not allowed in name field"))
 
             name = self.name.upper().replace(" ", "")
+            mfg_name = self.mfg_id.id
             self.env.cr.execute(""" select upper(name)
             from cm_sds_product where upper(REPLACE(name, ' ', ''))  = '%s'
-            and id != %s and company_id = %s""" %(name, self.id, self.company_id.id))
+            and id != %s and mfg_id = %s and company_id = %s 
+            and status not in ('expired','inactive') """ %(name, self.id, mfg_name, self.company_id.id))
             if self.env.cr.fetchone():
-                raise UserError(_("Sds Product name must be unique"))
+                raise UserError(_("SDS is already in active status for this product & manufacture. Duplicate is not allowed."))
+
+    @api.constrains('attachment_ids')
+    def _check_attachment_ids(self):
+        for record in self:
+            for attachment in record.attachment_ids:
+                if attachment.mimetype != 'application/pdf':
+                    raise UserError(_("Only PDF files are allowed in attachments tab"))
 
     @api.onchange('product_id')
     def onchange_product_id(self):
@@ -130,6 +143,8 @@ class CmSdsProduct(models.Model):
             res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
             if res_config_rule and self.user_id == self.env.user:
                 warning_msg.append("Created user is not allow to approve the entry")
+        if not self.attachment_ids:
+            warning_msg.append("SDS Document should be mandatory")
         if warning_msg:
             formatted_messages = "\n".join(warning_msg)
             raise UserError(_(formatted_messages))
@@ -170,6 +185,17 @@ class CmSdsProduct(models.Model):
             'inactive_user_id': self.env.user.id,
             'inactive_date': time.strftime(TIME_FORMAT)})
         return True
+    
+    def auto_entry_expire(self):
+        records = self.search([('status','=','active')])
+        target_tz = timezone('Asia/Kolkata')
+        utc_now = fields.Datetime.now()
+        local_now = fields.Datetime.context_timestamp(self, fields.Datetime.from_string(utc_now)).astimezone(target_tz)
+        today = local_now.date()
+        for rec in records:        
+            if rec.status == 'active' and rec.valid_to_date <= today:
+                rec.write({'status': 'expired'})
+        return True
 
     def unlink(self):
         for rec in self:
@@ -192,20 +218,7 @@ class CmSdsProduct(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_sds_product = self.env[CM_SDS_PRODUCT]
         result['all_draft'] = cm_sds_product.search_count([('status', '=', 'draft')])

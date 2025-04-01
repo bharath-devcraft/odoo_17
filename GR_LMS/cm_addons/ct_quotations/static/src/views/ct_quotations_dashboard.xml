@@ -19,9 +19,9 @@
                                     <div class="fs-2" t-out="transactionData['all_wfa']"/>WFA
                                 </a>
                             </div>
-                            <div class="g-col-2 p-0" t-on-click="setSearchContext" title="All Quotation Sent" filter_name="Quotation Sent">
+                            <div class="g-col-2 p-0" t-on-click="setSearchContext" title="All Approved" filter_name="Approved">
                                 <a href="#" class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal">
-                                    <div class="fs-2" t-out="transactionData['all_quotation_sent']"/>Quotation Sent
+                                    <div class="fs-2" t-out="transactionData['all_quotation_sent']"/>Approved
                                 </a>
                             </div>
                             <div class="g-col-2 p-0" t-on-click="setSearchContext" title="All Order Released" filter_name="Order Released">
@@ -56,7 +56,7 @@
                                     <div class="w-100 p-2" t-out="transactionData['my_wfa']"/>
                                 </a>
                             </div>
-                            <div class="g-col-2 p-0" t-on-click="setSearchContext" title="My Quotation Sent" filter_name="My Quotation Sent">
+                            <div class="g-col-2 p-0" t-on-click="setSearchContext" title="My Approved" filter_name="My Approved">
                                 <a href="#" class="btn btn-light d-flex align-items-center w-100 h-100 p-0 border-0 bg-100 fw-normal">
                                     <div class="w-100 p-2" t-out="transactionData['my_quotation_sent']"/>
                                 </a>

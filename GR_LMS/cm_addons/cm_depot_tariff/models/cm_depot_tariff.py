@@ -16,23 +16,20 @@ CUSTOM_STATUS = [
         ('draft', 'Draft'),
         ('editable', 'Editable'),
         ('active', 'Active'),
-        ('revised', 'Revised'),
         ('inactive', 'Inactive')]
 
 ENTRY_MODE =  [('manual','Manual'),
                ('auto', 'Auto')]
-
-TANK_T_CODE = [('t1','T1'),('t2','T2'),('t3','T3'),('t4','T4'),('t5','T5'),('t6','T6'),('t7','T7'),('t8','T8'),('t9','T9'),('t10','T10'),
-               ('t11', 'T11'),('t12', 'T12'),('t13', 'T13'),('t14', 'T14'),('t15', 'T16'),('t17', 'T17'),('t18', 'T18'),('t19', 'T19'),('t20', 'T20'),
-               ('t21', 'T21'),('t22', 'T22'),('t23', 'T23'),('t50', 'T50'),('t75', 'T75')]
 
 SUB_TYPE2 = [('swap_body','Swap Body'),
             ('baffle', 'Baffle'),
             ('foodgrade', 'Foodgrade'),
             ('industrial', 'Industrial')]
 
-PACKAGE_DEAL = [('applicable', 'Applicable'),
-                   ('not_applicable', 'Not Applicable')]
+PACKAGE_DEAL = [('applicable', 'Applicable'),('not_applicable', 'Not Applicable')]
+
+PRICE_OWNER = [('agent', 'Agent'),('operator', 'Operator')]
+
 
 class CmDepotTariff(models.Model):
     _name = 'cm.depot.tariff'
@@ -41,27 +38,28 @@ class CmDepotTariff(models.Model):
     _order = 'name asc'
 
 
-    name = fields.Char(string="Name", index=True, copy=False)
-    short_name = fields.Char(string="Short Name", copy=False, help="Maximum 4 char is allowed and will accept upper case only", size=4)
+    name = fields.Char(string="Name", index=True)
+    short_name = fields.Char(string="Short Name", help="Maximum 4 char is allowed and will accept upper case only", size=4)
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-    remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+    remarks = fields.Text(string="Remarks")
     company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
     eff_from_date = fields.Date(string="Effective From Date")
 
     depot_id = fields.Many2one('cm.depot.location', string="Depot Location Name", domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    depot_vendor_id = fields.Many2one('cm.depot.vendor.master', string="Deport Vendor Name", domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    depot_vendor_id = fields.Many2one('cm.depot.vendor.master', string="Depot Vendor Name", domain=[('status', '=', 'active'),('active_trans', '=', True)])
     city_id = fields.Many2one(CM_CITY, string="City", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     state_id = fields.Many2one('res.country.state', string="State", ondelete='restrict')
     country_id = fields.Many2one('res.country', string="Country", ondelete='restrict')
-    tank_t_code = fields.Selection(selection=TANK_T_CODE, string="Tank T Code")
+    tank_tcode_id = fields.Many2one('cm.tank.tcode', string="Tank T Code", domain=[('status', '=', 'active'),('active_trans', '=', True)])
     sub_type2 = fields.Selection(selection=SUB_TYPE2, string="Sub Type2")
     clean_cate_id = fields.Many2one('cm.cleaning.category', string="Cleaning Category", domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    # package_deal_ref_id = fields.Many2one('cm.master', string="Package Deal Ref", domain=[('status', '=', 'active'),('active_trans', '=', True)])
     package_deal = fields.Selection(selection=PACKAGE_DEAL, string="Package Deal")
     rental_per_day = fields.Float(string="Rental Per Day")
+    price_owner = fields.Selection(selection=PRICE_OWNER, string="Price Owner")
+    tot_amt = fields.Float(string="Total Amount", store=True, compute='_compute_all_line')
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -74,21 +72,24 @@ class CmDepotTariff(models.Model):
     update_date = fields.Datetime(string="Last Updated Date", copy=False, readonly=True)
     update_user_id = fields.Many2one(RES_USERS, string="Last Updated By", copy=False, ondelete='restrict', readonly=True)
 
-    line_ids = fields.One2many('cm.depot.tariff.line', 'header_id', string="Details", copy=True, c_rule=True)
+    line_ids = fields.One2many('cm.depot.tariff.line', 'header_id', string="Charges Details", copy=True, c_rule=True)
     line_ids_a = fields.One2many('cm.depot.tariff.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
     line_ids_b = fields.One2many('cm.depot.tariff.storage.fee.details.line', 'header_id', string="Storage Fee Details", copy=True, c_rule=True) 
 
-    
-    @api.constrains('depot_id','depot_vendor_id','tank_t_code','sub_type2','clean_cate_id','package_deal')
-    def depot_id_validation(self):
-        if self.depot_id:
+    @api.depends('line_ids')
+    def _compute_all_line(self):
+        for rec in self:
+            rec.tot_amt =  sum(rec.line_ids.mapped('gr_cost'))
+
+    def duplicate_validation(self):
+        if (self.depot_id and self.depot_vendor_id and self.tank_tcode_id and self.sub_type2 and self.clean_cate_id and self.package_deal and self.price_owner ):
             self.env.cr.execute(""" select id
             from cm_depot_tariff where depot_id  = %s and depot_vendor_id  = %s
-            and tank_t_code  = '%s' and sub_type2  = '%s' and clean_cate_id  = %s and package_deal  = '%s'
-            and id != %s and company_id = %s and status != 'inactive' """ %(self.depot_id.id,
-            self.depot_vendor_id.id, self.tank_t_code, self.sub_type2,self.clean_cate_id.id,self.package_deal, self.id, self.company_id.id))
+            and tank_tcode_id  = %s and sub_type2  = '%s' and clean_cate_id  = %s and package_deal  = '%s'
+            and id != %s and company_id = %s and status != 'inactive' and price_owner = '%s' """ %(self.depot_id.id,
+            self.depot_vendor_id.id, self.tank_tcode_id.id, self.sub_type2,self.clean_cate_id.id,self.package_deal, self.id, self.company_id.id, self.price_owner))
             if self.env.cr.fetchone():
-                raise UserError(_("Depot location name must be unique"))
+                raise UserError(_("Depot tariff name must be unique"))
 
     @api.onchange('depot_vendor_id')
     def onchange_depot_vendor_id(self):
@@ -112,6 +113,7 @@ class CmDepotTariff(models.Model):
 
     def validations(self):
         warning_msg = []
+        self.duplicate_validation()
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
         if not is_mgmt:
             res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
@@ -179,34 +181,42 @@ class CmDepotTariff(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_depot_tariff = self.env[CM_DEPOT_TARIFF]
-        result['all_draft'] = cm_depot_tariff.search_count([('status', '=', 'draft')])
-        result['all_active'] = cm_depot_tariff.search_count([('status', '=', 'active')])
-        result['all_inactive'] = cm_depot_tariff.search_count([('status', '=', 'inactive')])
-        result['all_editable'] = cm_depot_tariff.search_count([('status', '=', 'editable')])
-        result['my_draft'] = cm_depot_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid)])
-        result['my_active'] = cm_depot_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid)])
-        result['my_inactive'] = cm_depot_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid)])
-        result['my_editable'] = cm_depot_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid)])
+        result['all_draft'] = cm_depot_tariff.search_count([('status', '=', 'draft'), ('price_owner', '=', 'agent')])
+        result['all_active'] = cm_depot_tariff.search_count([('status', '=', 'active'), ('price_owner', '=', 'agent')])
+        result['all_inactive'] = cm_depot_tariff.search_count([('status', '=', 'inactive'), ('price_owner', '=', 'agent')])
+        result['all_editable'] = cm_depot_tariff.search_count([('status', '=', 'editable'), ('price_owner', '=', 'agent')])
+        result['my_draft'] = cm_depot_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
+        result['my_active'] = cm_depot_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
+        result['my_inactive'] = cm_depot_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
+        result['my_editable'] = cm_depot_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
               
-        result['all_today_count'] = cm_depot_tariff.search_count([('crt_date', '>=', fields.Date.today())])
-        result['all_month_count'] = cm_depot_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1))])
-        result['my_today_count'] = cm_depot_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today())])
-        result['my_month_count'] = cm_depot_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1))])
+        result['all_today_count'] = cm_depot_tariff.search_count([('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'agent')])
+        result['all_month_count'] = cm_depot_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1)), ('price_owner', '=', 'agent')])
+        result['my_today_count'] = cm_depot_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'agent')])
+        result['my_month_count'] = cm_depot_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1)), ('price_owner', '=', 'agent')])
+
+        return result
+    
+    @api.model
+    def retrieve_op_dashboard(self):
+        result = {}
+        
+        cm_depot_tariff = self.env[CM_DEPOT_TARIFF]
+        result['all_draft'] = cm_depot_tariff.search_count([('status', '=', 'draft'), ('price_owner', '=', 'operator')])
+        result['all_active'] = cm_depot_tariff.search_count([('status', '=', 'active'), ('price_owner', '=', 'operator')])
+        result['all_inactive'] = cm_depot_tariff.search_count([('status', '=', 'inactive'), ('price_owner', '=', 'operator')])
+        result['all_editable'] = cm_depot_tariff.search_count([('status', '=', 'editable'), ('price_owner', '=', 'operator')])
+        result['my_draft'] = cm_depot_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+        result['my_active'] = cm_depot_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+        result['my_inactive'] = cm_depot_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+        result['my_editable'] = cm_depot_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+              
+        result['all_today_count'] = cm_depot_tariff.search_count([('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'operator')])
+        result['all_month_count'] = cm_depot_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1)), ('price_owner', '=', 'operator')])
+        result['my_today_count'] = cm_depot_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'operator')])
+        result['my_month_count'] = cm_depot_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1)), ('price_owner', '=', 'operator')])
 
         return result

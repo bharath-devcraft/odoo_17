@@ -70,17 +70,16 @@
 
                                 <field name="status" column_invisible="1"/>
                                 <field name="header_id" column_invisible="1"/>
-                                <field name="product_id" required="1" force_save="1"/>
-                                <field name="description" readonly = "1" force_save="1"/>
+                                <field name="product_id"/>
                                 <field name="brand_id"/>
                                 <field name="uom_id"/>
-                                <field name="qty" required="1"/>
-                                <field name="unit_price" required="1"/>
-                                <field name="disc_per"/>
-                                <field name="disc_amt" readonly = "1" force_save="1" string="DV"/>
-                                <field name="tax_ids" widget="many2many_tags" options="{'no_create': True}"/>
-                                <field name="unitprice_wt" readonly = "1" force_save="1"/>
-                                <field name="tot_amt" readonly = "1" force_save="1" string="Line Total"/>
+                                <field name="qty"/>
+                                <field name="unit_price"/>
+                                <field name="disc_per" width="120px"/>
+                                <field name="disc_amt" string="DV"/>
+                                <field name="tax_ids"/>
+                                <field name="unitprice_wt" width="130px"/>
+                                <field name="tot_amt" string="Line Total"/>
                             </tree>
                             <form string="Details">
                                 <group>
@@ -109,13 +108,12 @@
                                             <tree editable="bottom">   
                                                 <field name="qty" sum="Total" required="1"/>  
                                                 <field name="serial_no" required="1"/>
-                                                <field name="expiry_date" required="1"/>
+                                                <field name="expiry_date" required="1" width="200px"/>
                                             </tree>
                                         </field>
                                     </page>
                                 </notebook>
-                                
-                                <br></br>
+
                                 <group class="oe_subtotal_footer oe_right">
                                     <field name="tot_amt" readonly = "1" force_save="1" string="Line Total"/>
                                     <field name="disc_amt" readonly = "1" force_save="1" string="DV"/><!--help= Discount Value -->
@@ -182,10 +180,10 @@
                                 <field name="expense_id" required="1" options="{'no_create': True}"/>
                                 <field name="description"/>
                                 <field name="amt"/>
-                                <field name="disc_per"/>
+                                <field name="disc_per" width="120px"/>
                                 <field name="disc_amt" readonly="1" force_save="1" string="DV"/>
                                 <field name="tax_ids" widget="many2many_tags" options="{'no_create': True}"/>
-                                <field name="tax_amt" readonly="1" force_save="1" string="Tax amount"/>
+                                <field name="tax_amt" readonly="1" force_save="1" string="Tax amount" width="150px"/>
                                 <field name="line_tot_amt" readonly="1" force_save="1" string="Sub Total"/>
                             </tree>
                         </field>
@@ -206,7 +204,7 @@
                     </page>
                     <page string="Approve / Reject Remarks">
                         <group>
-                            <field name="ap_rej_remark" nolabel="1" style="width:1000px;" readonly = "status in ('cancelled','rejected')"/>
+                            <field name="ap_rej_remark" nolabel="1" style="width:1000px;" readonly = "status in ('approved','cancelled','rejected')"/>
                         </group>
                     </page>
                     <page string="Cancel Remarks">
@@ -277,7 +275,6 @@
                 <field name="division_id"/>
                 <field name="department_id"/>
                 <field name="partner_id"/>
-                <field name="pay_mode"/>
                 <field name="net_amt" sum="Total amount"/>
                 <field name="line_count"/>
                 <field name="status" widget="badge" 
@@ -309,7 +306,6 @@
                 <field name="division_id"/>
                 <field name="department_id"/>
                 <field name="partner_id"/>
-                <field name="pay_mode"/>
                 <field name="net_amt" sum="Total amount"/>
                 <field name="line_count"/>
                 <field name="status" widget="badge" 
@@ -360,6 +356,7 @@
                     <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
                     <filter string="Confirmed By" name="confirm_user_id" domain="[]" context="{'group_by': 'confirm_user_id'}"/>
                     <filter string="Approved / Rejected By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                    <filter string="Cancelled By" name="cancel_user_id" domain="[]" context="{'group_by': 'cancel_user_id'}"/>
                     <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
                     <filter string="Entry Mode" name="entry_mode" domain="[]" context="{'group_by': 'entry_mode'}"/>
                 </group>
@@ -465,7 +462,7 @@
         <field name="context">{}</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
-            No record found. Let's create one!
+            No record found. Let's create one !
           </p><p>
             This is for base transaction.
           </p>

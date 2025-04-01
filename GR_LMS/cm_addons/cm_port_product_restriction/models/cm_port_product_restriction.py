@@ -22,7 +22,7 @@ ENTRY_MODE =  [('manual','Manual'),
 RESTRICTED_CATEGORY =  [('tank_operator','Tank Operator'),
                         ('carrier', 'Carrier'),
                         ('port', 'Port'),
-                        ('others', 'Others')]
+                        ('manufacturer', 'Manufacturer')]
 
 SHIPMENT_TYPE = [('import', 'Import'),
                 ('export', 'Export'),
@@ -30,6 +30,8 @@ SHIPMENT_TYPE = [('import', 'Import'),
                 ('all', 'All')]
 
 PACK_GRP = [('1', 'I'), ('2', 'II'), ('3', 'III')]
+
+LOCATION = [('pan_india', 'PAN India'), ('exim', 'Exim(Global)')]
 
 class CmPortProductRestriction(models.Model):
     _name = 'cm.port.product.restriction'
@@ -39,11 +41,13 @@ class CmPortProductRestriction(models.Model):
 
     name = fields.Char(string="Name", readonly=True, index=True, copy=False)
     product_id = fields.Many2one('cm.product', string="Product Name", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    bus_location = fields.Selection(selection=LOCATION, string="Business Location", default='exim')
     restricted_category = fields.Selection(selection=RESTRICTED_CATEGORY, string="Restricted Category", copy=False)
     shipment_type = fields.Selection(selection=SHIPMENT_TYPE, string="Shipment Type", copy=False)
     tank_operator_id = fields.Many2one('cm.tank.operator', string="Tank Operator Name", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)]) 
     carrier_id = fields.Many2one('cm.carrier', string="Carrier Name",copy=False, ondelete='restrict',domain=[('status', '=', 'active'),('active_trans', '=', True)])
     port_id = fields.Many2one('cm.port', string="Port Name", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    mfg_id = fields.Many2one('cm.product.manufacturer', string="Manufacturer Name", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
     reason = fields.Text(string="Reason", copy=False)
     un_no = fields.Char( string="UN Number", copy=False)
     sub_class1 = fields.Char(string="Sub Class I", size =10)
@@ -55,7 +59,7 @@ class CmPortProductRestriction(models.Model):
     remarks = fields.Text(string="Remarks", copy=False)
     company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -70,7 +74,7 @@ class CmPortProductRestriction(models.Model):
 
     line_ids = fields.One2many('cm.port.product.restriction.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
 
-    @api.constrains('restricted_category','product_id','tank_operator_id','carrier_id','port_id')
+    @api.constrains('restricted_category','product_id','tank_operator_id','carrier_id','port_id','mfg_id')
     def duplicate_validation(self):
         if self.restricted_category and self.product_id:
             self.env.cr.execute(""" select id
@@ -79,10 +83,12 @@ class CmPortProductRestriction(models.Model):
             and (tank_operator_id = %s or tank_operator_id is null)
             and (carrier_id = %s or carrier_id is null)
             and (port_id = %s or port_id is null)
+            and (mfg_id = %s or mfg_id is null)
             and id != %s and company_id = %s""",(self.restricted_category,self.product_id.id,
                                                 self.tank_operator_id.id if self.tank_operator_id else None,
                                                 self.carrier_id.id if self.carrier_id else None,
                                                 self.port_id.id if self.port_id else None,
+                                                self.mfg_id.id if self.mfg_id else None,
                                                 self.id, self.company_id.id))
             if self.env.cr.fetchone():
                 raise UserError(_("Duplicate entry are not allowed"))
@@ -92,9 +98,9 @@ class CmPortProductRestriction(models.Model):
         self.tank_operator_id = False
         self.carrier_id = False
         self.port_id = False
-        self.name = 'Others' if self.restricted_category == 'others' else False
+        self.mfg_id = False
 
-    @api.onchange('tank_operator_id','carrier_id','port_id')
+    @api.onchange('tank_operator_id','carrier_id','port_id','mfg_id')
     def onchange_ref_name(self):
         self.name = False
         if self.restricted_category:
@@ -104,8 +110,8 @@ class CmPortProductRestriction(models.Model):
                 self.name = self.carrier_id.name
             elif self.restricted_category == 'port' and self.port_id:
                 self.name = self.port_id.name
-            elif self.restricted_category == 'others':
-                self.name = 'Others'
+            elif self.restricted_category == 'manufacturer' and self.mfg_id:
+                self.name = self.mfg_id.name
 
     @api.onchange('product_id')
     def onchange_product_id(self):
@@ -190,20 +196,7 @@ class CmPortProductRestriction(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_port_pro_rst = self.env[CM_PORT_PRODUCT_RESTRICTION]
         result['all_draft'] = cm_port_pro_rst.search_count([('status', '=', 'draft')])

@@ -5,6 +5,8 @@ TYPE_INS = [('external', 'External'), ('cleaning', 'Cleaning'), ('condition', 'C
 
 YES_OR_NO = [('yes', 'Yes'), ('no', 'No')]
 
+DG_NON_DG = [('yes', 'DG'), ('no', 'Non DG')]
+
 PASS_FAIL = [('pass', 'Pass'), ('fail', 'Fail')]
 
 RES_COMPANY = 'res.company'
@@ -16,7 +18,7 @@ class CmTankMasterRecentlyUsedProductLine(models.Model):
 
     header_id = fields.Many2one('cm.tank.master', string="Header Ref", index=True, required=True, ondelete='cascade', c_rule=True)
     product_id = fields.Many2one('cm.product', string="Product Name", copy=False, domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    dg_product = fields.Selection(selection=YES_OR_NO, string="Dangerous Goods")
+    dg_product = fields.Selection(selection=DG_NON_DG, string="Product Type")
     bl_ref_no = fields.Char(string="BL Reference No")
     date = fields.Date(string="Date", copy=False)
 

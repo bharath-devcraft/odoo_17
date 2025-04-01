@@ -27,7 +27,7 @@ export class SingleFileBinaryField extends Component {
     }
 
     get uploadText() {
-        return this.props.record.fields[this.props.name].string;
+        return "Upload your file";
     }
 
     get files() {

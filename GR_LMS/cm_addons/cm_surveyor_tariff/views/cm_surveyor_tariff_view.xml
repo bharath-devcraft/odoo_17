@@ -42,10 +42,11 @@
                                 <field name="bus_location" readonly = "1" force_save="1"/>
                             </group>
                             <group>
-                                <field name="charges_category" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="charges_category" invisible="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="country_id" required="1" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
                                 <field name="country_code" required="1" invisible="1"/>
                                 <field name="state_id" required="country_code == 'IN'" readonly = "status not in ('draft','editable')" options="{'no_create': True}"/>
+                                <field name="tot_amt" force_save="1" readonly = "1"/>
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                         </group>
@@ -58,9 +59,9 @@
                                         <field name="charges_id" required="1" options="{'no_create': True}"/>
                                         <field name="mandatory" required="1"/>
                                         <field name="currency_id" required="1" options="{'no_create': True}"/>
-                                        <field name="tax_ids" widget="many2many_tags" options="{'no_create': True}" readonly="1" force_save="1"/>
+                                        <field name="costing_type" required="1" width="110px"/>
                                         <field name="actual_cost" required="1" width="110px" />
-                                        <field name="gr_cost" required="1"/>
+                                        <field name="gr_cost" required="1" width="130px"/>
                                         <field name="company_id" column_invisible="1"/>                           
                                     </tree>
                                 </field>
@@ -88,7 +89,9 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="price_owner" readonly = "1"/>
+                                        <field name="tot_amt" readonly = "1" invisible="1"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -108,6 +111,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -134,6 +138,32 @@
                     <field name="bus_location"/>
                     <field name="state_id"/>
                     <field name="country_id"/>
+                    <field name="tot_amt"/>
+                    <field name="status" widget="badge" decoration-info = "status == 'draft'"
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status == 'active'"
+                        decoration-primary = "status == 'inactive'"/>
+                    <field name="ap_rej_user_id" string="Approved By"/>
+                    <field name="crt_date"/>
+                </tree>
+            </field>
+        </record>
+        <record id="cm_op_surveyor_tariff_tree_js" model="ir.ui.view">
+            <field name="name">Dashboard View</field>
+            <field name="model">cm.surveyor.tariff</field>
+            <field name="priority" eval="10"/>
+            <field name="arch" type="xml">
+                <tree string="Surveyor Tariff" js_class="cm_op_surveyor_tariff_list"
+                        decoration-info="status == 'draft'" 
+                        decoration-success = "status == 'editable'"
+                        decoration-bf = "status in ('active','draft')"
+                        decoration-primary = "status == 'inactive'">
+                    <field name="eff_from_date"/>
+                    <field name="surveyor_id"/>
+                    <field name="bus_location"/>
+                    <field name="state_id"/>
+                    <field name="country_id"/>
+                    <field name="tot_amt"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -159,6 +189,7 @@
                     <field name="bus_location"/>
                     <field name="state_id"/>
                     <field name="country_id"/>
+                    <field name="tot_amt"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -180,11 +211,11 @@
                     <field name="state_id" string="State" filter_domain="[('state_id','ilike',self)]"/>
                     <field name="country_id" string="Country" filter_domain="[('country_id','ilike',self)]"/>
                     
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -197,8 +228,12 @@
                         <filter string="State" name="state_id" domain="[]" context="{'group_by': 'state_id'}"/>
                         <filter string="Country" name="country_id" domain="[]" context="{'group_by': 'country_id'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -209,16 +244,39 @@
             <field name="name">Surveyor Tariff</field>
             <field name="res_model">cm.surveyor.tariff</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[]</field>
+            <field name="domain">[('price_owner','=','agent')]</field>
             <field name="view_id" ref="cm_surveyor_tariff_tree_js"/>
             <field name="search_view_id" ref="cm_surveyor_tariff_search"/>
-            <field name="context">{}</field>
+            <field name="context">{'default_price_owner':'agent'}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                                  (0, 0, {'view_mode': 'tree', 'view_id': ref('cm_surveyor_tariff_tree_js')}),
+                                  (0, 0, {'view_mode': 'form', 'view_id': ref('cm_surveyor_tariff_form')})
+                                 ]"/>
+        </record>
+        
+        <record id="cm_op_surveyor_tariff_win_action" model="ir.actions.act_window">
+            <field name="name">Surveyor Tariff</field>
+            <field name="res_model">cm.surveyor.tariff</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('price_owner','=','operator')]</field>
+            <field name="view_id" ref="cm_op_surveyor_tariff_tree_js"/>
+            <field name="search_view_id" ref="cm_surveyor_tariff_search"/>
+            <field name="context">{'default_price_owner':'operator'}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
+            </field>
+            <field name="view_ids" eval="[(5, 0, 0), 
+                                  (0, 0, {'view_mode': 'tree', 'view_id': ref('cm_op_surveyor_tariff_tree_js')}),
+                                  (0, 0, {'view_mode': 'form', 'view_id': ref('cm_surveyor_tariff_form')})
+                                 ]"/>
         </record>
 
         <menuitem name="Surveyor Tariff" id="cm_surveyor_tariff_act_menu" parent="cm_master.cm_tariff_master_m_parent" action="cm_surveyor_tariff_win_action" sequence="11"/>
+        
+        <menuitem name="Surveyor Tariff" id="cm_op_surveyor_tariff_act_menu" parent="cm_master.cm_op_tariff_master_m_parent" action="cm_op_surveyor_tariff_win_action" sequence="11"/>
 
 
     </data>

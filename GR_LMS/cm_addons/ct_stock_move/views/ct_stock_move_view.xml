@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <record model="ir.ui.view" id="ct_stock_move_form">
+      <field name="name">Form View</field>
+      <field name="model">ct.stock.move</field>
+      <field name="arch" type="xml">
+        <form string="Move Details" create="False">
+            <header>
+                <button string="Approve"
+                    icon="fa-thumbs-up"
+                    class="btn btn-success"
+                    type="object"
+                    name="entry_approve" invisible = "status != 'wfa'"
+                    confirm="Are you sure to proceed ?"/>
+                
+                <field name="status" widget="statusbar" style="width:700px;"/>                
+
+            </header>
+            <sheet>
+                <widget name="web_ribbon" title="Draft" bg_color="bg-info" invisible = "status != 'draft'"/>
+                <widget name="web_ribbon" title="Valid"  bg_color="bg-success" invisible = "status != 'approved'"/>
+                <widget name="web_ribbon" title="Invalid" bg_color="bg-danger" invisible = "status != 'invalid'"/>
+                <group>
+                    <group>
+                        <field name="name" readonly = "1" force_save="1" class="animate-charcter" widget="CopyClipboardChar"/>
+                        <field name="entry_date" required = "1" readonly="status != 'draft'"/>
+                    </group>
+                    <group>
+                        <field name="from_location_id" required = "1" readonly="status != 'draft'"/>
+                        <field name="to_location_id" required = "1" readonly="status != 'draft'"/>
+                    </group>
+                </group>
+                
+                <group string="Product Details">
+                    <group>
+                        <field name="product_id" required = "1" readonly="status != 'draft'"/>
+                        <field name="description" required = "1" readonly="status != 'draft'"/>
+                        <field name="brand_id" readonly="status != 'draft'"/>
+                    </group>
+                    <group>
+                        <field name="uom_id" readonly="status != 'draft'"/>
+                        <field name="qty" required = "1" readonly="status != 'draft'"/> 
+                        <label for="unit_price"/>
+                        <div>
+                            <div class="o_address_format">
+                                <field name="unit_price" style="width: 35%%"  required="1" readonly = "1" force_save="1"/>
+                                <field name="currency_id"  style="width: 20%%"  options="{'no_create': True}" readonly = "1" force_save="1"/>
+                            </div>
+                        </div>
+                        <field name="status" readonly = "1" force_save="1" invisible="1"/>
+                    </group>
+                </group>
+                
+                <notebook>
+                    
+                    <page string="Entry Info">
+                        <group>
+                            <group>
+                                <field name="company_id" force_save="1"/> 
+                                <field name="fy_control_date" readonly = "1" force_save="1"/>
+                                <field name="active_rpt"/>
+                            </group>
+                            <group>
+                                <field name="active" widget="boolean_toggle"/>
+                                <field name="entry_mode" force_save="1"/>
+                                <field name="active_trans"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="user_id" widget="many2one_avatar_user" />
+                                <field name="ap_rej_user_id" invisible="status in ('draft','wfa')" widget="many2one_avatar_user" />
+                                <field name="update_user_id" widget="many2one_avatar_user" />
+                            </group>
+                            <group>
+                                <field name="crt_date" />
+                                <field name="ap_rej_date" invisible="status in ('draft','wfa')" />
+                                <field name="update_date" />
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+                <group>
+                    <field name="remarks"/>
+                </group>
+                <div class="oe_chatter">
+                    <field name="message_ids"/>
+                </div>  
+            </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="ct_stock_move_tree" model="ir.ui.view">
+        <field name="name">List View</field>
+        <field name="model">ct.stock.move</field>
+        <field name="priority" eval="1"/>
+        <field name="arch" type="xml">
+            <tree string="Move Details" create="False"
+                sample="1"
+                decoration-info = "status == 'draft'"
+                decoration-bf = "status in ('approved','draft')"
+                decoration-warning = "status == 'invalid'">
+
+                <field name="name" decoration-bf="1"/>
+                <field name="entry_date"/>
+                <field name="from_location_id"/>
+                <field name="to_location_id"/>
+                <field name="product_id"/>
+                <field name="brand_id"/>
+                <field name="uom_id"/>
+                <field name="qty"/>
+                <field name="status" widget="badge" 
+                    decoration-info = "status == 'draft'"
+                    decoration-bf = "status == 'approved'"
+                    decoration-warning = "status == 'invalid'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="ct_stock_move_search" model="ir.ui.view">
+        <field name="name">Search View</field>
+        <field name="model">ct.stock.move</field>
+        <field name="arch" type="xml">
+            <search string="Move Details">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="remarks"/>
+
+                <filter name="Draft" domain="[('status', '=', 'draft')]"/>
+                <filter name="Approved" domain="[('status', '=', 'approved')]"/>
+                <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/>
+                <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
+                <filter name="My Approved" string="My Approved" domain="[('user_id', '=', uid),('status', '=', 'approved')]"/>
+                <filter name="Hidden" domain="[('active', '=', False)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Ref No" name="name" domain="[]" context="{'group_by': 'name'}"/>
+                    <filter string="Move Date" name="entry_date" domain="[]" context="{'group_by': 'entry_date'}"/>
+                    <filter string="From Location" name="from_location_id" domain="[]" context="{'group_by': 'from_location_id'}"/>
+                    <filter string="To Location" name="to_location_id" domain="[]" context="{'group_by': 'to_location_id'}"/>
+                    <filter string="Product Name" name="product_id" domain="[]" context="{'group_by': 'product_id'}"/>
+                    <filter string="Brand" name="brand_id" domain="[]" context="{'group_by': 'brand_id'}"/>
+                    <filter string="Currency" name="currency_id" domain="[]" context="{'group_by': 'currency_id'}"/>
+                    <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter string="Approved / Rejected By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
+                    <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                    <filter string="Entry Mode" name="entry_mode" domain="[]" context="{'group_by': 'entry_mode'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="ct_stock_move_kanban" model="ir.ui.view">
+        <field name="name">Kanban View</field>
+        <field name="model">ct.stock.move</field>
+        <field name="arch" type="xml">
+            <kanban string="Move Details" class="o_kanban_mobile" sample="1" quick_create="false">
+                <field name="name"/>
+                <field name="entry_date"/>
+                <field name="currency_id"/>
+                <field name="ap_rej_user_id"/>
+                <field name="status"/>
+                <progressbar field="status"
+                    colors='{"draft": "info", "wfa": "success", "approved": "bf","cancelled": "primary","rejected": "warning"}'/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="kanban-card"> 
+                            <div class="kanban-table">
+                                <div class="kanban-row">
+                                    <div class="kanban-cell" t-att-title="'Ref Name'">
+                                        <field style="color: #4d4d4d; font-weight: bold; font-size: 18px;" name="name"/>
+                                    </div>
+                                    <div class="kanban-cell" t-att-title="'Move Date'">
+                                        <field style="color: #808080; font-weight: bold; font-size: 14px;" name="entry_date"/>
+                                    </div>
+                                </div>
+                                <div class="kanban-row">
+                                   
+                                    <div class="kanban-cell" t-att-title="'Approved/Reject By'">
+                                        <i class="fa fa-user" style="color: #4CAF50;" title="Supplier Icon"></i> <field name="ap_rej_user_id"/>
+                                    </div>
+                                </div>
+                                <div class="kanban-row">
+                                    <div class="kanban-cell" t-att-title="'Status'">
+                                        <field name="status" widget="label_selection" options="{'classes': {'draft': 'info', 'wfa': 'success', 'approved': 'default', 'cancelled': 'primary', 'rejected': 'warning'}}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="ct_stock_move_graph" model="ir.ui.view">
+       <field name="name">Graph View</field>
+       <field name="model">ct.stock.move</field>
+       <field name="arch" type="xml">
+            <graph string="Move Details" sample="1" disable_linking="True" stacked="0" type="pie">
+                <field name="id" string="Count" type="measure" operator="count"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="ct_stock_move_dashboard" model="ir.ui.view">
+       <field name="name">Dashboard View</field>
+       <field name="model">ct.stock.move</field>
+       <field name="arch" type="xml">
+            <dashboard/>
+        </field>
+    </record>
+
+    <record id="ct_stock_move_win_actions" model="ir.actions.act_window" >
+      <field name="name">Move Details</field>
+      <field name="res_model">ct.stock.move</field>
+      <field name="view_mode">tree,dashboard,form,kanban,graph</field>
+        <field name="domain">[]</field>
+        <field name="view_id" ref="ct_stock_move_tree"/>
+        <field name="search_view_id" ref="ct_stock_move_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            No record found. Let's create one !
+          </p><p>
+            This is for base transaction.
+          </p>
+        </field>
+    </record>
+
+    <record id="ct_view_stock_move_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="ct_stock_move.ct_stock_move_tree"/>
+        <field name="act_window_id" ref="ct_stock_move_win_actions"/>
+    </record>
+
+    <record id="ct_view_stock_move_dashbord" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">dashboard</field>
+        <field name="view_id" ref="ct_stock_move.ct_stock_move_dashboard"/>
+        <field name="act_window_id" ref="ct_stock_move_win_actions"/>
+    </record>
+
+    <record id="ct_view_stock_move_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="ct_stock_move.ct_stock_move_form"/>
+        <field name="act_window_id" ref="ct_stock_move_win_actions"/>
+    </record>
+
+    <record id="ct_view_stock_move_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="4"/>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="ct_stock_move.ct_stock_move_kanban"/>
+        <field name="act_window_id" ref="ct_stock_move_win_actions"/>
+    </record>
+
+    <record id="ct_view_stock_move_graph" model="ir.actions.act_window.view">
+        <field name="sequence" eval="5"/>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="ct_stock_move.ct_stock_move_graph"/>
+        <field name="act_window_id" ref="ct_stock_move_win_actions"/>
+    </record>
+
+    <menuitem name="Move Details" id="ct_stock_move_act_menu" parent="ct_grn.ct_inventory_View_m_parent"
+              action="ct_stock_move_win_actions" sequence="8"/>
+  </data>
+</odoo>

@@ -37,7 +37,7 @@
                     <group>
                         <label for="name" class="name-lable"/>
                         <div>
-                            <field name="name" class ="name-value" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
+                            <field name="name" class ="name-value" widget="auto_fill" required="1" readonly = "status not in ('draft','editable')"/>
                         </div> 
                         <field name="from_date" required="1" readonly = "status not in ('draft','editable')"/>
                     </group>
@@ -48,6 +48,18 @@
                     </group>
                 </group>
                 <notebook>
+                    <page string="Attachments" >
+                        <field name="line_ids_a" nolabel="1" readonly = "status not in ('draft','editable')">
+                            <tree editable="bottom">
+                                <field name="header_id" column_invisible="1"/>
+                                <field name="attach_desc" required="1"/>
+                                <field name="attachment_ids" required="1" widget="single_file_binary" options="{'no_create_edit': True}"/>
+                                <field name="attach_user_id" force_save="1" readonly="1"/>
+                                <field name="attach_date" force_save="1" readonly="1"/> 
+                                <field name="company_id" column_invisible="1"/>                              
+                            </tree>
+                        </field>
+                    </page>
                     <page string="Inactive Remarks" invisible = "status not in ('active','inactive')">
                         <field name="inactive_remark" readonly = "status != 'active'" nolabel="1"/>
                     </page>
@@ -59,7 +71,7 @@
                                 <field name="active_rpt"/>
                             </group>
                             <group>
-                                <field name="active" widget="boolean_toggle"/>
+                                <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                 <field name="entry_mode"/>
                             </group>
                         </group>
@@ -79,6 +91,7 @@
                         </group>
                     </page>
                 </notebook>
+                <br></br>
                 <group>
                     <field name="remarks"  placeholder="Write your remarks here."/>
                 </group>
@@ -139,14 +152,14 @@
         <field name="model">cm.fiscal.year</field>
         <field name="arch" type="xml">
             <search string="Fiscal Year">
-                <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
-                <field name="short_name" string="Short Name" filter_domain="[('short_name','ilike',self)]"/>
+                <field name="name" filter_domain="[('name','ilike',self)]"/>
+                <field name="short_name" filter_domain="[('short_name','ilike',self)]"/>
 
-                <filter name="my_master" string="My Master" domain="[('user_id', '=', uid)]"/>
                 <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                 <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                 <filter name="Active" domain="[('status', '=', 'active')]"/>
                 <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/>
                 <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                 <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                 <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -155,8 +168,12 @@
                 
                 <group expand="0" string="Group By">
                     <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                    <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                    <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                     <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                     <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                    <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                    <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                 </group>
             </search>
         </field>
@@ -171,11 +188,11 @@
         <field name="search_view_id" ref="cm_fiscal_year_search"/>
         <field name="context">{}</field>
         <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">No master record found. Let's create one!</p>
+            <p class="o_view_nocontent_smiling_face">No master record found. Let's create one !</p>
         </field>
     </record>
 
-    <menuitem name="Fiscal Year" id="cm_fiscal_year_act_menu" parent="cm_master.cm_master_m_parent" action="cm_fiscal_year_win_action"/>
+    <menuitem name="Fiscal Year" id="cm_fiscal_year_act_menu" parent="cm_master.cm_master_m_parent" action="cm_fiscal_year_win_action" sequence="10"/>
 
     </data>
         

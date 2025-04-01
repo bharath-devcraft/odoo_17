@@ -22,6 +22,9 @@ CUSTOM_STATUS = [
 ENTRY_MODE =  [('manual','Manual'),
                ('auto', 'Auto')]
 
+VESSEL_SERVICE_PROVIDERS = [('feeder', 'Feeder'), ('mlo', 'MLO'),
+                            ('costal', 'Costal'), ('all', 'All')]
+
 class CmVesselServiceRoute(models.Model):
     _name = 'cm.vessel.service.route'
     _description = 'Vessel Service Route'
@@ -31,13 +34,14 @@ class CmVesselServiceRoute(models.Model):
 
     name = fields.Char(string="Name", index=True, copy=False)
     short_name = fields.Char(string="Short Name", copy=False, help="Maximum 4 char is allowed and will accept upper case only", size=4)
+    vessel_service_providers = fields.Selection(selection=VESSEL_SERVICE_PROVIDERS, string="Vessel Service Providers", copy=False)
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
     remarks = fields.Text(string="Remarks", copy=False)
     company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
 
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -58,39 +62,37 @@ class CmVesselServiceRoute(models.Model):
     def name_validation(self):
         if self.name:
             if is_special_char(self.env, self.name):
-                raise UserError(_("Special character is not allowed in service name field"))
+                raise UserError(_("Special character is not allowed in route name field"))
 
             name = self.name.upper().replace(" ", "")
             self.env.cr.execute(""" select upper(name)
             from cm_vessel_service_route where upper(REPLACE(name, ' ', ''))  = '%s'
             and id != %s and company_id = %s""" %(name, self.id, self.company_id.id))
             if self.env.cr.fetchone():
-                raise UserError(_("Vessel service route service name must be unique"))
+                raise UserError(_("Vessel service route name must be unique"))
 
     @api.constrains('short_name')
     def short_name_validation(self):
         if self.short_name:
             if is_special_char(self.env, self.short_name):
-                raise UserError(_("Special character is not allowed in service id field"))
+                raise UserError(_("Special character is not allowed in route id field"))
 
             short_name = self.short_name.upper().replace(" ", "")
             self.env.cr.execute(""" select upper(short_name)
             from cm_vessel_service_route where upper(REPLACE(short_name, ' ', ''))  = '%s'
             and id != %s and company_id = %s""" %(short_name, self.id, self.company_id.id))
             if self.env.cr.fetchone():
-                raise UserError(_("Vessel service route service id must be unique"))
+                raise UserError(_("Vessel service short name must be unique"))
 
     def validate_detail_lines(self, warning_msg):
         dub_sequence = []
         for det_line in self.line_ids:
-            if det_line.entry_seq and det_line.entry_seq < 0:
+            if (det_line.entry_seq and det_line.entry_seq < 1) or not det_line.entry_seq:
                 warning_msg.append(f"Port name({det_line.port_id.name}) sequence should be greater than zero in vessel service route details tab")
-            if det_line.berthing_days and det_line.berthing_days < 0:
-                warning_msg.append(f"Port name({det_line.port_id.name}) berthing days should be greater than zero in vessel service route details tab")
-            if det_line.trans_days and det_line.trans_days < 0:
-                warning_msg.append(f"Port name({det_line.port_id.name}) transshipment days should be greater than zero in vessel service route details tab")
-            if det_line.avg_time and det_line.avg_time < 0:
-                warning_msg.append(f"Port name({det_line.port_id.name}) travel time days should be greater than zero in vessel service route details tab")
+            # if det_line.berthing_days and det_line.berthing_days < 1:
+            #     warning_msg.append(f"Port name({det_line.port_id.name}) berthing days should be greater than zero in vessel service route details tab")
+            if (det_line.avg_time and det_line.avg_time < 1) or not det_line.avg_time:
+                warning_msg.append(f"Port name({det_line.port_id.name}) transit days should be greater than zero in vessel service route details tab")
             dub_sequence.append(det_line.entry_seq)
         seq_duplicates = [sequence for sequence, count in Counter(dub_sequence).items() if count > 1]
         if seq_duplicates:
@@ -98,8 +100,6 @@ class CmVesselServiceRoute(models.Model):
 
     def validations(self):
         warning_msg = []
-        if self.name.strip() == self.short_name.strip():
-            warning_msg.append("Same service name and service id not allowed")
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
         if not is_mgmt:
             res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
@@ -168,20 +168,7 @@ class CmVesselServiceRoute(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
         cm_vessel_service_route = self.env[CM_VESSEL_SERVICE_ROUTE]
         result['all_draft'] = cm_vessel_service_route.search_count([('status', '=', 'draft')])

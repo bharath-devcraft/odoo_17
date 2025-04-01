@@ -37,7 +37,7 @@
                                     <field name="name" class="name-value" widget="no_special_char" required="1" readonly = "status not in ('draft','editable')"/>
                                 </div>
                                 <field name="short_name" widget="upper_case" required="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="categ_id" string="Category" required="1" domain="[('status', '=', 'active'),('active_trans', '=', True)]" readonly = "status not in ('draft','editable')" />
+                                <field name="categ_id" string="Category" invisible="1" domain="[('status', '=', 'active'),('active_trans', '=', True)]" readonly = "status not in ('draft','editable')" />
                                 <field name="hs_id" required="1" options="{'no_create': True}" readonly = "status not in ('draft','editable')"/>
                                 <field name="custom_type" required="1" invisible="1" readonly = "1"/>
                                 <field name="serial_no_req" required="1" readonly = "status not in ('draft','editable')"/>
@@ -45,10 +45,16 @@
                             <group>
                                 <field name="uom_po_id" string="Purchase UOM" options="{'no_create': True}" required="1" domain="[('status', '=', 'active'),('active_trans', '=', True)]" readonly = "status not in ('draft','editable')" />
                                 <field name="uom_id" string="Store UOM" options="{'no_create': True}" required="1" domain="[('status', '=', 'active'),('active_trans', '=', True)]" readonly = "status not in ('draft','editable')" />
-                                <field name="uom_coff" string="UOM Coff" required="1" readonly = "status not in ('draft','editable')"/>
+                                <field name="uom_coff" string="UOM Conversion Factor" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="list_price" string="Sales Price(INR)" invisible="1" readonly = "status not in ('draft','editable')"/>
-                                <field name="standard_price" string="Cost Price(INR)" readonly = "status not in ('draft','editable')"/>
-                                
+                                <label for= "standard_price"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="standard_price" string="Cost Price" style="width: 35%%" readonly = "status not in ('draft','editable')"/>
+                                        <field name="currency_id" style="width: 20%%" options="{'no_create': True}" required="standard_price > 0" force_save="1" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>
+
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                         </group>
@@ -77,7 +83,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -97,6 +103,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -122,7 +129,6 @@
                     <field name="name"/>
                     <field name="uom_po_id" string="Purchase UOM" />
                     <field name="uom_id" string="Store UOM"/>
-                    <field name="list_price" string="Sales Price(INR)"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -147,7 +153,6 @@
                     <field name="name"/>
                     <field name="uom_po_id" string="Purchase UOM" />
                     <field name="uom_id" string="Store UOM"/>
-                    <field name="list_price" string="Sales Price(INR)"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -172,7 +177,6 @@
                     <field name="name"/>
                     <field name="uom_po_id" string="Purchase UOM" />
                     <field name="uom_id" string="Store UOM"/>
-                    <field name="list_price" string="Sales Price(INR)"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -192,11 +196,11 @@
                     <field name="name" string="Name" filter_domain="[('name','ilike',self)]"/>
                     <field name="short_name" string="Short Name" filter_domain="[('short_name','ilike',self)]"/>
                     
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -207,8 +211,12 @@
                         <filter string="Purchase UOM" name="uom_po_id" domain="[]" context="{'group_by': 'status'}"/>
                         <filter string="Store UOM" name="uom_id" domain="[]" context="{'group_by': 'status'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -223,7 +231,7 @@
             <field name="search_view_id" ref="cm_product_template_accessories_search"/>
             <field name="context">{'default_custom_type':'flexi_accessories'}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
             <field name="view_ids" eval="[(5, 0, 0), 
                                   (0, 0, {'view_mode': 'tree', 'view_id': ref('cm_product_template_accessories_tree_js')}),
@@ -239,7 +247,7 @@
             <field name="search_view_id" ref="cm_product_template_accessories_search"/>
             <field name="context">{'default_custom_type':'consumables'}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
             <field name="view_ids" eval="[(5, 0, 0), 
                                   (0, 0, {'view_mode': 'tree', 'view_id': ref('cm_product_template_general_tree_js')}),
@@ -248,7 +256,7 @@
         </record>
 
 
-        <menuitem name="Flexi Accessories" id="cm_product_template_accessories_act_menu" parent="cm_master.cm_crm_master_m_parent" action="cm_product_template_accessories_win_action" sequence="122"/>
+        <menuitem name="Flexi Accessories" id="cm_product_template_accessories_act_menu" parent="cm_master.cm_flexi_master_m_parent" action="cm_product_template_accessories_win_action" sequence="4"/>
      
         <menuitem name="General Product" id="cm_product_template_general_act_menu" parent="cm_master.cm_store_master_m_parent" action="cm_product_template_general_win_action" sequence="2"/> 
 

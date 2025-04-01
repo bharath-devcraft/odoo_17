@@ -32,18 +32,32 @@
                         <widget name="web_ribbon" title="Active" bg_color="bg-success" invisible = "status != 'active'"/>
                         <group>
                             <group >
-                                <label for="flexi_bag_id" class="name-lable"/>
+                                <label for="flexi_type" class="name-lable"/>
                                 <div>
-                                    <field name="flexi_bag_id"  options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
+                                    <field name="flexi_type"  options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
                                 </div>                                
-                                <field name="qty"/>  
+                                <field name="flexi_layer_type_id" required="1" readonly = "status not in ('draft','editable')"/> 
+                                <field name="vendor_id" required="1" readonly = "status not in ('draft','editable')"/>                                 
                                 <field name="line_count"/>                             
                                 <field name="name" invisible="1"/>
                             </group>
-                            <group>								
-								<field name="tot_amt" force_save="1" readonly="1"/>
-								<field name="markup" required="1" readonly = "status not in ('draft','editable')"/> 
-								<field name="tot_sale_amt" force_save="1" readonly="1"/>
+                            <group>	
+								<field name="qty"/>
+								<label for= "tot_amt"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="tot_amt" style="width: 35%%"  force_save="1" readonly="1"/>
+                                        <field name="tot_currency_id" style="width: 20%%" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>	  							
+								<field name="markup" required="1" readonly = "status not in ('draft','editable')"/> 								
+								<label for= "tot_sale_amt"/>
+                                <div>
+                                    <div class="o_address_format">
+                                        <field name="tot_sale_amt" style="width: 35%%"  force_save="1" readonly="1"/>
+                                        <field name="currency_id" style="width: 20%%" options="{'no_create': True}" required="1" readonly = "status not in ('draft','editable')"/>
+                                    </div>
+                                </div>								
                                 <field name="status" readonly = "1" invisible="1"/>
                             </group>
                         </group>
@@ -56,6 +70,7 @@
                                         <field name="accessories_id" required="1" options="{'no_create': True}"/>
                                         <field name="uom_id" force_save="1" readonly="1" options="{'no_create': True}"/>
                                         <field name="qty" required="1"/>
+                                        <field name="tax_ids" widget="many2many_tags" options="{'no_create': True}" readonly="1" force_save="1"/>
                                         <field name="unit_price" force_save="1" readonly="1"/>
                                         <field name="tot_amt" force_save="1" readonly="1"/>
                                         <field name="company_id" column_invisible="1"/>                           
@@ -85,7 +100,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -105,6 +120,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -126,10 +142,13 @@
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
-                    <field name="name"/>
+                    <field name="flexi_type"/>
+                    <field name="flexi_layer_type_id"/>
+                    <field name="vendor_id"/>
                     <field name="qty"/>
                     <field name="line_count" string="No of Items"/>
                     <field name="tot_sale_amt"/>
+                    <field name="currency_id"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -150,10 +169,13 @@
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status in ('active','draft')"
                         decoration-primary = "status == 'inactive'">
-                    <field name="name"/>
+                    <field name="flexi_type"/>
+                    <field name="flexi_layer_type_id"/>
+                    <field name="vendor_id"/>
                     <field name="qty"/>
                     <field name="line_count" string="No of Items"/>
                     <field name="tot_sale_amt"/>
+                    <field name="currency_id"/>
                     <field name="status" widget="badge" decoration-info = "status == 'draft'"
                         decoration-success = "status == 'editable'"
                         decoration-bf = "status == 'active'"
@@ -170,14 +192,15 @@
             <field name="model">cm.accessories.set</field>
             <field name="arch" type="xml">
                 <search string="Accessories Set">
-                    <field name="name" string="Flexi Bag Type" filter_domain="[('name','ilike',self)]"/>
-                    <field name="line_ids" string="Accessories Name" filter_domain="[('line_ids.accessories_id','ilike',self)]"/>
+                    <field name="name" string="Flexi Type" filter_domain="[('name','ilike',self)]"/>
+                    <field name="vendor_id" string="Vendor Name" filter_domain="[('vendor_id','ilike',self)]"/>
+                    <field name="line_ids" string="Accessories Name" filter_domain="[('line_ids.accessories_id','ilike',self)]"/>                    
                     
-                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="Draft" domain="[('status', '=', 'draft')]"/>
                     <filter name="Editable" domain="[('status', '=', 'editable')]"/>
                     <filter name="Active" domain="[('status', '=', 'active')]"/>
                     <filter name="Inactive" domain="[('status', '=', 'inactive')]"/>
+                    <filter name="my_entries" string="My Entries" domain="[('user_id', '=', uid)]"/> 
                     <filter name="My Draft" string="My Draft" domain="[('user_id', '=', uid),('status', '=', 'draft')]"/>
                     <filter name="My Editable" string="My Editable" domain="[('user_id', '=', uid),('status', '=', 'editable')]"/>
                     <filter name="My Active" string="My Active" domain="[('user_id', '=', uid),('status', '=', 'active')]"/>
@@ -185,9 +208,16 @@
                     <filter name="Hidden" domain="[('active', '=', False)]"/>
                     
                     <group expand="0" string="Group By">
+                        <filter string="Flexi Type" name="flexi_type" domain="[]" context="{'group_by': 'flexi_type'}"/>
+                        <filter string="Layer Type" name="flexi_layer_type_id" domain="[]" context="{'group_by': 'flexi_layer_type_id'}"/>
+                        <filter string="Vendor Name" name="vendor_id" domain="[]" context="{'group_by': 'vendor_id'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -203,11 +233,11 @@
             <field name="search_view_id" ref="cm_accessories_set_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 
-        <menuitem name="Accessories Set" id="cm_accessories_set_act_menu" parent="cm_master.cm_crm_master_m_parent" action="cm_accessories_set_win_action" sequence="125"/>
+        <menuitem name="Accessories Set" id="cm_accessories_set_act_menu" parent="cm_master.cm_flexi_master_m_parent" action="cm_accessories_set_win_action" sequence="7"/>
 
     </data>
         

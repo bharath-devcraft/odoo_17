@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ct_gate_pass,ct.gate.pass,model_ct_gate_pass,custom_properties.group_erp_admin,1,1,1,1
+access_ct_gate_pass_line,ct.gate.pass.line,model_ct_gate_pass_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_gate_pass_attachment_line,ct.gate.pass.attachment.line,model_ct_gate_pass_attachment_line,custom_properties.group_erp_admin,1,1,1,1
+access_ct_gate_pass_batch_cancel,ct.gate.pass.batch.cancel,model_ct_gate_pass_batch_cancel,custom_properties.group_erp_admin,1,1,1,1
+access_ct_gate_pass_serialno_line,ct.gate.pass.serialno.line,model_ct_gate_pass_serialno_line,custom_properties.group_erp_admin,1,1,1,1

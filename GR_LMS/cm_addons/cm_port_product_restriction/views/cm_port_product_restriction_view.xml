@@ -40,10 +40,12 @@
                                 <field name="pack_grp" readonly = "1" force_save="1"/>
                             </group>
                             <group>
+                                <field name="bus_location" readonly = "1"/>
                                 <field name="restricted_category" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="tank_operator_id" options="{'no_create': True}" required="restricted_category == 'tank_operator'" readonly = "status not in ('draft','editable')" invisible="restricted_category != 'tank_operator'"/>
                                 <field name="carrier_id" options="{'no_create': True}" required="restricted_category == 'carrier'" readonly = "status not in ('draft','editable')" invisible="restricted_category != 'carrier'"/>
                                 <field name="port_id" string="POD Port Name" options="{'no_create': True}" required="restricted_category == 'port'" readonly = "status not in ('draft','editable')" invisible="restricted_category != 'port'"/>
+                                <field name="mfg_id" options="{'no_create': True}" required="restricted_category == 'manufacturer'" readonly = "status not in ('draft','editable')" invisible="restricted_category != 'manufacturer'"/>
                                 <field name="shipment_type" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="reason" required="1" readonly = "status not in ('draft','editable')"/>
                                 <field name="status" readonly = "1" invisible="1"/>
@@ -74,7 +76,7 @@
                                         <field name="active_rpt"/>
                                     </group>
                                     <group>
-                                        <field name="active" widget="boolean_toggle"/>
+                                        <field name="active" widget="boolean_toggle" groups="custom_properties.group_set_to_draft"/>
                                         <field name="entry_mode"/>
                                     </group>
                                 </group>
@@ -94,6 +96,7 @@
                                 </group>
                             </page>
                         </notebook>
+                        <br></br>
                         <group>
                             <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
@@ -180,8 +183,12 @@
                         <filter string="Ref Name" name="name" domain="[]" context="{'group_by': 'name'}"/>
                         <filter string="Shipment Type" name="shipment_type" domain="[]" context="{'group_by': 'shipment_type'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Created By" name="user_id" domain="[]" context="{'group_by': 'user_id'}"/>
+                        <filter string="Creation Date" name="crt_date" domain="[]" context="{'group_by': 'crt_date'}"/>
                         <filter string="Approved By" name="ap_rej_user_id" domain="[]" context="{'group_by': 'ap_rej_user_id'}"/>
                         <filter string="Approved Date" name="ap_rej_date" domain="[]" context="{'group_by': 'ap_rej_date'}"/>
+                        <filter string="Inactivated By" name="inactive_user_id" domain="[]" context="{'group_by': 'inactive_user_id'}"/>
+                        <filter string="Inactivated Date" name="inactive_date" domain="[]" context="{'group_by': 'inactive_date'}"/>
                     </group>
                 </search>
             </field>
@@ -197,7 +204,7 @@
             <field name="search_view_id" ref="cm_port_product_restriction_search"/>
             <field name="context">{}</field>
             <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">No records found. Let's create one!</p>
+                <p class="o_view_nocontent_smiling_face">No records found. Let's create one !</p>
             </field>
         </record>
 

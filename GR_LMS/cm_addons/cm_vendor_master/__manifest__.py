@@ -8,7 +8,7 @@
     'description': """Scope of this module to fulfill the necessary features related to common vendor master form.""",
 
     'author': "Praveenkumar M",
-    'website': "https://www.goodrich.co",
+    'website': "https://catalystsolutions.sg",
     'category': 'Custom Modules/custom_modules',
     'application' : True,
     'version': '0.1',
@@ -16,6 +16,7 @@
     'data': [
         'security/ir.model.access.csv',
         'data/audit_rule_data.xml',
+        'data/default_data.xml',
         'views/cm_vendor_master_view.xml',
         'wizard/cm_vendor_master_batch_inactive_view.xml'
     ],

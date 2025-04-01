@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Save and Discard Button-->
+<templates>
+    <t
+        t-name="web_save_discard_button.FormStatusIndicator"
+        t-inherit="web.FormStatusIndicator"
+        t-inherit-mode="extension"
+        owl="1"
+    >
+        <xpath expr="//button/i[(hasclass('fa-cloud-upload'))]" position="replace">
+            <button type="button" class="btn" style="background-color: #66598f; color: white; border: none;outline: none;">
+                <i class="fa fa-cloud-upload fa-fw"></i>
+                <span class="ms-2">Save</span>
+            </button>
+        </xpath>
+        <xpath expr="//button/i[(hasclass('fa-undo'))]" position="replace">
+            <button type="button" class="btn" style="background-color: #dc3545; color: white; border: none;">
+                <i class="fa fa-undo fa-fw"></i>
+                <span class="ms-2">Discard</span>
+            </button>
+        </xpath>
+    </t>
+</templates>

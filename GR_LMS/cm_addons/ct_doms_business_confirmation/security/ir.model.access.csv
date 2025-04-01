@@ -1,0 +1,9 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"access_ct_doms_business_confirmation","ct.doms.business.confirmation","model_ct_doms_business_confirmation","custom_properties.group_erp_admin",1,1,1,1
+"access_ct_doms_business_confirmation_line","ct.doms.business.confirmation.line","model_ct_doms_business_confirmation_line","custom_properties.group_erp_admin",1,1,1,1
+"access_ct_doms_business_confirmation_attachment_line","ct.doms.business.confirmation.attachment.line","model_ct_doms_business_confirmation_attachment_line","custom_properties.group_erp_admin",1,1,1,1
+"access_ct_doms_business_confirmation_terms_conditions_line","ct.doms.business.confirmation.terms.conditions.line","model_ct_doms_business_confirmation_terms_conditions_line","custom_properties.group_erp_admin",1,1,1,1
+"access_ct_doms_business_confirmation_tax_line","ct.doms.business.confirmation.tax.line","model_ct_doms_business_confirmation_tax_line","custom_properties.group_erp_admin",1,1,1,1
+"access_ct_doms_bus_con_pricing_details_line","ct.doms.bus.con.pricing.details.line","model_ct_doms_bus_con_pricing_details_line","custom_properties.group_erp_admin",1,1,1,1
+"access_ct_doms_bus_con_cus_pri_details_line","ct.doms.bus.con.cus.pri.details.line","model_ct_doms_bus_con_cus_pri_details_line","custom_properties.group_erp_admin",1,1,1,1
+"access_ct_doms_bus_con_batch_cancel","ct.doms.business.confirmation.batch.cancel","model_ct_doms_bus_con_batch_cancel","custom_properties.group_erp_admin",1,1,1,1

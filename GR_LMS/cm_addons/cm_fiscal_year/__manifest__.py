@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "Fiscal Year Master",
+    'name': "Fiscal Year",
 
-    'summary': "This is a custom fiscal years",
+    'summary': "This is a custom fiscal year master",
 
     'description': """Scope of this module to fulfill the necessary features related to fiscal year form.""",
 
     'author': "Bharath",
-    'website': "https://www.goodrich.co",
+    'website': "https://catalystsolutions.sg",
     'category': 'Custom Modules/custom_modules',
     'application' : True,
     'version': '0.1',
@@ -15,6 +15,7 @@
     'data': [
         'security/ir.model.access.csv',
         'data/audit_rule_data.xml',
+        'data/security_rule.xml',
         'views/cm_fiscal_year_view.xml',
         'wizard/cm_fiscal_year_batch_inactive_view.xml',
     ],

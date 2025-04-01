@@ -42,7 +42,7 @@
                             </tree>
                         </field>
                         <group>
-                            <field name="note"  placeholder="Write your notes here."/>
+                            <field name="remarks"  placeholder="Write your remarks here."/>
                         </group>
                     </page>
                     <page string="Inactive Remark" invisible = "status not in ('active','inactive')">
@@ -153,7 +153,7 @@
         <field name="context">{}</field>
         <field name="help" type="html">
           <p class="o_view_nocontent_smiling_face">
-            No mail configuration record found. Let's create one!
+            No mail configuration record found. Let's create one !
           </p><p>
             This is for mail configuration.
           </p>

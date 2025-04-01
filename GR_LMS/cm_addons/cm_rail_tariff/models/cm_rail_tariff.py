@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
-from odoo.addons.custom_properties.decorators import validation,is_special_char
+from odoo.addons.custom_properties.decorators import validation
 from datetime import datetime
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
@@ -26,40 +26,41 @@ CARGO_CATEGORY =  [('dg','DG'), ('non_dg', 'Non DG'), ('both', 'Both')]
 
 CONTAINER_SIZE = [('20_feet_tk','20 Feet TK')]
 
+PRICE_OWNER = [('agent','Agent'), ('operator','Operator')]
+
 class CmRailTariff(models.Model):
     _name = 'cm.rail.tariff'
     _description = 'Rail Tariff'
     _inherit = ['mail.thread', 'mail.activity.mixin', 'avatar.mixin']
     _order = 'name asc'
 
-    def _get_dynamic_domain(self):
-        cur_rec = self.env['res.currency'].search([('short_name', '=', 'INR'),('status', '=', 'active'),('active_trans', '=', True)], limit=1)
-        return cur_rec.id if cur_rec else None
-
-    name = fields.Char(string="Name", index=True, copy=False)
-    eff_from_date = fields.Date(string="Effective From Date", copy=False)
-    pol_port_id = fields.Many2one(CM_PORT, string="POL", copy=False, ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True)]")
-    pod_port_id = fields.Many2one(CM_PORT, string="POD", copy=False, ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('port_category', '=', 'dry_port')]")
-    fpod_port_id = fields.Many2one(CM_PORT, string="FPOD", copy=False, ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True)]")
-    distance = fields.Integer(string="Distance(KM)", copy=False)
-    container_category = fields.Selection(selection=CONTAINER_CATEGORY, string="Container Category", copy=False)
-    cargo_category = fields.Selection(selection=CARGO_CATEGORY, string="Cargo Category", copy=False) 
-    container_size = fields.Selection(selection=CONTAINER_SIZE, string="Container Size", copy=False, default='20_feet_tk', c_rule=True)
-    currency_id = fields.Many2one('res.currency', string="Currency", copy=False, ondelete='restrict', tracking=True, default=_get_dynamic_domain, required=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
-    actual_cost = fields.Float(string="Actual Cost", copy=False)
-    busy_season_cost = fields.Float(string="Busy Season Cost", copy=False)
-    gr_cost = fields.Float(string="GR Cost", copy=False)
-    laden_dg_extra = fields.Float(string="Laden DG Extra(%)", copy=False)
-    over_wt_limit = fields.Float(string="Over Wt Limit(MT)", copy=False)
-    surcharge_per = fields.Float(string="Over Wt Surcharge MT(%)", copy=False)
+    name = fields.Char(string="Name", index=True)
+    eff_from_date = fields.Date(string="Effective From Date")
+    vendor_id = fields.Many2one('cm.vendor.master', string="Vendor Name", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    pol_port_id = fields.Many2one(CM_PORT, string="POL", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True)]")
+    pod_port_id = fields.Many2one(CM_PORT, string="POD", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True),('port_category', '=', 'dry_port')]")
+    fpod_port_id = fields.Many2one(CM_PORT, string="FPOD", ondelete='restrict', domain="[('status', '=', 'active'),('active_trans', '=', True)]")
+    distance = fields.Integer(string="Distance(KM)")
+    transit_days = fields.Integer(string="Transit Days")
+    container_category = fields.Selection(selection=CONTAINER_CATEGORY, string="Empty/Laden")
+    cargo_category = fields.Selection(selection=CARGO_CATEGORY, string="Product Type") 
+    container_size = fields.Selection(selection=CONTAINER_SIZE, string="Container Size", default='20_feet_tk', c_rule=True)
+    currency_id = fields.Many2one('res.currency', string="Currency", ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])
+    actual_cost = fields.Float(string="Actual Cost")
+    busy_season_cost = fields.Float(string="Busy Season Cost")
+    gr_cost = fields.Float(string="Total Actual Cost", store=True, compute='_compute_gr_cost_line')
+    laden_dg_extra = fields.Float(string="Laden DG Extra(%)")
+    over_wt_limit = fields.Float(string="Over Wt Limit(MT)")
+    surcharge_per = fields.Float(string="Over Wt Surcharge MT(%)")
+    price_owner = fields.Selection(selection=PRICE_OWNER, string="Price Owner")
+    tot_amt = fields.Float(string="Total Amount", store=True, compute='_compute_all_line')
     status = fields.Selection(selection=CUSTOM_STATUS, string="Status", copy=False, default="draft", readonly=True, store=True, tracking=True)
     inactive_remark = fields.Text(string="Inactive Remarks", copy=False)
-    remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+    remarks = fields.Text(string="Remarks")
+    pri_chrg_head_id = fields.Many2one('cm.charges.heads', string="Charge Head", copy=False, ondelete='restrict', domain=[('status', '=', 'active'),('active_trans', '=', True)])    
     company_id = fields.Many2one('res.company', copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, domain=[('status', '=', 'active'),('active_trans', '=', True)])
 
-
-
-    active = fields.Boolean(string="Visible", default=True)
+    active = fields.Boolean(string="Visible in View", default=True)
     active_rpt = fields.Boolean(string="Visible In Reports", default=True)
     active_trans = fields.Boolean(string="Visible In Transactions", default=True)
     entry_mode = fields.Selection(selection=ENTRY_MODE, string="Entry Mode", copy=False, default="manual", tracking=True, readonly=True)
@@ -74,6 +75,38 @@ class CmRailTariff(models.Model):
 
     line_ids_a = fields.One2many('cm.rail.tariff.attachment.line', 'header_id', string="Attachments", copy=True, c_rule=True)
     line_ids_b = fields.One2many('cm.rail.tariff.laden.charges.line', 'header_id', string="Laden Charges", copy=True, c_rule=True)
+    line_ids_c = fields.One2many('cm.rail.tariff.charges.details.line', 'header_id', string="Charges Details", copy=True, c_rule=True)
+
+    def duplicate_validation(self):
+        if (self.pol_port_id and self.pod_port_id
+            and self.container_category and self.price_owner):
+            self.env.cr.execute(""" select id
+            from cm_rail_tariff where pol_port_id  = %s
+            and pod_port_id = %s
+            and container_category = '%s' and price_owner = '%s'
+            and id != %s""" %(self.pol_port_id.id,self.pod_port_id.id,
+                                                self.container_category,
+                                                self.price_owner,self.id))
+            if self.env.cr.fetchone():
+                raise UserError(_("Duplicate entry are not allowed"))
+
+    @api.depends('line_ids_c', 'gr_cost')
+    def _compute_all_line(self):
+        for rec in self:
+            if rec.container_category == 'laden':
+                rec.tot_amt = sum(rec.line_ids_c.mapped('recovery_value')) or 0.0
+            elif rec.container_category == 'empty':
+                rec.tot_amt = rec.gr_cost or 0.0
+
+    @api.depends('actual_cost', 'busy_season_cost')
+    def _compute_gr_cost_line(self):
+        for rec in self:
+            rec.gr_cost = (rec.actual_cost or 0.0) + (rec.busy_season_cost or 0.0)
+
+    @api.onchange('line_ids_b')
+    def onchange_line_b_gr_cost_line(self):
+        for rec in self.line_ids_b:
+            rec.gr_cost = (rec.actual_cost or 0.0) + (rec.busy_season_cost or 0.0)
 
     @api.onchange('container_category')
     def onchange_container_category(self):
@@ -84,14 +117,22 @@ class CmRailTariff(models.Model):
                 self.over_wt_limit = False
                 self.surcharge_per = False
                 self.line_ids_b = [(5, 0, 0)]
+                cur_rec_id = self.env['res.currency'].search_read(
+                    [('short_name', '=', 'INR'), ('status', '=', 'active'), ('active_trans', '=', True)],
+                    fields=['id'],
+                    limit=1
+                )
+                self.currency_id = cur_rec_id[0]['id'] if cur_rec_id else None
             elif self.container_category == 'laden':
                 self.cargo_category = 'non_dg'
                 self.actual_cost = False
+                self.currency_id = False
                 self.busy_season_cost = False
                 self.gr_cost = False
         else:
             self.cargo_category = False
             self.actual_cost = False
+            self.currency_id = False
             self.busy_season_cost = False
             self.gr_cost = False
             self.laden_dg_extra = False
@@ -106,14 +147,20 @@ class CmRailTariff(models.Model):
         else:
             self.name = False
 
+    @api.onchange('laden_dg_extra')
+    def onchange_laden_dg_extra(self):
+        if self.laden_dg_extra and not (0 < self.laden_dg_extra <= 100):
+            raise UserError(_("Laden DG Extra (%) must be greater than zero and less than or equal to hundred."))
+
     def validations(self):
         warning_msg = []
+        self.duplicate_validation()
         is_mgmt = self.env[RES_USERS].has_group('custom_properties.group_mgmt_admin')
         if not is_mgmt:
             res_config_rule = self.env[IR_CONFIG_PARAMETER].sudo().get_param('custom_properties.rule_checker_master')
             if res_config_rule and self.user_id == self.env.user:
                 warning_msg.append("Created user is not allow to approve the entry")
-        if not self.laden_dg_extra or self.laden_dg_extra <= 0:
+        if self.container_category != 'empty' and (not self.laden_dg_extra or self.laden_dg_extra <= 0):
             warning_msg.append("Laden DG Extra(%) should be greater than zero")
         if warning_msg:
             formatted_messages = "\n".join(warning_msg)
@@ -177,34 +224,42 @@ class CmRailTariff(models.Model):
      
     @api.model
     def retrieve_dashboard(self):
-        result = {
-            'all_draft': 0,
-            'all_active': 0,
-            'all_inactive': 0,
-            'all_editable': 0,
-            'my_draft': 0,
-            'my_active': 0,
-            'my_inactive': 0,
-            'my_editable': 0,
-            'all_today_count': 0,
-            'all_today_value': 0,
-            'my_today_count': 0,
-            'my_today_value': 0,
-        }
+        result = {}
         
-        rail_tariff = self.env[CM_RAIL_TARIFF]
-        result['all_draft'] = rail_tariff.search_count([('status', '=', 'draft')])
-        result['all_active'] = rail_tariff.search_count([('status', '=', 'active')])
-        result['all_inactive'] = rail_tariff.search_count([('status', '=', 'inactive')])
-        result['all_editable'] = rail_tariff.search_count([('status', '=', 'editable')])
-        result['my_draft'] = rail_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid)])
-        result['my_active'] = rail_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid)])
-        result['my_inactive'] = rail_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid)])
-        result['my_editable'] = rail_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid)])
+        cm_rail_tariff = self.env[CM_RAIL_TARIFF]
+        result['all_draft'] = cm_rail_tariff.search_count([('status', '=', 'draft'), ('price_owner', '=', 'agent')])
+        result['all_active'] = cm_rail_tariff.search_count([('status', '=', 'active'), ('price_owner', '=', 'agent')])
+        result['all_inactive'] = cm_rail_tariff.search_count([('status', '=', 'inactive'), ('price_owner', '=', 'agent')])
+        result['all_editable'] = cm_rail_tariff.search_count([('status', '=', 'editable'), ('price_owner', '=', 'agent')])
+        result['my_draft'] = cm_rail_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
+        result['my_active'] = cm_rail_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
+        result['my_inactive'] = cm_rail_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
+        result['my_editable'] = cm_rail_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'agent')])
               
-        result['all_today_count'] = rail_tariff.search_count([('crt_date', '>=', fields.Date.today())])
-        result['all_month_count'] = rail_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1))])
-        result['my_today_count'] = rail_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today())])
-        result['my_month_count'] = rail_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1))])
+        result['all_today_count'] = cm_rail_tariff.search_count([('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'agent')])
+        result['all_month_count'] = cm_rail_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1)), ('price_owner', '=', 'agent')])
+        result['my_today_count'] = cm_rail_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'agent')])
+        result['my_month_count'] = cm_rail_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1)), ('price_owner', '=', 'agent')])
+
+        return result
+    
+    @api.model
+    def retrieve_op_dashboard(self):
+        result = {}
+        
+        cm_rail_tariff = self.env[CM_RAIL_TARIFF]
+        result['all_draft'] = cm_rail_tariff.search_count([('status', '=', 'draft'), ('price_owner', '=', 'operator')])
+        result['all_active'] = cm_rail_tariff.search_count([('status', '=', 'active'), ('price_owner', '=', 'operator')])
+        result['all_inactive'] = cm_rail_tariff.search_count([('status', '=', 'inactive'), ('price_owner', '=', 'operator')])
+        result['all_editable'] = cm_rail_tariff.search_count([('status', '=', 'editable'), ('price_owner', '=', 'operator')])
+        result['my_draft'] = cm_rail_tariff.search_count([('status', '=', 'draft'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+        result['my_active'] = cm_rail_tariff.search_count([('status', '=', 'active'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+        result['my_inactive'] = cm_rail_tariff.search_count([('status', '=', 'inactive'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+        result['my_editable'] = cm_rail_tariff.search_count([('status', '=', 'editable'), ('user_id', '=', self.env.uid), ('price_owner', '=', 'operator')])
+              
+        result['all_today_count'] = cm_rail_tariff.search_count([('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'operator')])
+        result['all_month_count'] = cm_rail_tariff.search_count([('crt_date', '>=', datetime.today().replace(day=1)), ('price_owner', '=', 'operator')])
+        result['my_today_count'] = cm_rail_tariff.search_count([('user_id', '=', self.env.uid),('crt_date', '>=', fields.Date.today()), ('price_owner', '=', 'operator')])
+        result['my_month_count'] = cm_rail_tariff.search_count([('user_id', '=', self.env.uid), ('crt_date', '>=',datetime.today().replace(day=1)), ('price_owner', '=', 'operator')])
 
         return result

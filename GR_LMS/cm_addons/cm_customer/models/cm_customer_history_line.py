@@ -14,7 +14,7 @@ class CmCustomerHistoryLine(models.Model):
 	feedback = fields.Char(string="Feedback", size=252)
 	crt_date = fields.Datetime(string="Added Date", copy=False, readonly=True)
 	user_id = fields.Many2one(RES_USERS, string="Added By", copy=False, ondelete='restrict', readonly=True)
-	remarks = fields.Html(string="Remarks", copy=False, sanitize=False)
+	remarks = fields.Text(string="Remarks", copy=False)
 	company_id = fields.Many2one(RES_COMPANY, copy=False, default=lambda self: self.env.company, ondelete='restrict', readonly=True, required=True)
 
 	@api.onchange('feedback')
